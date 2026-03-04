@@ -162,49 +162,92 @@ During interpretation, if a called method doesn't exist, an alert offers to crea
 
 ## 4. Data Types
 
-Prograph has **ten data types**:
+Phograph has **nine data types**:
 
 | Type | Description |
 |------|-------------|
-| **Integer** | Whole numbers (32-bit in Marten) |
-| **Real** | Floating-point numbers |
-| **String** | Text data (treated as a unit, not a character array) |
+| **Integer** | Whole numbers (64-bit signed) |
+| **Real** | Floating-point numbers (64-bit IEEE 754 double) |
+| **String** | Text data (UTF-8, treated as a unit, not a character array) |
 | **Boolean** | `true` / `false` |
 | **List** | Ordered collection; elements can be of any type; nesting supported |
+| **Dict** | Key-value map; keys can be any hashable type (integer, real, string, boolean); values any type |
 | **Object** | Instance of a user-defined class |
-| **External Structure** | Reference to OS/platform data structures |
-| **NULL** | Explicit null value |
-| **NONE** | Absence of a value |
-| **Undefined** | Uninitialized state |
+| **External** | Opaque reference to a platform/FFI resource (Swift object, C pointer, OS handle) |
+| **Null** | The single "nothing" value. Represents absence of data. |
+
+**Design change from original Prograph:** The original had three confusing "nothing" values -- NULL, NONE, and Undefined -- with unclear, overlapping semantics. Phograph collapses these into a single `null`. An uninitialized attribute is `null`. An absent return value is `null`. There is one nothing, not three.
 
 ### Dynamic Typing
 
-Prograph is **dynamically typed** (late-binding, duck-typed, comparable to Python). Types are checked at runtime, not compile time. Variables, persistents, and class attributes can hold any data type and can change types during execution. Declaring a type in a class definition sets only the default initial value.
+Phograph is **dynamically typed** (late-binding, duck-typed, comparable to Python). Types are checked at runtime, not compile time. Persistents and class attributes can hold any data type and can change types during execution. Declaring a type in a class definition sets only the default initial value.
+
+### Optional Type Annotations
+
+While Phograph is dynamically typed, **optional type annotations** can be added to method input/output nodes and class attributes. These serve as:
+- Documentation (visible in the editor as labels on nodes)
+- Runtime validation (if enabled, a type mismatch produces a clear error rather than a downstream failure)
+- Editor assistance (autocomplete, refactoring)
+
+Annotations are never required. When present, they are checked at runtime on entry to the annotated method. Annotation syntax in the node label: `name: Type` (e.g., `count: Integer`, `items: List`, `config: Dict`).
 
 ### Constants
 
-Depicted as a horizontal line with a root node and the value displayed above. Immutable. Types include integers, reals, strings, lists, booleans, and null.
+Depicted as a horizontal line with a root node and the value displayed above. Immutable. Types include integers, reals, strings, lists, dicts, booleans, and null.
 
 ### Strings
 
-- Entire blocks of text treated as a single entity, not character arrays
+- UTF-8 encoded, full Unicode support
+- Entire blocks of text treated as a single entity, not a character array
 - Number base representation: decimal (plain digits), hex (`"16#<digits>"`), octal (`"8#<digits>"`), binary (`"2#<digits>"`)
+- String interpolation: `"Hello, {name}"` where `{name}` is replaced by the value of the wire named `name` entering the constant
 
 ### Lists
 
 - Flexible arrays; elements need not be the same type; size not pre-declared
 - Literal syntax in dialogs: `(1 2 3 4)`
 - Nested lists (2D or higher): `((1 2 3)(4 5 6))`
-- No risk of out-of-bounds access in the way C arrays have
+- Safe access: out-of-bounds `get-nth` produces a **failure** (not an error), which can be handled by control annotations
 - 1-indexed (not 0-indexed)
+
+### Dicts (Dictionaries)
+
+A **Dict** is an unordered key-value map. Keys must be hashable (integer, real, string, boolean). Values can be any type.
+
+- Literal syntax in dialogs: `{name: "Alice", age: 30, scores: (95 87 92)}`
+- Nested dicts: `{user: {name: "Alice", email: "a@b.com"}}`
+- Missing key access produces a **failure** (not an error), handled by control annotations
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `dict-create` | -- | dict | Create an empty dict |
+| `dict-get` | dict, key | value | Get value for key (fails if key absent) |
+| `dict-get-default` | dict, key, default | value | Get value for key, or default if absent |
+| `dict-set` | dict, key, value | dict | Return new dict with key set (immutable) |
+| `dict-set!` | dict, key, value | -- | Set key in place (mutating) |
+| `dict-remove` | dict, key | dict | Return new dict with key removed |
+| `dict-has?` | dict, key | boolean | Check if key exists |
+| `dict-keys` | dict | list | List of all keys |
+| `dict-values` | dict | list | List of all values |
+| `dict-pairs` | dict | list | List of (key, value) pairs |
+| `dict-size` | dict | integer | Number of entries |
+| `dict-merge` | dict1, dict2 | dict | Merge two dicts (dict2 wins on conflicts) |
+
+Dicts work with **list annotations**: applying an ellipsis-annotated operation to a dict iterates over its (key, value) pairs, each delivered as a two-element list.
 
 ### Evaluations
 
-Small formula-like constructs embedded in an operation icon. Hold a single mathematical equation with up to 26 inputs named `a` through `z` sequentially. No function-call overhead. Example: `b*b - 4*a*c` with inputs `a`, `b`, `c`.
+Small formula-like constructs embedded in an operation icon. Hold a single mathematical equation with inputs named by the wires connected to them. No function-call overhead. Example: `b*b - 4*a*c` with inputs `a`, `b`, `c`.
+
+**Design change from original Prograph:** The original limited evaluations to 26 inputs named `a` through `z`. Phograph evaluations name inputs from the connected wire labels, with no fixed limit.
 
 ### Memory Management
 
-Garbage collection based on **reference counting**. A separate heap is used for Prograph instances and simple data types, distinct from the platform memory manager.
+**Automatic Reference Counting (ARC)** with **cycle detection**. Each object tracks its reference count; when the count reaches zero, the object is deallocated immediately (deterministic destruction). A background cycle detector periodically scans for reference cycles among objects and breaks them.
+
+This replaces the original's pure reference counting (which leaked cycles) and aligns with Swift's ARC model for seamless interop. Deterministic destruction enables **automatic cleanup**: objects that hold resources (file handles, network connections, GPU buffers) can implement a `/finalize` method that is called when the object is deallocated.
+
+**Design change from original Prograph:** The original had no destructors. Phograph adds `/finalize` -- an optional method called automatically when an object's reference count reaches zero. Use it for resource cleanup (close files, release GPU buffers, disconnect network sockets). Not a replacement for explicit cleanup in all cases, but a safety net.
 
 ---
 
@@ -250,23 +293,23 @@ An **inject** determines at runtime which method to call. Instead of a fixed met
 - Runtime dispatch based on user selection
 - Function-pointer-like behavior
 - Callback patterns
-- The ABC framework's behavior system relies heavily on injection
+- Plugin/extension architectures where behavior is selected dynamically
 
 ---
 
 ## 6. Primitives Reference
 
-Prograph CPX contains approximately **307 built-in primitives**. Key categories:
+Phograph includes approximately **350 built-in primitives**. Key categories:
 
-### I/O Primitives
+### Console / Debug I/O Primitives
+
+The original Prograph `show`/`ask`/`answer` primitives were blocking modal dialogs. Phograph replaces them with non-blocking canvas-based equivalents (see Section 12.8: `alert`, `prompt`, `confirm`) for user-facing interaction. The following are retained for **debugging and console output only**:
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
-| `show` | value(s) | -- | Display value(s) in a dialog; polymorphic, accepts any type |
-| `ask` | prompt string | user input string | Prompt user for text input |
-| `answer` | question, button1, button2 | button clicked | Present a two-button dialog |
-| `answer-v` | question, button1, button2, ... | button name | Present a multi-button dialog; returns name of clicked button |
-| `select` | prompt | file path | File selection dialog |
+| `log` | value(s) | -- | Print value(s) to the debug console; polymorphic, accepts any type. Does not block. |
+| `inspect` | value | value | Print value to debug console and pass it through unchanged. Useful for inserting into a dataflow chain without breaking it. |
+| `breakpoint` | -- | -- | Pause execution here if debugger is attached. No-op in compiled builds. |
 
 ### Arithmetic Primitives
 
@@ -330,15 +373,15 @@ All comparison primitives automatically carry a **control annotation** for use i
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
-| `"join"` | str1, str2, ... | concatenated | Concatenate strings (quotes in name signal string-only) |
+| `concat` | str1, str2, ... | concatenated | Concatenate strings |
 | `prefix` | string, count | prefix | First N characters |
 | `suffix` | string, count | suffix | Last N characters |
 | `middle` | string, start, count | substring | Extract substring |
 | `to-string` | value | string | Convert any type to string representation (polymorphic) |
 | `from-string` | string | value | Parse string to number/other type |
 | `format` | value, format-spec | formatted string | Printf-like formatting |
-| `to-ascii` | string | list of ints | String to list of ASCII code points |
-| `from-ascii` | list of ints | string | List of ASCII code points to string |
+| `to-codepoints` | string | list of ints | String to list of Unicode code points |
+| `from-codepoints` | list of ints | string | List of Unicode code points to string |
 | `length` | string | integer | String length |
 | `string-search` | haystack, needle | position | Find substring |
 
@@ -376,10 +419,35 @@ All comparison primitives automatically carry a **control annotation** for use i
 
 ### File Primitives
 
-| Primitive | Description |
-|-----------|-------------|
-| `save` | Save a persistent or object to disk |
-| `load` | Load a persistent or object from disk |
+See Section 12.12 for the full file I/O primitive set (`file-read-text`, `file-write-text`, `file-read-object`, `file-write-object`, `file-pick`, etc.). The original Prograph's `save`/`load` primitives are replaced by these.
+
+### Dict Primitives
+
+See Section 4 (Dicts) for the full dict primitive set (`dict-get`, `dict-set`, `dict-keys`, etc.).
+
+### Networking Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `http-get` | url | response | Async HTTP GET. Returns a Future (see Section 7.3). |
+| `http-post` | url, body, content-type | response | Async HTTP POST. Returns a Future. |
+| `http-request` | method, url, headers-dict, body | response | General async HTTP request. Returns a Future. |
+| `response-status` | response | integer | HTTP status code |
+| `response-body` | response | string | Response body as string |
+| `response-body-data` | response | data | Response body as raw bytes |
+| `response-headers` | response | dict | Response headers as dict |
+| `json-parse` | string | value | Parse JSON string into Phograph values (dicts, lists, strings, numbers, booleans, null) |
+| `json-encode` | value | string | Encode Phograph value as JSON string |
+| `url-encode` | string | string | URL-encode a string |
+| `url-decode` | string | string | URL-decode a string |
+
+### Timer Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `timer-after` | seconds, method-name, target | timer | Call method on target after delay. Returns a timer handle. |
+| `timer-every` | seconds, method-name, target | timer | Call method on target repeatedly at interval. |
+| `timer-cancel` | timer | -- | Cancel a pending timer. |
 
 ---
 
@@ -450,6 +518,134 @@ A **match** combines a comparison primitive with a control annotation. Compariso
 ### The Fail Mechanism
 
 The **Fail** control is used inside local methods or subordinate methods. When activated, it sets a failure flag that propagates upward to the calling method. The calling method's operation icon can then have its own control annotation to respond to the failure. This provides a limited form of exception handling.
+
+### 7.1 Error Handling (Phograph Extension)
+
+The original Prograph Fail mechanism propagates a boolean flag with no information about *what* went wrong. Phograph extends this with **Error values** that carry a message and optional details.
+
+#### Error Data Type
+
+An **Error** is a value (not an exception) with:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `message` | String | Human-readable error description |
+| `code` | String | Machine-readable error code (e.g., `"file-not-found"`, `"network-timeout"`) |
+| `details` | Dict or Null | Optional additional context |
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `error-create` | message | error | Create an error value |
+| `error-create-code` | message, code | error | Create an error with a code |
+| `error-message` | error | string | Get error message |
+| `error-code` | error | string | Get error code |
+| `error-details` | error | dict or null | Get error details |
+| `error?` | value | boolean | Test if a value is an error |
+
+#### Try Annotation
+
+The **try annotation** is a control annotation that catches failures from an operation and converts them to error values flowing out of a dedicated error output node.
+
+When an operation has a try annotation:
+- On **success**: data flows through the normal output nodes. The error output produces `null`.
+- On **failure**: normal output nodes produce `null`. The error output produces an `Error` value describing what went wrong.
+
+This replaces the pattern of using `continue-on-failure` + downstream testing with a direct, visible error flow path. The error wire is visually distinct (dashed or colored) so error paths are immediately obvious in the dataflow graph.
+
+```
+[read-file] ──try──┬── file-contents (string or null)
+                    └── error (Error or null)
+```
+
+Downstream operations can test the error output with a match:
+
+```
+Case 1:2
+  [read-file] ──try── contents, err
+  [error?] err ──X── (next case on success: there IS an error)
+  [...process contents normally...]
+
+Case 2:2
+  [...handle the error...]
+```
+
+#### Fail With Error
+
+The original Fail control propagates a bare boolean. Phograph extends it: when a method fails, it can attach an Error value to the failure. The try annotation on the calling operation captures this Error.
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `fail-with` | error | -- | Fail the current method with an error value attached. The error propagates to the caller's try annotation. |
+
+If no try annotation exists on the caller, the failure propagates upward as in original Prograph. If it reaches the top level with no handler, the runtime halts with an error report showing the full call stack.
+
+### 7.2 Concurrency and Async (Phograph Extension)
+
+The original Prograph mentioned "thread primitives" without specification. Phograph defines a concurrency model based on **Futures** and **async operations** that fits naturally into the dataflow paradigm.
+
+#### The Dataflow Advantage
+
+Prograph's dataflow model is already inherently concurrent: operations with no data dependencies between them *can* execute in parallel. Phograph makes this explicit.
+
+#### Futures
+
+A **Future** represents a value that will be available later. When an async operation (e.g., `http-get`, `file-read-text-async`) is called, it returns a Future immediately. Data continues to flow through other independent parts of the graph. When the Future's value is needed by a downstream operation, that operation **waits** until the Future resolves.
+
+This means async behavior is implicit in the wiring: connect a Future to a downstream operation, and the downstream operation automatically waits. No special `await` keyword or annotation needed -- it falls out of the data-driven firing rule ("execute when all inputs are available").
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `future-value` | future | value | Block until the future resolves and return its value. (Usually implicit -- just connect the wire.) |
+| `future-resolved?` | future | boolean | Non-blocking check: has the future resolved yet? |
+| `future-then` | future, method-name | future | When future resolves, call method with result. Returns a new future for the method's output. |
+| `future-error` | future | error or null | If the future resolved with failure, return the error. |
+| `future-all` | list of futures | future of list | A future that resolves when all input futures resolve. |
+| `future-any` | list of futures | future | A future that resolves when the first input future resolves. |
+| `future-create` | -- | future, resolver | Create a future and a resolver. Call `resolver-resolve` or `resolver-fail` on the resolver to complete the future. |
+| `resolver-resolve` | resolver, value | -- | Resolve the associated future with a value. |
+| `resolver-fail` | resolver, error | -- | Fail the associated future with an error. |
+
+#### Async Variants of Blocking Primitives
+
+For operations that might take significant time, async variants return Futures:
+
+| Primitive | Returns | Description |
+|-----------|---------|-------------|
+| `http-get` | Future of response | Non-blocking HTTP GET |
+| `http-post` | Future of response | Non-blocking HTTP POST |
+| `file-read-text-async` | Future of string | Non-blocking file read |
+| `file-write-text-async` | Future of null | Non-blocking file write |
+
+#### Dispatch
+
+For CPU-bound work that should run off the main thread:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `dispatch` | method-name, args-list | future | Execute method on a background thread. Returns a future for the result. |
+| `dispatch-main` | method-name, args-list | future | Execute method on the main thread (required for UI updates). |
+
+#### Channels (Inter-method Communication)
+
+For producer-consumer patterns:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `channel-create` | -- | channel | Create a new channel |
+| `channel-send` | channel, value | -- | Send a value into the channel (blocks if buffer full) |
+| `channel-receive` | channel | value | Receive a value from the channel (blocks if empty) |
+| `channel-try-receive` | channel | value or null | Non-blocking receive; returns null if empty |
+| `channel-close` | channel | -- | Close the channel |
+
+### 7.3 Summary of Control Flow Extensions
+
+| Original Prograph | Phograph |
+|-------------------|----------|
+| Fail propagates bare boolean | Fail can carry an Error value with message and code |
+| No error information at call site | Try annotation captures Error on dedicated output wire |
+| Unhandled failure = silent halt | Unhandled failure = error report with full call stack |
+| "Thread primitives" unspecified | Futures, dispatch, channels |
+| No async operations | Async primitives return Futures; dataflow firing rule handles waiting naturally |
 
 ---
 
@@ -522,7 +718,20 @@ The Class Attribute Window has two regions separated by a horizontal line:
 
 Inherited attributes show an arrow in their symbol. Default values are set in the Attributes window and automatically applied when instances are created.
 
-**Access control:** In original Prograph CPX, all attributes are effectively public. This was a noted shortcoming.
+### Access Control (Phograph Extension)
+
+In original Prograph CPX, all attributes were effectively public. Phograph adds visibility modifiers:
+
+| Visibility | Symbol | Description |
+|------------|--------|-------------|
+| **public** | Open circle | Accessible from anywhere. Default for methods. |
+| **private** | Filled circle | Accessible only from within the same class. Default for attributes. |
+| **protected** | Half-filled circle | Accessible from the same class and its subclasses. |
+| **read-only** | Circle with line | Publicly readable (get), privately writable (set). |
+
+Visibility is set per-attribute and per-method. Violating access control produces a **failure** (not a compile error, since Phograph is dynamically typed), which can be caught with a try annotation or control annotation.
+
+**Design rationale:** Attributes default to **private** (the safe default). Methods default to **public** (the useful default). This matches the principle of least surprise: you must explicitly expose data, but all behavior is visible by default.
 
 ### Instance Generation
 
@@ -598,27 +807,61 @@ A class alias marks that you want to reference or subclass a class from another 
 
 ### Persistent Variables
 
-Persistents are Prograph's global variables with automatic persistence:
+Persistents are Phograph's global variables with automatic persistence:
 
 - **Icon shape:** Oval
 - **Created via:** `Opers Menu > Persistent` on a blank operation, then named
 - **No nodes by default.** Add a root node to read; add a terminal node to write
-- **Value dialog** shows current type and value; type selected from popup (null, integer, real, string, list, boolean, etc.)
+- **Value dialog** shows current type and value; type selected from popup (null, integer, real, string, list, dict, boolean, etc.)
 
-### Persistence Behavior
+### Persistence Behavior (Phograph Redesign)
 
-| Environment | Behavior |
-|-------------|----------|
-| Interpreter | Value automatically saved to disk when program exits and restored on next run (modifies the program file itself) |
-| Compiled | Automatic persistence does NOT work. Must use `save` and `load` primitives explicitly |
+The original Prograph had a broken persistence model: the interpreter embedded persistent values directly into the program file (mixing code and data), and compiled programs had no automatic persistence at all. Phograph fixes this.
 
-### Class Attributes as Persistents
+**Phograph persistence** uses a separate **persistent store** -- a file in the application's data directory, distinct from the program source. Persistence works identically in the interpreter and in compiled applications.
 
-Class attributes (shared across all instances) behave similarly to persistents in the interpreter: they retain their values between executions. In compiled programs, they behave as regular global variables unless explicitly saved.
+| Aspect | Original Prograph | Phograph |
+|--------|-------------------|----------|
+| Storage location | Embedded in program file | Separate store file in app data directory |
+| Interpreter | Auto-save on exit, auto-load on start | Same |
+| Compiled | No auto-persistence; manual save/load | Auto-persistence, same as interpreter |
+| Data/code separation | Violated (data in source file) | Clean separation |
 
-### Object Persistence / Database
+#### Persistent Store Primitives
 
-Objects can be made persistent, effectively functioning as an object database. The 1985 preliminary report noted that PROGRAPH contained "a database subsystem which is also functional in nature." This enabled database-like applications without external database systems.
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `persistent-save-all` | -- | -- | Explicitly flush all persistent values to disk |
+| `persistent-load-all` | -- | -- | Explicitly reload all persistent values from disk |
+| `persistent-reset` | name | -- | Reset a named persistent to its default value |
+| `persistent-reset-all` | -- | -- | Reset all persistents to defaults |
+| `persistent-path` | -- | string | Get the file path of the persistent store |
+
+Auto-save triggers:
+- When the application exits normally
+- Periodically (configurable interval, default 60 seconds)
+- On `persistent-save-all`
+
+Auto-load triggers:
+- When the application starts
+- On `persistent-load-all`
+
+### Class Attributes
+
+Class attributes (shared across all instances) are **not** automatically persistent. They behave as global variables that reset to their default values on each application launch. To persist a class attribute, use a persistent variable instead.
+
+**Design rationale:** Implicit persistence on class attributes (original Prograph) created confusion about which values survived restarts. In Phograph, persistence is always explicit: if you want a value to survive restarts, use a persistent.
+
+### Object Serialization
+
+Any Phograph object can be serialized to disk and deserialized back. This replaces the original's vague "object persistence" with explicit file I/O:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `file-write-object` | path, object | -- | Serialize an object graph to a file |
+| `file-read-object` | path | object | Deserialize an object graph from a file |
+
+The serializer handles object graphs including shared references and cycles. It does **not** serialize external resources (file handles, network connections, GPU buffers) -- these serialize as null with a warning in the debug console.
 
 ---
 
@@ -1355,23 +1598,89 @@ Prograph CPX supports **multiple threads of execution** in both the interpreter 
 
 ## 14. External Code Integration
 
-### C Tools Kit
+### Overview
 
-The C Tools kit from Prograph International enables writing C functions that link into Prograph programs. External methods appear in code windows with a distinctive icon (two horizontal lines, one at top and one at bottom).
+Phograph runs on Apple platforms (macOS, iOS, iPadOS). External code integration targets **Swift** as the primary interop language, with C interop for lower-level needs. The original Prograph's Mac Toolbox / Pascal integration is replaced entirely.
 
-### Mac Toolbox Access
+### Swift Interop
 
-All Mac Toolbox ROM routines are accessible as **External Primitives**:
-- Named constants (e.g., `blackColor -> 33`)
-- Global variables
-- Field accessors for structures (e.g., BitMap fields)
-- New external primitives can be added for any C or Pascal library
+Phograph can call Swift functions and methods, and Swift code can call Phograph methods. This is the primary mechanism for accessing platform APIs (UIKit, AppKit, SwiftUI views, CoreData, AVFoundation, etc.).
 
-### Callback Primitive
+#### Calling Swift from Phograph
 
-The **callback primitive** passes a reference to a Prograph method to an external routine (e.g., Mac Toolbox's `TrackControl`). This enables bidirectional interaction between Prograph and native code.
+An **external method** icon (rectangle with lines at top and bottom edges) represents a call to a Swift function. External methods are declared in a **bridge section** that maps Phograph names to Swift function signatures.
 
-Implementation detail: All Prograph data items reside in Handles, and the interpreter uses a linked list of its own stack frames rather than the platform stack. The callback mechanism bridges these two execution models.
+```
+Bridge declaration:
+  Phograph name: "camera-capture"
+  Swift function: CameraCapture.takePhoto() -> UIImage?
+  Inputs: none
+  Outputs: image or null
+```
+
+Type marshaling between Phograph and Swift:
+
+| Phograph Type | Swift Type |
+|---------------|------------|
+| Integer | Int |
+| Real | Double |
+| String | String |
+| Boolean | Bool |
+| List | [Any] |
+| Dict | [AnyHashable: Any] |
+| Null | nil (Optional) |
+| Object | Wrapped in a PhographObject container |
+| External | The raw Swift/ObjC object reference |
+
+The `External` type holds an opaque reference to a Swift or Objective-C object. It can be passed to other external methods but not inspected from Phograph code. To extract data from an External, call an external method that returns Phograph-native types.
+
+#### Calling Phograph from Swift
+
+Swift code can invoke Phograph methods via the runtime API:
+
+```swift
+let runtime = PhographRuntime.shared
+let result = runtime.call("MyClass/calculate", args: [42, 3.14])
+```
+
+This enables:
+- Swift UI code calling back into Phograph logic
+- Platform event handlers delegating to Phograph methods
+- Integration with Swift frameworks that require callbacks/delegates
+
+#### External Method Declaration Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `external-call` | module, function-name, args-list | result | Dynamic external call (slower, no bridge section needed) |
+| `external-async-call` | module, function-name, args-list | future | Async external call, returns a Future |
+
+### C Interop
+
+For C libraries and lower-level system calls, Phograph supports calling C functions through Swift's C interop:
+
+- C functions are wrapped in a thin Swift bridge
+- Pointer types are represented as `External` values in Phograph
+- Memory management for C allocations must be handled explicitly (allocate/free)
+
+### Platform API Access
+
+Common platform APIs are exposed as Phograph primitive sections (importable sections, not built into the core language):
+
+| Section | Contents |
+|---------|----------|
+| `Platform.Camera` | Photo/video capture, camera permissions |
+| `Platform.Location` | GPS, heading, geofencing |
+| `Platform.Notifications` | Local and push notifications |
+| `Platform.Keychain` | Secure credential storage |
+| `Platform.UserDefaults` | Simple key-value preferences |
+| `Platform.Biometrics` | Face ID / Touch ID |
+| `Platform.Share` | System share sheet |
+| `Platform.Speech` | Text-to-speech, speech recognition |
+| `Platform.Haptics` | Haptic feedback engine |
+| `Platform.StoreKit` | In-app purchases |
+
+These sections wrap Swift/platform APIs into Phograph primitives with Phograph-native types. They are optional imports -- a Phograph program only links what it uses.
 
 ---
 
@@ -1380,7 +1689,7 @@ Implementation detail: All Prograph data items reside in Handles, and the interp
 Documented weaknesses of the original Prograph, with their status in Phograph:
 
 ### 1. Unlabeled Inputs/Outputs
-No inline labels on wires or nodes. Understanding a method requires reading comments or memorizing arity conventions. **Status: open.** Allow optional labels on input/output nodes in the Phograph editor.
+No inline labels on wires or nodes. Understanding a method requires reading comments or memorizing arity conventions. **Status: open.** Allow optional labels on input/output nodes in the Phograph editor. Optional type annotations (Section 4) add labels when used.
 
 ### 2. Non-Routable Wiring
 Wires could not be manually routed around obstacles, creating visual "spaghetti" for complex methods. **Status: open.** Automatic wire routing with manual override in the Phograph editor.
@@ -1400,14 +1709,38 @@ Code could not be easily shared via email or text. **Status: open.** Phograph sh
 ### 7. Static Complexity
 Large projects with many side-effects were difficult to reason about. **Status: open.** Better visualization of data flow paths, effect tracking, module-level isolation.
 
-### 8. No Access Control
-All attributes are effectively public. **Status: open.** Add public/private/protected visibility modifiers on attributes and methods.
+### 8. No Access Control -- ADDRESSED
+All attributes were effectively public. **Status: replaced.** Phograph adds public/private/protected/read-only visibility modifiers on attributes and methods (Section 9). Attributes default to private; methods default to public.
 
-### 9. No Destructors
-No automatic cleanup mechanism for objects. **Status: open.** Use ARC-style automatic resource management.
+### 9. No Destructors / Cleanup -- ADDRESSED
+No automatic cleanup mechanism for objects. **Status: replaced.** Phograph uses ARC with cycle detection and adds `/finalize` methods called automatically on deallocation (Section 4, Memory Management).
 
 ### 10. Window System / UI Framework -- ADDRESSED
 The original ABCs (147 classes wrapping Mac Toolbox widgets) were platform-locked, over-engineered, and the Behavior/Inject indirection for event handling was confusing. **Status: replaced.** Phograph uses a canvas-based scene graph with ~25 classes (Section 11), unified pointer/gesture input (Section 12), direct drawing via DrawContext, automatic layout, and first-class touch support. No OS-native widgets. No Behavior Editor. No inject indirection. Works on both macOS and iOS from one codebase.
+
+### 11. No Error Information -- ADDRESSED
+The Fail mechanism propagated a bare boolean with no message or context. **Status: replaced.** Phograph adds Error values with message/code/details, try annotations for error capture, and `fail-with` for error propagation (Section 7.1).
+
+### 12. No Concurrency/Async Model -- ADDRESSED
+Thread primitives were mentioned but never specified. **Status: replaced.** Phograph defines Futures, dispatch, channels, and async variants of blocking primitives. The dataflow firing rule handles async waiting naturally (Section 7.2).
+
+### 13. No Dict/Map Data Type -- ADDRESSED
+The original used lists of lists for key-value data. **Status: replaced.** Phograph adds a first-class Dict type with full primitive support and list-annotation compatibility (Section 4).
+
+### 14. Three Confusing "Nothing" Values -- ADDRESSED
+NULL, NONE, and Undefined had overlapping, unclear semantics. **Status: replaced.** Phograph has a single `null` value (Section 4).
+
+### 15. Broken Persistence Model -- ADDRESSED
+The interpreter embedded persistent values in the program file (mixing code and data). Compiled programs had no automatic persistence. **Status: replaced.** Phograph stores persistents in a separate data file. Persistence works identically in interpreter and compiled modes (Section 10).
+
+### 16. External Code Integration Obsolete -- ADDRESSED
+Mac Toolbox / Pascal / 68K integration is irrelevant on modern Apple platforms. **Status: replaced.** Phograph targets Swift interop with type marshaling, bidirectional calling, and optional platform API sections (Section 14).
+
+### 17. Modal I/O Primitives -- ADDRESSED
+`show`, `ask`, `answer` were blocking modal dialogs incompatible with modern UI and iOS. **Status: replaced.** Phograph uses `log`/`inspect` for debug output and canvas-based `alert`/`prompt`/`confirm` for user interaction (Section 6, Section 12.8).
+
+### 18. No Networking -- ADDRESSED
+No primitives for HTTP, JSON, or network communication. **Status: replaced.** Phograph adds `http-get`, `http-post`, `http-request`, `json-parse`, `json-encode`, and related primitives with async Future returns (Section 6).
 
 ---
 

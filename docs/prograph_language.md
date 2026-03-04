@@ -81,26 +81,98 @@ Management and employees formed **Pictorius**, which acquired PI's assets. A Win
 
 ### The Dataflow Paradigm
 
-Prograph is a **visual, object-oriented, dataflow, multiparadigm programming language** that uses iconic symbols to represent actions taken on data. Programs are entirely graphical -- text is used only for naming operations, classes, methods, and for comments. There is no textual source code representation.
+Phograph is a **visual, object-oriented, dataflow, multiparadigm programming language** that uses iconic symbols to represent actions taken on data. It descends from Prograph but incorporates ideas from 40 years of dataflow language evolution -- Unreal Blueprints, Houdini, LabVIEW, vvvv, Enso, Max/MSP, Hazel, the Elm Architecture, and others.
 
 The fundamental execution model:
 
 - **Data flows from top to bottom** through a directed acyclic graph of operation icons
 - Operations execute **when all their input data is available** (data-driven firing rule)
 - Execution order depends solely on data dependencies, not spatial position
-- This model is **inherently parallelizable**: independent operations with no data dependencies between them can execute concurrently
+- This model is **inherently parallelizable**: independent operations with no data dependencies between them can execute concurrently as Swift tasks (see §13)
 
-Prograph is acknowledged as **not a pure dataflow language** -- data flowing through diagrams can include class instances subject to side-effects. It is formally "a class-based, single inheritance object-oriented language with dynamic typing and a garbage collection mechanism based on reference counting."
+Phograph is **not a pure dataflow language** -- data flowing through diagrams can include class instances subject to side-effects. It is formally "a class-based, single inheritance object-oriented language with dynamic typing, protocols, and automatic reference counting."
+
+### Dual Wire Types: Data and Execution
+
+Phograph has two kinds of wires, inspired by Unreal Blueprints and Cables.gl:
+
+- **Data wires** (solid lines): carry values between operations. This is the classic Prograph wire. Data flows top-to-bottom. An operation fires when all data inputs are available.
+- **Execution wires** (dashed lines with arrow): enforce sequencing between operations that have side effects. An operation with an execution-in pin fires only after the upstream operation on the execution wire has completed, even if all data inputs are already available.
+
+**Why both?** Pure dataflow can express any computation, but when operations have side effects (file I/O, network calls, UI mutations), the programmer must control the order. Original Prograph used **synchro links** for this, but they were awkward and disconnected from the data model. Execution wires make sequencing first-class and visible.
+
+**Rules:**
+- Execution wires are **optional**. Pure-dataflow graphs (no side effects) need no execution wires.
+- An operation can have **both** data inputs and an execution-in pin. It fires when all data inputs are available **and** the execution wire is triggered.
+- Execution wires form a linear chain (or tree) through a method. Multiple execution wires can fan out from one operation (parallel execution of the targets).
+- If an operation has no execution-in pin, it fires purely on data availability (classic dataflow).
+
+### Hybrid Evaluation: Push, Pull, and Tick
+
+Phograph uses a **hybrid evaluation model** rather than pure push or pure pull:
+
+- **Pull-based (demand-driven)** by default: computation proceeds only when a downstream operation demands a value. Unused branches are never evaluated. This is critical for performance (inspired by Nuke's ROI propagation and Kotlin Flow's cold-by-default).
+- **Push-based (event-driven)** for reactive UI: when an observable attribute changes or a user event fires, the change pushes downstream through bound nodes. This maps to Combine publishers.
+- **Tick-based (synchronous)** for animation: during each display frame, all animation-connected nodes evaluate synchronously. The current frame is a "tick" in the Lustre/SCADE sense. Maps to `CADisplayLink`.
+- **Async** for I/O: async operations return Futures. The dataflow firing rule handles waiting naturally (see §7.2). Maps to Swift `Task`.
+
+### Dual Visual/Textual Representation
+
+Inspired by Enso's isomorphic representation, every Phograph graph has an equivalent **Swift source code** representation. The programmer can switch between views:
+
+- **Visual view**: the dataflow graph (primary editing mode)
+- **Text view**: generated Swift code (read-only by default; editable for dense computation)
+
+This solves the "screen real estate" problem: a 50-node arithmetic subgraph that occupies a large screen area may be a single line of Swift. The programmer can collapse a subgraph into an **inline expression node** (see §5) or switch to text view for complex math.
+
+The dual representation also enables:
+- **Text-based diffs and code review** (git-friendly)
+- **Searching** code with standard text tools
+- **Copy-paste** between Phograph and Swift projects
+
+The Swift representation is the **compilation target** -- the visual graph compiles to Swift source, which compiles to native ARM64 via the Swift compiler.
 
 ### Visual Syntax
 
-The visual syntax is the **only** representation of Prograph code. There are no syntax errors possible in the traditional sense -- the editor enforces structural validity by construction. The approximately twenty operation icon types each have:
+The visual syntax is the **primary** representation of Phograph code. The editor enforces structural validity by construction -- invalid connections are rejected. The approximately twenty operation icon types each have:
 
-- **Input nodes** (terminals): small circles at the **top** of the icon
-- **Output nodes** (roots): small circles at the **bottom** of the icon
-- **Data links** (wires): lines connecting the root (output) of one icon to the terminal (input) of another
+- **Input nodes** (terminals): shaped pins at the **top** of the icon (shape indicates type; see Pin Shapes below)
+- **Output nodes** (roots): shaped pins at the **bottom** of the icon
+- **Data links** (wires): solid lines connecting the root (output) of one icon to the terminal (input) of another
+- **Execution links**: dashed lines with arrows connecting execution-out to execution-in pins
 
-Data flows top-to-bottom through wires. In debug/step mode, data can be observed "coursing through a method like balls falling through a Pachinko machine."
+Data flows top-to-bottom through wires. In debug/step mode, data can be observed on every wire with **live value visualization** -- hover over any wire to see its current value (or its value from the last execution trace).
+
+### Pin Shapes and Type Indication
+
+Inspired by Scratch/Snap!'s shape-based type system, Phograph pins have shapes that communicate type compatibility at a glance:
+
+| Pin Shape | Type Category | Examples |
+|-----------|--------------|----------|
+| **Circle** | Scalar | Integer, Real, String, Boolean |
+| **Square** | Collection | List, Dict |
+| **Diamond** | Optional | Any type that may be null |
+| **Hexagon** | Boolean | Boolean values specifically |
+| **Triangle** | Execution | Execution-in / execution-out flow |
+| **Star** | Error | Error output from try annotations |
+
+**Colors** further distinguish types within a category: Integer (blue), Real (green), String (pink), Boolean (red), List (orange), Dict (purple), Object (teal), External (gray), Null (white), Error (bright red).
+
+### Visible Coercion Dots
+
+Inspired by LabVIEW, wherever Phograph performs an implicit type conversion (e.g., Integer to Real, or value to String), a small **coercion dot** appears on the wire at the point of conversion. This makes type coercions visible rather than invisible magic. The dot's color indicates the conversion direction.
+
+### Typed Holes: Always-Runnable Graphs
+
+Inspired by Hazel, an incomplete Phograph graph is **always valid and always runnable**:
+
+- An unconnected input pin is a **typed hole** with an inferred type and a placeholder/default value (zero for numbers, empty string for strings, empty list for lists, null for objects).
+- The type of a hole is inferred from context (what the pin expects).
+- When the graph runs with holes, the holes produce their placeholder values, and the graph executes to the extent possible, producing partial results.
+- The editor visually marks holes (pulsing outline) so they're obvious but not errors.
+- **Fill-and-resume**: when the programmer connects a wire to a hole in a running graph, only the affected subgraph re-evaluates. The rest of the graph keeps its results. This is incremental computation at the language level.
+
+**Design principle:** There is no "broken" state. Every intermediate editing state produces some output. This is the single most important UX principle for a visual programming language.
 
 ### No Local Variables
 
@@ -305,11 +377,61 @@ This replaces the original's pure reference counting (which leaked cycles) and a
 
 Lines connecting a root of one icon to a terminal of another. Data flows along these links from producer to consumer. Multiple wires can originate from a single root (fan-out / data duplication). A terminal can receive from at most one root.
 
-### Synchro Links
+### Synchro Links (Deprecated)
 
-**Synchro links** override data-driven execution order, forcing one operation to complete before another begins. Visually depicted as semicircular connectors "pointing" in the direction of required execution order. The visual equivalent of sequential statement ordering in textual languages.
+The original Prograph's **synchro links** are superseded by **execution wires** (see §2). Synchro links are accepted by the parser for backward compatibility but the editor converts them to execution wires automatically.
 
-Used when two operations have no data dependency but must execute in a specific order (e.g., one has side effects the other depends on).
+### Execution Pins
+
+Operations that have side effects can have **execution-in** (triangle at top-left) and **execution-out** (triangle at bottom-left) pins. These accept execution wires that enforce sequencing.
+
+- Execution-in: the operation does not fire until the upstream execution wire triggers, even if all data inputs are available.
+- Execution-out: fires after the operation completes, triggering downstream operations on execution wires.
+- An operation can have multiple execution-out pins (fan-out = parallel execution of targets).
+
+**Pure operations** (no side effects) have no execution pins. The editor can infer purity: an operation with no Set, no I/O primitive, and no external call is pure. Pure operations fire on data availability alone.
+
+### Hot and Cold Inlets
+
+Inspired by Max/MSP, each data input pin on an operation is either **hot** or **cold**:
+
+- **Hot inlet** (filled pin): when new data arrives on this pin and all other inputs are available, the operation fires. This is the default for all pins in classic Prograph.
+- **Cold inlet** (hollow pin): new data arriving on this pin does NOT trigger firing. The value is stored and used when the operation next fires (triggered by a hot inlet or execution wire).
+
+**Why?** In reactive/streaming graphs, an operation like `multiply(price, quantity)` should not re-fire every time `quantity` updates AND every time `price` updates -- you typically want it to fire when `price` updates, using the latest `quantity`. Making `quantity` cold solves this.
+
+- By default, all inlets are hot (classic Prograph behavior).
+- The programmer toggles an inlet between hot/cold via a context menu.
+- Cold inlets are visually distinct (hollow circle vs filled circle within their shape).
+- In non-reactive (one-shot) execution, the hot/cold distinction has no effect -- the operation still fires when all inputs are available.
+
+### Inline Expression Nodes
+
+Inspired by Houdini's VEX expressions, an **inline expression node** embeds a small textual expression directly inside an operation icon, avoiding the need to create a subgraph for simple math or string operations.
+
+An inline expression node:
+- Displays the expression text inside the icon (e.g., `a * b + c`)
+- Has input pins named after the variables in the expression
+- Has one output pin for the result
+- Supports arithmetic, comparison, boolean logic, string interpolation, and ternary (`condition ? then : else`)
+- Is semantically equivalent to a subgraph of primitive operations, but takes much less screen space
+
+This extends the existing **Evaluation** icon (§5) with a richer expression language. Simple computations that would require 3-5 nodes can be a single inline expression.
+
+### Reroute Nodes
+
+Inspired by Unreal Blueprints, a **reroute node** (also called a knot) is a zero-operation pass-through that lets the programmer route wires around visual obstacles. A reroute node has one input and one output of the same type. It adds no computation -- it's purely for wire management.
+
+### Fuzzy Finder for Node Creation
+
+Inspired by Unity Visual Scripting and Enso, the **primary way to add nodes** to a graph is a fuzzy-search popup:
+
+- Triggered by double-clicking empty canvas, pressing Tab, or typing
+- Shows a searchable list of all available operations, primitives, class methods, and Swift API nodes
+- **Context-sensitive**: if triggered by dragging from an existing pin, the list is filtered to show only compatible operations (matching the pin's type)
+- Supports fuzzy matching: typing "htgt" matches "http-get"
+- Shows type signatures and brief descriptions in the popup
+- Recent/frequent operations appear at the top
 
 ### Inject Construct
 
@@ -629,7 +751,7 @@ When an operation has a try annotation:
 - On **success**: data flows through the normal output nodes. The error output produces `null`.
 - On **failure**: normal output nodes produce `null`. The error output produces an `Error` value describing what went wrong.
 
-This replaces the pattern of using `continue-on-failure` + downstream testing with a direct, visible error flow path. The error wire is visually distinct (dashed or colored) so error paths are immediately obvious in the dataflow graph.
+This replaces the pattern of using `continue-on-failure` + downstream testing with a direct, visible error flow path. The error wire is visually distinct (dashed red) so error paths are immediately obvious in the dataflow graph.
 
 ```
 [read-file] ──try──┬── file-contents (string or null)
@@ -647,6 +769,39 @@ Case 1:2
 Case 2:2
   [...handle the error...]
 ```
+
+#### Error Cluster Wiring (Phograph Extension)
+
+Inspired by LabVIEW's error cluster pattern, fallible operations can optionally accept an **error-in** pin and produce an **error-out** pin. This enables chaining error handling through a sequence of operations:
+
+- If an operation receives an error on its error-in pin, it **skips execution** and passes the error through to error-out unchanged.
+- If an operation receives null on error-in (no error), it executes normally. If it fails, it produces an error on error-out. If it succeeds, it passes null on error-out.
+
+This creates a clean error propagation chain without explicit error checking at each step:
+
+```
+[open-file] ──err──▶ [read-contents] ──err──▶ [parse-json] ──err──▶ [validate]
+                                                                         │
+                                                                    error (if any)
+```
+
+If `open-file` fails, `read-contents`, `parse-json`, and `validate` are all skipped, and the original error flows through to the end. The programmer only needs to check for errors once, at the end of the chain.
+
+Error wires are **visually distinct** (dashed red lines with star-shaped error pins). The error path can be **collapsed/hidden** for clean graphs -- the error wiring still exists but is not rendered unless the programmer enables error path visibility.
+
+This maps directly to Swift's `throws` / `try` chains and `Result<T, Error>`.
+
+#### Let-It-Crash Semantics (Phograph Extension)
+
+Inspired by Erlang's supervision model, unexpected errors in Phograph are **isolated per-node**:
+
+- When a node crashes (runtime error, not a controlled Fail), the crash is contained to that node.
+- The node shows a **red error state** with the error message.
+- Downstream nodes receive an error value on their inputs (not a process crash).
+- The rest of the graph continues running.
+- The errored node can be **restarted** (re-evaluated with its last good inputs) from the debugger.
+
+The graph never stops running due to a single node failure. This is critical for live/interactive use.
 
 #### Fail With Error
 
@@ -716,15 +871,41 @@ For producer-consumer patterns:
 | `channel-try-receive` | channel | value or null | Non-blocking receive; returns null if empty |
 | `channel-close` | channel | -- | Close the channel |
 
-### 7.3 Summary of Control Flow Extensions
+### 7.3 Managed Effects (Phograph Extension)
+
+Inspired by the Elm Architecture, side effects in Phograph can be expressed as **commands** (data describing an effect) rather than performed directly. This keeps the dataflow graph pure and testable.
+
+A **Command** is a value that describes a side effect without performing it:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `cmd-http-get` | url | command | Describe an HTTP GET (does not execute it) |
+| `cmd-http-post` | url, body, content-type | command | Describe an HTTP POST |
+| `cmd-write-file` | path, contents | command | Describe a file write |
+| `cmd-delay` | seconds, message | command | Describe a delayed message |
+| `cmd-batch` | list of commands | command | Combine multiple commands |
+| `cmd-none` | -- | command | No-op command |
+| `perform` | command | future | Execute a command, returning a Future for its result |
+
+**Why managed effects?** When effects are data, the graph is a pure function from inputs to (outputs + commands). This enables:
+- **Testing**: pass test inputs, check that the correct commands are produced, without actually performing I/O
+- **Replay**: record commands from a session and replay them for debugging
+- **Batching**: combine multiple effects and execute them efficiently
+
+Managed effects are **optional**. The programmer can call `http-get` directly (imperative style) or produce a `cmd-http-get` command (managed style). The managed style is recommended for application-level logic; imperative style is fine for scripts and prototypes.
+
+### 7.4 Summary of Control Flow Extensions
 
 | Original Prograph | Phograph |
 |-------------------|----------|
 | Fail propagates bare boolean | Fail can carry an Error value with message and code |
 | No error information at call site | Try annotation captures Error on dedicated output wire |
+| Error checking at every step | Error cluster wiring chains error propagation automatically |
+| One crash kills the program | Let-it-crash: node crashes are isolated, rest of graph continues |
 | Unhandled failure = silent halt | Unhandled failure = error report with full call stack |
 | "Thread primitives" unspecified | Futures, dispatch, channels |
 | No async operations | Async primitives return Futures; dataflow firing rule handles waiting naturally |
+| Side effects performed directly | Managed effects: describe effects as commands, execute via runtime |
 
 ---
 
@@ -770,6 +951,52 @@ An annotation that "winds an output back to the top" to become an input on the n
 ### Loop Modifier Annotation
 
 Attached to an operation to make it iterate. The loop continues until a control annotation (terminate/finish) fires. When loop, partition, or list annotations are added, the icon takes on a **"stack of icons" appearance** to indicate multiple executions.
+
+### Shift Registers (Phograph Extension)
+
+Inspired by LabVIEW, a **shift register** is a visual mechanism for carrying an accumulator value from one loop iteration to the next. It replaces the inject/accumulate annotation with a clearer visual metaphor:
+
+- A shift register appears as a pair of connected terminals on opposite sides of a loop boundary: one on the **right edge** (end of iteration) and one on the **left edge** (start of next iteration).
+- The programmer sets an **initial value** on the left terminal.
+- At the end of each iteration, the value on the right terminal feeds back to the left terminal for the next iteration.
+- When the loop completes, the final value on the right terminal exits the loop.
+
+```
+     ┌──────────────────────────────┐
+ 0 ──┤◀ accumulator    accumulator ▶├── final sum
+     │                              │
+     │   [+] input, accumulator     │
+     │        → accumulator         │
+     └──────────────────────────────┘
+```
+
+This is the visual equivalent of `fold`/`reduce`: the wire going from end to start of the loop IS the accumulator. Multiple shift registers on a single loop enable carrying multiple accumulators.
+
+### Spreads: Automatic Broadcasting (Phograph Extension)
+
+Inspired by vvvv's **spreads** and Grasshopper's data trees, Phograph wires implicitly support **automatic broadcasting** over collections. This generalizes the original ellipsis annotation:
+
+- Any scalar operation can receive a **List** on an input that expects a scalar. The operation automatically executes once per element, producing a List of results.
+- If multiple inputs receive Lists, the operation maps over them in parallel (zip semantics for equal-length lists; shorter lists cycle for unequal lengths, vvvv-style).
+- Broadcasting is **recursive**: a List of Lists produces a List of Lists.
+
+This means **most explicit loops are unnecessary**. Instead of:
+
+```
+[list of prices] ──ellipsis──▶ [* 1.1] ──ellipsis──▶ [list of adjusted prices]
+```
+
+The programmer simply wires a List into a scalar operation, and the result is a List:
+
+```
+[list of prices] ──▶ [* 1.1] ──▶ [list of adjusted prices]
+```
+
+The wire's visual appearance changes to indicate spread data flow: a **double line** for Lists, a **triple line** for Lists of Lists.
+
+**Relationship to ellipsis annotation:** The original ellipsis annotation is retained as an **explicit** opt-in. Spreads are **implicit** -- the system auto-broadcasts when a List arrives at a scalar pin. The programmer can disable auto-broadcasting on a per-pin basis if they want the List treated as a single value (e.g., for `length`, `sort`, `first`).
+
+Operations that are inherently list-level (like `length`, `sort`, `reverse`, `append`) do **not** auto-broadcast -- they operate on the list as a whole. The type system distinguishes between "this pin expects a scalar (auto-broadcasts)" and "this pin expects a List (no broadcasting)."
 
 ### Nested Loops
 
@@ -875,6 +1102,36 @@ When the same method name exists in multiple classes in an inheritance chain:
 - The caller doesn't need to know the specific subclass
 
 Especially powerful with **list annotations**: send the same method to every object in a mixed-type list, and each object executes its own version.
+
+### Front Panel / Block Diagram Duality (Phograph Extension)
+
+Inspired by LabVIEW and the natural marriage with SwiftUI, a Phograph class can have **two views**:
+
+- **Block Diagram**: the dataflow graph (methods, operations, wires). This is the implementation.
+- **Front Panel**: a SwiftUI view that serves as the class's visual interface. UI controls on the front panel (sliders, text fields, buttons, toggles) automatically appear as **input terminals** on the block diagram. Display elements (labels, charts, images) automatically appear as **output terminals**.
+
+This means building a UI is declarative: place controls on the front panel, and they become wirable data sources/sinks in the dataflow graph.
+
+**How it works:**
+1. The programmer designs the front panel by placing SwiftUI-like controls (Button, Slider, TextField, Toggle, Label, Image, etc.) from a palette.
+2. Each control generates a corresponding terminal on the block diagram: a Slider produces an output terminal of type Real; a TextField produces a String output and accepts a String input (for pre-filling).
+3. The programmer wires these terminals to operations in the block diagram.
+4. At runtime, user interaction with the front panel pushes values into the graph; graph outputs update the display elements.
+
+**SwiftUI mapping:** The front panel compiles to a SwiftUI `View` struct. Each control maps to a SwiftUI view with appropriate property wrappers: Slider → `@State var sliderValue: Double`, TextField → `@Binding var text: String`, etc. (See §14 for details.)
+
+Not every class needs a front panel. Classes without one are pure logic / data classes. Classes with a front panel are **view classes** -- they have UI.
+
+### Actor-Based Concurrency for Objects (Phograph Extension)
+
+Inspired by Swift Concurrency and Erlang, each Phograph class instance is conceptually a **Swift actor**:
+
+- Instance attributes are **actor-isolated**: only the instance's own methods can access them directly.
+- Method calls from outside the instance are automatically `await`ed (asynchronous cross-actor access).
+- This eliminates shared mutable state bugs: two operations can never simultaneously mutate the same object.
+- In the visual graph, wires that cross an actor boundary are rendered as **dashed lines** to indicate async access. The compiler verifies that values crossing boundaries are `Sendable`.
+
+**Opt-out:** Classes can be marked as `@nonactor` for performance-critical cases where the programmer guarantees single-threaded access. This compiles to a plain Swift class instead of an actor.
 
 ### Composition
 
@@ -1791,25 +2048,63 @@ Screen
 
 ### Interpreter / Incremental Compiler
 
-The CPX development environment uses an **incremental compiler** that is approximately 10x faster than the Prograph 2.5 interpreter. Programs can be edited while running. The environment is tightly integrated: editor, compiler, and debugger are unified.
+The Phograph development environment uses an **incremental compiler** that compiles individual methods on demand. Programs can be edited while running. The environment is tightly integrated: editor, compiler, and debugger are unified.
 
 Key capabilities:
 - Methods can be created while executing (via the "method does not exist" alert)
 - Individual methods can be executed in isolation (`Execute Method`)
 - Execution can be resumed after creating missing methods (`Resume` from Exec menu)
-- Abort infinite loops: Command+Period, then Return
+- Abort infinite loops: Command+Period
+- **Hot reloading** (inspired by Erlang): edit a node's implementation while the graph is running. The change takes effect on the next evaluation cycle. No restart needed.
 
 ### Stand-Alone Compiler
 
-The compiler produces standalone applications. It:
-- Translates the visual program into native ARM64 code (Apple Silicon / iOS) via LLVM or Swift intermediate output
+The compiler produces standalone applications via a two-stage process:
+
+1. **Visual graph → Swift source code**: the dataflow graph is translated to Swift source, preserving the dual representation (§2). Each method becomes a Swift function. Each class becomes a Swift actor (or class, if `@nonactor`).
+2. **Swift → native binary**: the Swift compiler produces optimized ARM64 code.
+
+Compilation details:
 - Tree-shakes unused classes and methods to reduce binary size
-- Supports automatic persistence (same behavior as interpreter -- see Section 10)
+- Supports automatic persistence (same behavior as interpreter -- see §10)
 - Produces universal binaries for macOS (Apple Silicon + Intel) or iOS .ipa bundles
+- The generated Swift code is human-readable and can be inspected or modified
+
+### Automatic Parallelism from Graph Structure
+
+Inspired by LabVIEW and Swift Structured Concurrency, independent branches of the dataflow graph compile to **concurrent Swift tasks** automatically. The programmer does not explicitly thread -- the compiler infers parallelism from the graph structure.
+
+**How it works:**
+- The compiler analyzes data dependencies in each method's graph.
+- Operations with no data dependency between them are placed in a **Swift TaskGroup** and execute concurrently.
+- The TaskGroup awaits all results before downstream operations fire.
+- A compound node (subgraph / method call) is a child task. Cancellation propagates down the task tree.
+
+**Example:**
+```
+Input ──┬──▶ [http-get url-a] ──┬──▶ [combine-results] ──▶ Output
+        └──▶ [http-get url-b] ──┘
+```
+The two `http-get` operations have no dependency between them. The compiler emits:
+```swift
+async let resultA = httpGet(urlA)
+async let resultB = httpGet(urlB)
+let combined = combineResults(await resultA, await resultB)
+```
+
+**UI safety:** Operations that touch UI are automatically `@MainActor`. The compiler enforces that non-`@MainActor` code does not directly access `@MainActor` state (visualized as dashed wires crossing an actor boundary).
+
+### Incremental Evaluation
+
+Inspired by Hazel's fill-and-resume and Compose's positional memoization:
+
+- When a node is added or modified in a running graph, only the **affected subgraph** re-evaluates. Unaffected nodes retain their previous results.
+- The runtime tracks which state each node depends on. When state changes, only nodes downstream of the change re-evaluate.
+- This makes live editing fast even in large graphs.
 
 ### Debugging
 
-Prograph's debugging is visual and deeply integrated:
+Phograph's debugging is visual and deeply integrated:
 
 | Feature | Description |
 |---------|-------------|
@@ -1817,17 +2112,53 @@ Prograph's debugging is visual and deeply integrated:
 | **Data inspection** | Tooltip-like popups show data values on any wire when stopped |
 | **Value modification** | Change data values mid-execution and resume |
 | **Live code editing** | Modify code while stopped in debugger; no recompile needed |
-| **Breakpoints** | Standard breakpoint support |
-| **Single-step** | Step operation by operation |
+| **Breakpoints** | On data wires (break when value passes) and execution wires (break before operation fires) |
+| **Single-step** | Step operation by operation, following execution wires |
 | **Roll-back** | Step backward through execution history |
 | **Roll-forward** | Step forward after rolling back |
 | **Execution stack** | Visual display of the call stack |
+| **Error isolation** | Crashed nodes show red with error message; rest of graph continues (see §7.1) |
 
-The debugging experience was considered one of Prograph's strongest features: "for many users the visual execution aspects of the language were as important as its edit-time graphical facilities."
+### Trace-Driven Development (Phograph Extension)
 
-### Threads
+Inspired by Darklang, every graph execution **records a trace** -- the value on every wire at every evaluation:
 
-Prograph CPX supports **multiple threads of execution** in both the interpreter and compiled runtime. Thread-related primitives are available for thread management.
+- When you open a graph, you see the **actual values from the last run** on every wire. No need to set breakpoints or add `log` nodes.
+- Values are rendered **appropriately for their type**: numbers as numbers, strings as strings, lists as scrollable tables, images as thumbnails, colors as swatches.
+- Clicking a wire shows the **value history**: all values that have flowed through it across recent evaluations.
+- You develop against **real data**, not hypothetical inputs.
+
+Traces are stored in the project's debug data (not committed to version control). They can be exported for bug reports.
+
+**Trace-based testing:** A trace can be saved as a **test fixture**. The system re-runs the graph with the recorded inputs and verifies that the outputs match. This generates regression tests from normal development.
+
+### Per-Node Preview Toggle
+
+Inspired by Grasshopper, each node can have its output **previewed** inline in the graph. The preview shows a small visualization of the output value:
+
+- Numbers: the value
+- Strings: first ~50 characters
+- Lists: count and first few elements
+- Images: thumbnail
+- Objects: class name and key attribute values
+- Shapes: rendered preview
+
+Previews can be toggled on/off per-node (right-click → Toggle Preview). Previews update in real time during live evaluation.
+
+### Concurrency
+
+Phograph maps to **Swift Structured Concurrency** (see §7.2):
+
+| Phograph Concept | Swift Mapping |
+|-----------------|--------------|
+| Independent graph branches | `async let` / `TaskGroup` |
+| Class instance | `actor` (default) or `class` (`@nonactor`) |
+| Method call to another object | `await actor.method()` |
+| Future | `Task<T, Error>` |
+| Channel | `AsyncStream` / `AsyncChannel` |
+| Dispatch | `Task { }` |
+| Dispatch-main | `MainActor.run { }` |
+| Observable attribute | `@Published` / Combine publisher |
 
 ---
 
@@ -1898,9 +2229,33 @@ For C libraries and lower-level system calls, Phograph supports calling C functi
 - Pointer types are represented as `External` values in Phograph
 - Memory management for C allocations must be handled explicitly (allocate/free)
 
+### Automatic Swift API Surface (Phograph Extension)
+
+Inspired by Unity Visual Scripting's automatic node generation, Phograph can **automatically import any Swift type, method, and property as a node** -- no manual bridge declarations needed.
+
+**How it works:**
+1. The Phograph compiler reads Swift module interfaces (`.swiftinterface` files) for imported frameworks.
+2. Every public type, method, property, and enum case is automatically available as a node in the fuzzy finder (§5).
+3. Type marshaling (see table above) applies automatically. Swift generics are handled via wildcard pins.
+4. The programmer types `UIImage` in the fuzzy finder and sees all `UIImage` methods as available nodes.
+
+**Node naming convention:** Swift methods appear as `TypeName.methodName`. For instance, `String.count`, `Array.append`, `URLSession.data(from:)`.
+
+**Advantages:**
+- No manual bridge maintenance. When Apple releases a new API, it's immediately available.
+- Autocomplete shows Swift documentation inline.
+- Type safety is preserved: the generated node's pins have the correct Phograph types.
+
+**Limitations:**
+- Complex Swift generics (associated types, existentials) may require manual bridge hints.
+- Objective-C APIs accessed through Swift bridging headers are supported but may have less precise type information.
+- The automatic surface is read-only -- the programmer cannot modify the generated nodes, only use them.
+
+For cases where automatic import doesn't suffice, the manual bridge declaration (see above) remains available.
+
 ### Platform API Access
 
-Common platform APIs are exposed as Phograph primitive sections (importable sections, not built into the core language):
+Common platform APIs are additionally exposed as **curated Phograph primitive sections** with Phograph-idiomatic naming and documentation (importable sections, not built into the core language):
 
 | Section | Contents |
 |---------|----------|
@@ -1915,7 +2270,7 @@ Common platform APIs are exposed as Phograph primitive sections (importable sect
 | `Platform.Haptics` | Haptic feedback engine |
 | `Platform.StoreKit` | In-app purchases |
 
-These sections wrap Swift/platform APIs into Phograph primitives with Phograph-native types. They are optional imports -- a Phograph program only links what it uses.
+These sections wrap Swift/platform APIs into Phograph primitives with Phograph-native types. They are optional imports -- a Phograph program only links what it uses. These exist alongside the automatic API surface for convenience and better documentation.
 
 ---
 
@@ -1927,10 +2282,10 @@ Documented weaknesses of the original Prograph, with their status in Phograph:
 No inline labels on wires or nodes. Understanding a method requires reading comments or memorizing arity conventions. **Status: open.** Allow optional labels on input/output nodes in the Phograph editor. Optional type annotations (Section 4) add labels when used.
 
 ### 2. Non-Routable Wiring
-Wires could not be manually routed around obstacles, creating visual "spaghetti" for complex methods. **Status: open.** Automatic wire routing with manual override in the Phograph editor.
+Wires could not be manually routed around obstacles, creating visual "spaghetti" for complex methods. **Status: partially addressed.** Automatic wire routing with manual override in the Phograph editor. Reroute/knot nodes (§5) allow explicit wire path control.
 
 ### 3. No Inline Grouping
-No mechanism to group operations without creating a full named method. **Status: open.** Anonymous grouping / visual regions in the Phograph editor.
+No mechanism to group operations without creating a full named method. **Status: partially addressed.** Inline expression nodes (§5) handle simple cases. Anonymous grouping / visual regions for larger groups remain open for the IDE.
 
 ### 4. Confusing Conditionals -- PARTIALLY ADDRESSED
 The if-then-else pattern via case structure and control annotations was "far and away the most confusing construct in the language." **Status: partially addressed.** Pattern matching on cases (Section 9) makes the case system dramatically more intuitive by letting cases declare what they expect (type, value, structure) rather than imperatively testing for it. The underlying control annotation system is retained for advanced use.
@@ -1938,11 +2293,11 @@ The if-then-else pattern via case structure and control annotations was "far and
 ### 5. Window Proliferation (IDE)
 Opening methods, classes, and subclasses in the original generated many overlapping windows. **Status: open.** The Phograph IDE should use tabbed interface, split views, and breadcrumb navigation.
 
-### 6. Non-Textual Sharing
-Code could not be easily shared via email or text. **Status: open.** Phograph should define a serialization format (JSON) for visual diffs, code review, and sharing.
+### 6. Non-Textual Sharing -- ADDRESSED
+Code could not be easily shared via email or text. **Status: addressed.** Phograph's dual visual/textual representation (§2) means every graph has equivalent Swift source code. Diffs, code review, and sharing use the text representation. The graph serialization format is JSON.
 
-### 7. Static Complexity
-Large projects with many side-effects were difficult to reason about. **Status: open.** Better visualization of data flow paths, effect tracking, module-level isolation.
+### 7. Static Complexity -- PARTIALLY ADDRESSED
+Large projects with many side-effects were difficult to reason about. **Status: partially addressed.** Execution wires (§2) make side-effect ordering explicit and visible. Managed effects (§7.3) enable pure dataflow graphs. Error cluster wiring (§7.1) makes error paths visible. Actor-based concurrency (§9) isolates mutable state. Remaining IDE work: effect highlighting, data flow path tracing.
 
 ### 8. No Access Control -- ADDRESSED
 All attributes were effectively public. **Status: replaced.** Phograph adds public/private/protected/read-only visibility modifiers on attributes and methods (Section 9). Attributes default to private; methods default to public.
@@ -2005,7 +2360,37 @@ Could check `integer?` but not get the class of an object or test protocol confo
 Debug output primitive and natural logarithm both named `log`. **Status: replaced.** Debug output is `log`; logarithm is `ln` (natural), `log10`, `log2` (Section 6).
 
 ### 28. Obsolete Compiler Target -- ADDRESSED
-Original compiler targeted 68K Motorola. **Status: replaced.** Phograph compiler targets ARM64 via LLVM, producing universal macOS binaries and iOS .ipa bundles (Section 13).
+Original compiler targeted 68K Motorola. **Status: replaced.** Phograph compiler targets ARM64 via Swift intermediate, producing universal macOS binaries and iOS .ipa bundles (§13).
+
+### 29. No Execution Sequencing Beyond Synchro Links -- ADDRESSED
+Synchro links were the only way to order side-effectful operations, but they were disconnected from the data model and hard to read. **Status: replaced.** Phograph adds execution wires (§2) -- first-class dashed wires with arrow that enforce sequencing. Execution pins on operations make side-effect ordering explicit and visible.
+
+### 30. No Implicit Parallelism -- ADDRESSED
+Original Prograph described the dataflow model as "inherently parallelizable" but the implementation was single-threaded. **Status: replaced.** Phograph compiles independent graph branches to concurrent Swift tasks automatically (§13). The graph structure IS the parallelism specification.
+
+### 31. All-or-Nothing Evaluation -- ADDRESSED
+Original Prograph had no incremental evaluation -- any change required full re-execution. **Status: replaced.** Phograph supports incremental evaluation (§13): only affected subgraphs re-evaluate when inputs change. Fill-and-resume from Hazel means edits to a running graph take effect immediately.
+
+### 32. No Debugging Data After Execution -- ADDRESSED
+Original Prograph showed values only during step-through debugging. After execution, all wire values were gone. **Status: replaced.** Trace-driven development (§13) records values on every wire. The last execution's data is always visible.
+
+### 33. No Automatic API Binding -- ADDRESSED
+Every external function call required a manual bridge declaration. **Status: replaced.** Automatic Swift API surface generation (§14) makes every public Swift type/method/property available as a node without manual binding.
+
+### 34. No Type Visibility -- ADDRESSED
+Wire types were invisible -- the programmer had to run the program to discover type mismatches. **Status: replaced.** Pin shapes indicate type category (§2). Pin colors indicate specific types. Visible coercion dots (§2) show implicit conversions. Type annotations propagate through the graph.
+
+### 35. Explicit Loops Required for Collections -- ADDRESSED
+Processing a list required explicit loops or ellipsis annotations. **Status: replaced.** Spreads (§8) enable automatic broadcasting: any scalar operation implicitly maps over lists. Most loops are eliminated.
+
+### 36. No Node Discovery Mechanism -- ADDRESSED
+The programmer had to know which primitives/methods existed by reading documentation. **Status: replaced.** Fuzzy finder (§5) provides searchable, context-sensitive node creation. Dragging from a pin filters to compatible nodes.
+
+### 37. No Managed Effects / Testability -- ADDRESSED
+Side effects were performed directly, making graphs impure and hard to test. **Status: replaced.** Managed effects (§7.3) express side effects as command values executed by the runtime. Graphs are pure and testable.
+
+### 38. Crash Propagation -- ADDRESSED
+A runtime error in any operation halted the entire program. **Status: replaced.** Let-it-crash semantics (§7.1) isolate crashes per-node. The errored node shows red; the rest of the graph continues.
 
 ---
 
@@ -2044,3 +2429,34 @@ Original compiler targeted 68K Motorola. **Status: replaced.** Phograph compiler
 - Philip T. Cox faculty page, Dalhousie University. https://web.cs.dal.ca/~pcox/
 - Noel Rappin: "Prograph." https://noelrappin.com/blog/2018/11/prograph/
 - C2 Wiki: PrographLanguage. https://kidneybone.com/c2/wiki/PrographLanguage
+
+### Dataflow Language Influences
+
+The following systems were surveyed for features adopted into Phograph:
+
+- **Unreal Engine Blueprints** -- dual execution+data wires
+- **Unity Visual Scripting** -- automatic API node generation, fuzzy finder
+- **Houdini** -- inline VEX expressions, digital assets
+- **Nuke** -- pull-based demand-driven evaluation
+- **TouchDesigner** -- continuous/live evaluation
+- **Max/MSP** -- hot/cold inlets
+- **vvvv** -- spreads (automatic broadcasting)
+- **Cables.gl** -- execution wire model
+- **Enso** -- dual visual/textual representation
+- **Grasshopper** -- per-node preview toggle
+- **Dynamo** -- list@level nesting control
+- **LabVIEW** -- front panel/block diagram, error cluster wiring, shift registers, visible coercion dots, automatic parallelism
+- **Reaktor** -- snapshot/preset system, multi-level abstraction
+- **Scratch/Snap!** -- shape-based type indication on pins
+- **Lucid** -- variables as streams, `fby` (followed-by)
+- **Lustre/SCADE** -- synchronous tick model, `pre` (previous value)
+- **Elm** -- The Elm Architecture (Model/Update/View), managed effects, no runtime exceptions
+- **RxSwift/Combine** -- reactive operators as nodes, backpressure
+- **Swift Concurrency** -- structured concurrency mapping, actors, Sendable checking
+- **Kotlin Flow** -- cold-by-default evaluation, StateFlow/SharedFlow
+- **Erlang/Elixir** -- let-it-crash + supervision, hot reloading, process isolation
+- **Darklang** -- trace-driven development
+- **Hazel** -- typed holes, always-runnable graphs, fill-and-resume
+- **Origami** -- physics-based animation nodes, device mirroring
+- **SwiftUI** -- property wrapper pin types, view modifier chains, environment
+- **React** -- hooks as node design pattern, dependency-driven re-evaluation

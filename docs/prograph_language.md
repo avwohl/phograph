@@ -1,4 +1,4 @@
-# Prograph Language Specification
+# Phograph Language Specification
 
 A comprehensive reference for implementing a modern Prograph-based visual dataflow programming language for macOS and iOS.
 
@@ -149,14 +149,15 @@ Inspired by Scratch/Snap!'s shape-based type system, Phograph pins have shapes t
 
 | Pin Shape | Type Category | Examples |
 |-----------|--------------|----------|
-| **Circle** | Scalar | Integer, Real, String, Boolean |
+| **Circle** | Scalar | Integer, Real, String |
+| **Hexagon** | Boolean | Boolean values (distinct shape for at-a-glance recognition) |
 | **Square** | Collection | List, Dict |
 | **Diamond** | Optional | Any type that may be null |
-| **Hexagon** | Boolean | Boolean values specifically |
+| **Pentagon** | Object | Class instances, External references |
 | **Triangle** | Execution | Execution-in / execution-out flow |
 | **Star** | Error | Error output from try annotations |
 
-**Colors** further distinguish types within a category: Integer (blue), Real (green), String (pink), Boolean (red), List (orange), Dict (purple), Object (teal), External (gray), Null (white), Error (bright red).
+**Colors** further distinguish types within a shape category: Integer (blue circle), Real (green circle), String (pink circle), Boolean (red hexagon), List (orange square), Dict (purple square), Object (teal pentagon), External (gray pentagon), Null (white diamond), Error (bright red star).
 
 ### Visible Coercion Dots
 
@@ -259,7 +260,7 @@ During interpretation, if a called method doesn't exist, an alert offers to crea
 
 ## 4. Data Types
 
-Phograph has **nine data types**:
+Phograph has **twelve data types**:
 
 | Type | Description |
 |------|-------------|
@@ -269,8 +270,11 @@ Phograph has **nine data types**:
 | **Boolean** | `true` / `false` |
 | **List** | Ordered collection; elements can be of any type; nesting supported |
 | **Dict** | Key-value map; keys can be any hashable type (integer, real, string, boolean); values any type |
+| **Data** | Raw binary byte buffer (for file I/O, network payloads, images, cryptography) |
+| **Date** | Point in time with nanosecond precision (see Date/Time Primitives below) |
 | **Object** | Instance of a user-defined class |
 | **External** | Opaque reference to a platform/FFI resource (Swift object, C pointer, OS handle) |
+| **Enum** | Value of an enum type with optional associated data (see §9, Enum Types) |
 | **Null** | The single "nothing" value. Represents absence of data. |
 
 **Design change from original Prograph:** The original had three confusing "nothing" values -- NULL, NONE, and Undefined -- with unclear, overlapping semantics. Phograph collapses these into a single `null`. An uninitialized attribute is `null`. An absent return value is `null`. There is one nothing, not three.
@@ -332,11 +336,11 @@ A **Dict** is an unordered key-value map. Keys must be hashable (integer, real, 
 
 Dicts work with **list annotations**: applying an ellipsis-annotated operation to a dict iterates over its (key, value) pairs, each delivered as a two-element list.
 
-### Evaluations
+### Evaluations (Inline Expressions)
 
-Small formula-like constructs embedded in an operation icon. Hold a single mathematical equation with inputs named by the wires connected to them. No function-call overhead. Example: `b*b - 4*a*c` with inputs `a`, `b`, `c`.
+Small formula-like constructs embedded in an operation icon. Hold a single expression with inputs named by the wires connected to them. No function-call overhead. Example: `b*b - 4*a*c` with inputs `a`, `b`, `c`.
 
-**Design change from original Prograph:** The original limited evaluations to 26 inputs named `a` through `z`. Phograph evaluations name inputs from the connected wire labels, with no fixed limit.
+**Design change from original Prograph:** The original limited evaluations to 26 inputs named `a` through `z` and supported only arithmetic. Phograph **inline expression nodes** (see §5) extend evaluations with a richer expression language: arithmetic, comparison, boolean logic, string interpolation, ternary (`condition ? then : else`), and method calls. Wire labels name the inputs, with no fixed limit. Evaluations and inline expressions are the same feature -- "evaluation" is the original Prograph term; "inline expression" is the modern name.
 
 ### Memory Management
 
@@ -345,6 +349,58 @@ Small formula-like constructs embedded in an operation icon. Hold a single mathe
 This replaces the original's pure reference counting (which leaked cycles) and aligns with Swift's ARC model for seamless interop. Deterministic destruction enables **automatic cleanup**: objects that hold resources (file handles, network connections, GPU buffers) can implement a `/finalize` method that is called when the object is deallocated.
 
 **Design change from original Prograph:** The original had no destructors. Phograph adds `/finalize` -- an optional method called automatically when an object's reference count reaches zero. Use it for resource cleanup (close files, release GPU buffers, disconnect network sockets). Not a replacement for explicit cleanup in all cases, but a safety net.
+
+### Data (Binary Buffers)
+
+A **Data** value is a contiguous buffer of raw bytes. Used for binary file I/O, network payloads, image data, and cryptographic operations.
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `data-create` | size | data | Create a zero-filled buffer of N bytes |
+| `data-from-list` | list of integers | data | Create from a list of byte values (0-255) |
+| `data-to-list` | data | list of integers | Convert to list of byte values |
+| `data-length` | data | integer | Number of bytes |
+| `data-slice` | data, offset, length | data | Extract a sub-range |
+| `data-concat` | data1, data2 | data | Concatenate two buffers |
+| `data-to-string` | data, encoding | string | Decode bytes to string (`"utf8"`, `"ascii"`, `"base64"`) |
+| `data-from-string` | string, encoding | data | Encode string to bytes |
+| `data-get-byte` | data, index | integer | Get byte at index (0-indexed, since bytes are not a Phograph collection) |
+| `data-set-byte` | data, index, value | data | Return new buffer with byte set |
+
+Data values are **immutable by default** (operations return new buffers). For performance-critical scenarios, mutable variants (`data-set-byte!`) modify in place.
+
+Maps to Swift `Data` for interop.
+
+### Date and Time
+
+A **Date** represents an absolute point in time with nanosecond precision. Internally stored as seconds since the Unix epoch (January 1, 1970 UTC). Maps to Swift `Date` for interop.
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `date-now` | -- | date | Current date and time |
+| `date-create` | year, month, day, hour, minute, second | date | Create a date from components (in local timezone) |
+| `date-create-utc` | year, month, day, hour, minute, second | date | Create a date from components (in UTC) |
+| `date-components` | date | year, month, day, hour, minute, second | Decompose a date (in local timezone) |
+| `date-components-utc` | date | year, month, day, hour, minute, second | Decompose a date (in UTC) |
+| `date-timestamp` | date | real | Seconds since Unix epoch |
+| `date-from-timestamp` | real | date | Create from Unix timestamp |
+| `date-add` | date, seconds | date | Add a duration (in seconds) to a date |
+| `date-diff` | date1, date2 | real | Difference in seconds between two dates |
+| `date-format` | date, format-string | string | Format a date (e.g., `"yyyy-MM-dd HH:mm:ss"`) |
+| `date-parse` | string, format-string | date | Parse a date from a string (fails if format doesn't match) |
+| `date-weekday` | date | integer | Day of week (1=Sunday, 7=Saturday) |
+| `date-compare` | date1, date2 | integer | -1, 0, or 1 (for use with `sort-by`) |
+
+**Duration primitives** for convenience:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `seconds` | n | real | n seconds (identity, for readability) |
+| `minutes` | n | real | n * 60 seconds |
+| `hours` | n | real | n * 3600 seconds |
+| `days` | n | real | n * 86400 seconds |
+
+Dates are compared with standard comparison primitives (`=`, `<`, `>`, etc.).
 
 ---
 
@@ -357,7 +413,7 @@ This replaces the original's pure reference counting (which leaked cycles) and a
 | **Plain operation** | Rectangle | Unnamed placeholder; becomes typed once named |
 | **Universal method** | Rectangle with name | Call to a standalone method |
 | **Primitive** | Rectangle with single line at bottom edge | Built-in operation supplied by the runtime |
-| **External method** | Rectangle with lines at top and bottom edges | Call to C/Pascal/OS routine |
+| **External method** | Rectangle with lines at top and bottom edges | Call to Swift/C function (see §14) |
 | **Local method** | Rectangle with vertical lines on left and right | Grouped operations within a parent method |
 | **Instance generator** | Octagon | Creates a new instance of a class |
 | **Persistent** | Oval | Accesses a global persistent variable |
@@ -370,8 +426,8 @@ This replaces the original's pure reference counting (which leaked cycles) and a
 
 ### Node Types
 
-- **Root nodes** (outputs): circles at the bottom of an icon; data exits here
-- **Terminal nodes** (inputs): circles at the top of an icon; data enters here
+- **Root nodes** (outputs): shaped pins at the bottom of an icon; data exits here (shape indicates type, see §2 Pin Shapes)
+- **Terminal nodes** (inputs): shaped pins at the top of an icon; data enters here
 
 ### Data Links (Wires)
 
@@ -597,6 +653,19 @@ All comparison primitives automatically carry a **control annotation** for use i
 | `append` | list1, list2 | combined | Concatenate two lists |
 | `reverse` | list | reversed | Reverse list order |
 | `empty?` | list | boolean | Test if list is empty |
+| `filter` | list, method-ref | list | Keep elements where method-ref returns true |
+| `reduce` | list, initial-value, method-ref | value | Fold list: method-ref(accumulator, element) → accumulator |
+| `map` | list, method-ref | list | Apply method-ref to each element, collect results |
+| `flat-map` | list, method-ref | list | Map, then flatten one level |
+| `any?` | list, method-ref | boolean | True if method-ref returns true for any element |
+| `all?` | list, method-ref | boolean | True if method-ref returns true for all elements |
+| `find` | list, method-ref | element | First element where method-ref returns true (fails if not found) |
+| `zip` | list1, list2 | list of pairs | Combine two lists element-wise into (a, b) pairs |
+| `enumerate` | list | list of pairs | Each element paired with its 1-based index: ((1, a) (2, b) ...) |
+| `unique` | list | list | Remove duplicate elements, preserving order |
+| `group-by` | list, method-ref | dict | Group elements by method-ref result; returns dict of key → list |
+
+**Note on `map` vs spreads:** Spreads (§8) auto-broadcast scalar operations over lists, replacing `map` for primitives. Use explicit `map` when the transformation is a user-defined method that takes extra arguments or has complex logic. Spreads handle the common case; `map`/`filter`/`reduce` handle the general case.
 
 ### Type-Checking and Introspection Primitives
 
@@ -630,7 +699,7 @@ See Section 4 (Dicts) for the full dict primitive set (`dict-get`, `dict-set`, `
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
-| `http-get` | url | response | Async HTTP GET. Returns a Future (see Section 7.3). |
+| `http-get` | url | response | Async HTTP GET. Returns a Future (see §7.2). |
 | `http-post` | url, body, content-type | response | Async HTTP POST. Returns a Future. |
 | `http-request` | method, url, headers-dict, body | response | General async HTTP request. Returns a Future. |
 | `response-status` | response | integer | HTTP status code |
@@ -1092,7 +1161,7 @@ Create a method in the subclass with the same name as a parent method. The subcl
 
 ### Abstract Superclasses
 
-Classes intended never to be instantiated directly. Made abstract by omitting the initialization method (`<<>>`). Provide shared code to subclasses.
+Classes intended never to be instantiated directly. Made abstract by omitting the `init` method. Provide shared code to subclasses.
 
 ### Polymorphism
 
@@ -1121,6 +1190,13 @@ This means building a UI is declarative: place controls on the front panel, and 
 **SwiftUI mapping:** The front panel compiles to a SwiftUI `View` struct. Each control maps to a SwiftUI view with appropriate property wrappers: Slider → `@State var sliderValue: Double`, TextField → `@Binding var text: String`, etc. (See §14 for details.)
 
 Not every class needs a front panel. Classes without one are pure logic / data classes. Classes with a front panel are **view classes** -- they have UI.
+
+**Relationship to Canvas system (§11):** The Front Panel and Canvas serve different purposes:
+
+- **Front Panel** (this section) is for **application-level UI** -- forms, dashboards, settings screens, data-driven interfaces. It compiles to SwiftUI views and gets native platform appearance (dark mode, Dynamic Type, accessibility) for free. Use the front panel when you want standard app UI.
+- **Canvas** (§11) is for **custom rendering** -- games, visualizations, charts, drawing apps, image editors, or any UI that needs pixel-level control. It renders into a GPU-backed pixel buffer with full control over every pixel.
+
+A single class can have both: a front panel for controls and a canvas for a custom rendering area (the canvas would be embedded as a view in the front panel). The front panel's controls generate terminals on the block diagram; the canvas's shapes are manipulated through the block diagram's operations.
 
 ### Actor-Based Concurrency for Objects (Phograph Extension)
 
@@ -1184,10 +1260,70 @@ Data-determined dispatch (`/MethodName`) works across protocol boundaries: if mu
 
 | Protocol | Required Methods | Description |
 |----------|-----------------|-------------|
-| `Equatable` | `/equals` | Can be compared for equality |
-| `Comparable` | `/compare` | Can be ordered (returns -1, 0, 1) |
-| `Serializable` | `/serialize`, `/deserialize` | Can be saved to / loaded from data |
-| `Printable` | `/to-string` | Has a human-readable string representation |
+| `Equatable` | `/equals` | Can be compared for equality. The `=` primitive calls this method on objects. |
+| `Comparable` | `/compare` | Can be ordered (returns -1, 0, 1). The `<`, `>`, `sort` primitives call this. |
+| `Serializable` | `/serialize`, `/deserialize` | Can be saved to / loaded from data. `file-write-object` calls `/serialize`. |
+| `Printable` | `/to-string` | Has a human-readable string representation. The `to-string` primitive and `log` call this method on objects that conform. |
+
+### Enum Types (Phograph Extension)
+
+Phograph adds **enum types** -- algebraic data types (tagged unions) where each variant can carry associated data. This fills a critical gap: without enums, pattern matching is limited to duck-typing on primitive types.
+
+#### Defining an Enum
+
+An enum is created in the Classes window, like a class, but with a distinct icon (rounded rectangle with vertical dividers). Each variant is listed with its name and optional associated data types.
+
+```
+Enum "Result" has 2 variants:
+  success(value)       -- carries one value of any type
+  failure(error)       -- carries an Error
+
+Enum "Direction" has 4 variants:
+  north                -- no associated data
+  south
+  east
+  west
+
+Enum "LoadState" has 3 variants:
+  idle                 -- no data
+  loading(progress: Real)   -- carries progress 0.0-1.0
+  loaded(data: Data)        -- carries the loaded data
+  failed(error: Error)      -- carries error info
+```
+
+#### Creating Enum Values
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `EnumName.variant` | associated values | enum value | Create an enum value. E.g., `Result.success` with input `42` produces a `Result` value. |
+
+In the visual graph, creating an enum value uses an icon labeled with the enum and variant name (e.g., `Result.success`). The input pins match the variant's associated data types.
+
+#### Pattern Matching on Enums
+
+Enum variants are the primary use case for case-based pattern matching:
+
+```
+Method "handle-result" has 2 cases:
+
+Case 1:2  Input: result: Result.success(value)
+  [...use value...]
+
+Case 2:2  Input: result: Result.failure(error)
+  [...handle error...]
+```
+
+Each case specifies the variant to match. Associated data is destructured into named bindings. This is exhaustive -- the editor warns if not all variants are covered.
+
+#### Enum Introspection
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `enum-variant` | enum-value | string | Get the variant name (e.g., `"success"`) |
+| `enum-type` | enum-value | string | Get the enum type name (e.g., `"Result"`) |
+| `enum?` | value | boolean | Test if a value is an enum |
+
+**Swift mapping:** Phograph enums compile to Swift `enum` types with associated values. `Result.success(42)` becomes `Result.success(42)` in Swift. This enables seamless interop with Swift APIs that return enums (like `Swift.Result`).
 
 ### Pattern Matching on Cases (Phograph Extension)
 
@@ -1343,6 +1479,17 @@ Class attributes (shared across all instances) are **not** automatically persist
 
 **Design rationale:** Implicit persistence on class attributes (original Prograph) created confusion about which values survived restarts. In Phograph, persistence is always explicit: if you want a value to survive restarts, use a persistent.
 
+### Persistents and Concurrency
+
+Persistents are global shared state. In the actor-based concurrency model (§9), persistent access is mediated by a dedicated **PersistentStore actor**:
+
+- Reading a persistent is an `await` (async read from the store actor)
+- Writing a persistent is an `await` (async write to the store actor)
+- This serializes all persistent access, preventing data races
+- In the visual graph, persistent ovals have dashed wires (like cross-actor access) to indicate the async nature
+
+For performance, frequently-read persistents can be **cached** per-actor with a configurable staleness tolerance.
+
 ### Object Serialization
 
 Any Phograph object can be serialized to disk and deserialized back. This replaces the original's vague "object persistence" with explicit file I/O:
@@ -1426,7 +1573,7 @@ The scene graph is a tree of **Shape** objects. Every visible element -- a butto
 | `bounds` | Rect | (0, 0, 0, 0) | Position and size in parent coordinates |
 | `transform` | Transform | identity | Affine transform (translate, rotate, scale, skew) |
 | `children` | List | () | Ordered list of child shapes (drawn back-to-front) |
-| `parent` | Shape or NULL | NULL | Parent shape (set automatically on add) |
+| `parent` | Shape or null | null | Parent shape (set automatically on add) |
 | `style` | Style | default | Visual style (fill, stroke, shadow, opacity, corner-radius) |
 | `visible` | Boolean | true | Whether this shape and its children are drawn |
 | `interactive` | Boolean | true | Whether this shape receives pointer/key events |
@@ -1474,17 +1621,17 @@ The scene graph is a tree of **Shape** objects. Every visible element -- a butto
 
 ### 11.4 Style
 
-Every Shape has a `Style` object controlling its visual appearance. Style attributes cascade: if a child's style attribute is NONE, it inherits from its parent.
+Every Shape has a `Style` object controlling its visual appearance. Style attributes cascade: if a child's style attribute is `null`, it inherits from its parent.
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `fill-color` | Color or NONE | NONE | Background fill color |
-| `fill-gradient` | Gradient or NONE | NONE | Linear or radial gradient fill (overrides fill-color) |
-| `stroke-color` | Color or NONE | NONE | Border/outline color |
+| `fill-color` | Color or null | null | Background fill color |
+| `fill-gradient` | Gradient or null | null | Linear or radial gradient fill (overrides fill-color) |
+| `stroke-color` | Color or null | null | Border/outline color |
 | `stroke-width` | Real | 0.0 | Border/outline thickness |
 | `corner-radius` | Real | 0.0 | Rounded corner radius |
 | `opacity` | Real | 1.0 | Opacity (0.0 transparent, 1.0 opaque). Applied to shape and all children. |
-| `shadow-color` | Color or NONE | NONE | Drop shadow color |
+| `shadow-color` | Color or null | null | Drop shadow color |
 | `shadow-offset` | Point | (0, 0) | Drop shadow offset |
 | `shadow-blur` | Real | 0.0 | Drop shadow blur radius |
 | `padding` | Insets | (0,0,0,0) | Internal padding (top, right, bottom, left) |
@@ -1601,7 +1748,7 @@ The DrawContext maintains a **graphics state stack** (fill color, stroke color, 
 | `draw-clip-rect` | ctx, rect | ctx | Intersect clipping region with rect |
 | `draw-clip-path` | ctx, path | ctx | Intersect clipping region with path |
 
-**Note:** All draw primitives take the `DrawContext` as first input and pass it through as output. This enables chaining in the dataflow graph: the context flows through a pipeline of drawing operations, with synchro links ensuring correct ordering when the same context passes through independent branches.
+**Note:** All draw primitives take the `DrawContext` as first input and pass it through as output. This enables chaining in the dataflow graph: the context flows through a pipeline of drawing operations, with execution wires ensuring correct ordering when the same context passes through independent branches.
 
 #### Retained vs. Immediate Drawing
 
@@ -1641,10 +1788,10 @@ Any Shape can specify size constraints that the layout system respects:
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `min-width` | Real or NONE | NONE | Minimum width |
-| `max-width` | Real or NONE | NONE | Maximum width |
-| `min-height` | Real or NONE | NONE | Minimum height |
-| `max-height` | Real or NONE | NONE | Maximum height |
+| `min-width` | Real or null | null | Minimum width |
+| `max-width` | Real or null | null | Maximum width |
+| `min-height` | Real or null | null | Minimum height |
+| `max-height` | Real or null | null | Maximum height |
 | `flex` | Real | 0.0 | Flex grow factor within a Stack (0 = fixed size, >0 = proportional share of remaining space) |
 
 Layout is computed in the `/layout` method, which runs top-down before drawing. A shape's `/layout` is called only when its bounds or children have changed (dirty flag).
@@ -1906,16 +2053,16 @@ Simple modal dialogs are provided as primitives (these block execution, similar 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
 | `alert` | title, message, button-labels | selected-label | Show a modal alert with 1-3 buttons; returns which was tapped |
-| `prompt` | title, message, default-text | text or NULL | Show a text-input dialog; returns entered text or NULL if cancelled |
+| `prompt` | title, message, default-text | text or null | Show a text-input dialog; returns entered text or null if cancelled |
 | `confirm` | title, message | boolean | Show OK/Cancel dialog; returns true/false |
 
 ### 12.9 Clipboard
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
-| `clipboard-get-text` | -- | string or NULL | Get text from system clipboard |
+| `clipboard-get-text` | -- | string or null | Get text from system clipboard |
 | `clipboard-set-text` | string | -- | Set text on system clipboard |
-| `clipboard-get-image` | -- | image or NULL | Get image from system clipboard |
+| `clipboard-get-image` | -- | image or null | Get image from system clipboard |
 | `clipboard-set-image` | image | -- | Set image on system clipboard |
 | `clipboard-has-text?` | -- | boolean | Check if clipboard contains text |
 | `clipboard-has-image?` | -- | boolean | Check if clipboard contains image |
@@ -1967,8 +2114,8 @@ File I/O is handled by simple primitives, not a 9-class hierarchy:
 | `file-exists?` | path | boolean | Check if file exists |
 | `file-delete` | path | -- | Delete a file |
 | `file-list` | directory-path | list of strings | List files in a directory |
-| `file-pick` | title, file-types | path or NULL | System file picker dialog |
-| `file-pick-save` | title, default-name | path or NULL | System save dialog |
+| `file-pick` | title, file-types | path or null | System file picker dialog |
+| `file-pick-save` | title, default-name | path or null | System save dialog |
 
 ### 12.13 Printing
 
@@ -2017,10 +2164,11 @@ Screen
 ```
 
 **Thread model:**
-- The Phograph interpreter runs on a dedicated background thread
-- Metal rendering runs on the main thread (Apple requirement)
-- The event queue bridges them with a mutex
-- The pixel buffer uses its own mutex for resize safety
+- Canvas rendering (Metal) runs on the main thread (`@MainActor`, Apple requirement)
+- Dataflow operations run as Swift tasks on background executors; UI-touching operations are automatically `@MainActor`
+- Operations on the same object (actor) are serialized; operations on independent objects run in parallel (see §9, Actor-Based Concurrency)
+- The event queue bridges user input to the dataflow graph via `@MainActor` event handlers
+- The pixel buffer uses its own actor isolation for resize safety
 
 ### 12.16 Comparison: Original ABCs vs. Phograph Canvas System
 
@@ -2391,6 +2539,27 @@ Side effects were performed directly, making graphs impure and hard to test. **S
 
 ### 38. Crash Propagation -- ADDRESSED
 A runtime error in any operation halted the entire program. **Status: replaced.** Let-it-crash semantics (§7.1) isolate crashes per-node. The errored node shows red; the rest of the graph continues.
+
+### 39. No Binary Data Type -- ADDRESSED
+No way to work with raw bytes (file I/O, network payloads, images). **Status: replaced.** Phograph adds a `Data` type with primitives for creation, slicing, encoding/decoding (§4).
+
+### 40. No Date/Time Support -- ADDRESSED
+No date, time, or duration primitives. **Status: replaced.** Phograph adds a `Date` type with creation, decomposition, formatting, parsing, arithmetic, and comparison primitives (§4).
+
+### 41. No Algebraic Data Types / Enums -- ADDRESSED
+No way to define tagged unions. Pattern matching was limited to duck-typing on primitive types. **Status: replaced.** Phograph adds enum types with variants and optional associated data (§9). Enum variants are the primary target for pattern matching.
+
+### 42. No Higher-Order List Operations -- ADDRESSED
+List processing required explicit loops or the ellipsis annotation. No filter, reduce, find, or grouping. **Status: replaced.** Phograph adds `filter`, `reduce`, `map`, `flat-map`, `any?`, `all?`, `find`, `zip`, `enumerate`, `unique`, `group-by` (§6).
+
+### 43. Front Panel / Canvas Confusion -- ADDRESSED
+Two UI systems (SwiftUI front panel and canvas scene graph) could confuse users. **Status: addressed.** The relationship is documented: Front Panel is for app-level UI (forms, settings); Canvas is for custom rendering (games, visualizations). Both can coexist in a single class (§9).
+
+### 44. Persistent Variables Not Concurrency-Safe -- ADDRESSED
+Global persistent state with concurrent actor access could cause data races. **Status: replaced.** Persistents are mediated by a dedicated PersistentStore actor with serialized access (§10).
+
+### 45. Inconsistent Null/NONE/NULL Usage -- ADDRESSED
+Spec used `NULL`, `NONE`, and `null` inconsistently. **Status: replaced.** All "nothing" values are consistently `null` throughout the spec.
 
 ---
 

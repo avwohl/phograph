@@ -157,7 +157,7 @@ Inspired by Scratch/Snap!'s shape-based type system, Phograph pins have shapes t
 | **Triangle** | Execution | Execution-in / execution-out flow |
 | **Star** | Error | Error output from try annotations |
 
-**Colors** further distinguish types within a shape category: Integer (blue circle), Real (green circle), String (pink circle), Boolean (red hexagon), List (orange square), Dict (purple square), Object (teal pentagon), External (gray pentagon), Null (white diamond), Error (bright red star).
+**Colors** further distinguish types within a shape category: Integer (blue circle), Real (green circle), String (pink circle), Data (dark cyan circle), Date (amber circle), Boolean (red hexagon), List (orange square), Dict (purple square), Object (teal pentagon), External (gray pentagon), Enum (indigo pentagon), Null (white diamond), Error (bright red star).
 
 ### Visible Coercion Dots
 
@@ -260,7 +260,7 @@ During interpretation, if a called method doesn't exist, an alert offers to crea
 
 ## 4. Data Types
 
-Phograph has **twelve data types**:
+Phograph has **thirteen data types**:
 
 | Type | Description |
 |------|-------------|
@@ -274,6 +274,7 @@ Phograph has **twelve data types**:
 | **Date** | Point in time with nanosecond precision (see Date/Time Primitives below) |
 | **Object** | Instance of a user-defined class |
 | **External** | Opaque reference to a platform/FFI resource (Swift object, C pointer, OS handle) |
+| **Error** | Error value with message, code, and optional details (see §7.1) |
 | **Enum** | Value of an enum type with optional associated data (see §9, Enum Types) |
 | **Null** | The single "nothing" value. Represents absence of data. |
 
@@ -472,7 +473,7 @@ An inline expression node:
 - Supports arithmetic, comparison, boolean logic, string interpolation, and ternary (`condition ? then : else`)
 - Is semantically equivalent to a subgraph of primitive operations, but takes much less screen space
 
-This extends the existing **Evaluation** icon (§5) with a richer expression language. Simple computations that would require 3-5 nodes can be a single inline expression.
+This extends the existing **Evaluation** icon (§4) with a richer expression language. Simple computations that would require 3-5 nodes can be a single inline expression.
 
 ### Reroute Nodes
 
@@ -529,11 +530,11 @@ This replaces the inject pattern of passing a method name string and hoping it r
 
 ## 6. Primitives Reference
 
-Phograph includes approximately **350 built-in primitives**. Key categories:
+Phograph includes approximately **400 built-in primitives**. Key categories:
 
 ### Console / Debug I/O Primitives
 
-The original Prograph `show`/`ask`/`answer` primitives were blocking modal dialogs. Phograph replaces them with non-blocking canvas-based equivalents (see Section 12.8: `alert`, `prompt`, `confirm`) for user-facing interaction. The following are retained for **debugging and console output only**:
+The original Prograph `show`/`ask`/`answer` primitives were blocking modal dialogs. Phograph replaces them with non-blocking canvas-based equivalents (see §12.8: `alert`, `prompt`, `confirm`) for user-facing interaction. The following are retained for **debugging and console output only**:
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
@@ -558,10 +559,16 @@ The original Prograph `show`/`ask`/`answer` primitives were blocking modal dialo
 | `sin` | radians | sine | Sine |
 | `cos` | radians | cosine | Cosine |
 | `tan` | radians | tangent | Tangent |
+| `asin` | value | radians | Arc sine |
+| `acos` | value | radians | Arc cosine |
+| `atan` | value | radians | Arc tangent |
+| `atan2` | y, x | radians | Arc tangent of y/x (preserves quadrant) |
 | `rand` | -- | random real | Random number [0, 1) |
 | `+1` | n | n+1 | Increment by one |
+| `mod` | a, b | remainder | Modulo (remainder of a / b) |
 | `min` | a, b | minimum | Minimum of two values |
 | `max` | a, b | maximum | Maximum of two values |
+| `clamp` | value, low, high | clamped | Clamp value to range [low, high] |
 | `floor` | n | floor | Floor |
 | `ceiling` | n | ceiling | Ceiling |
 | `truncate` | n | truncated | Truncate to integer |
@@ -578,7 +585,6 @@ The original Prograph `show`/`ask`/`answer` primitives were blocking modal dialo
 | `>` | a, b | boolean | Greater than |
 | `<=` (`≤`) | a, b | boolean | Less than or equal |
 | `>=` (`≥`) | a, b | boolean | Greater than or equal |
-
 | `!=` (`≠`) | a, b | boolean | Not equal (polymorphic) |
 
 All comparison primitives automatically carry a **control annotation** for use in matches.
@@ -641,7 +647,7 @@ All comparison primitives automatically carry a **control annotation** for use i
 | `detach-l` | list | first, rest | Remove and return leftmost element |
 | `detach-r` | list | rest, last | Remove and return rightmost element |
 | `sort` | list | sorted list | Sort in ascending order |
-| `sort-by` | list, method-ref | sorted list | Sort using a comparison method (see Section 5, Method References) |
+| `sort-by` | list, method-ref | sorted list | Sort using a comparison method (see §5, Method References) |
 | `make-list` | count, initial-value | list | Create list of N elements initialized to value |
 | `in` | list, element | index | Find element index (1-indexed). **Fails** if not found (use with try or control annotation). |
 | `contains?` | list, element | boolean | Test if list contains element (non-failing alternative to `in`) |
@@ -680,20 +686,22 @@ All comparison primitives automatically carry a **control annotation** for use i
 | `null?` | value | boolean | Test if value is null |
 | `object?` | value | boolean | Test if value is a class instance |
 | `error?` | value | boolean | Test if value is an error |
+| `data?` | value | boolean | Test if value is binary data |
+| `date?` | value | boolean | Test if value is a date |
 | `external?` | value | boolean | Test if value is an external reference |
-| `type-of` | value | string | Returns type name: `"integer"`, `"real"`, `"string"`, `"list"`, `"dict"`, `"boolean"`, `"null"`, `"error"`, `"external"`, or the class name for objects |
+| `type-of` | value | string | Returns type name: `"integer"`, `"real"`, `"string"`, `"list"`, `"dict"`, `"boolean"`, `"data"`, `"date"`, `"enum"`, `"null"`, `"error"`, `"external"`, or the class name for objects |
 | `class-of` | object | string | Returns the class name of an object instance |
 | `instance-of?` | object, class-name | boolean | Test if object is an instance of the named class (including superclasses) |
 | `responds-to?` | object, method-name | boolean | Test if object has a method with the given name |
-| `conforms-to?` | object, protocol-name | boolean | Test if object conforms to a protocol (see Section 9) |
+| `conforms-to?` | object, protocol-name | boolean | Test if object conforms to a protocol (see §9) |
 
 ### File Primitives
 
-See Section 12.12 for the full file I/O primitive set (`file-read-text`, `file-write-text`, `file-read-object`, `file-write-object`, `file-pick`, etc.). The original Prograph's `save`/`load` primitives are replaced by these.
+See §12.12 for the full file I/O primitive set (`file-read-text`, `file-write-text`, `file-read-object`, `file-write-object`, `file-pick`, etc.). The original Prograph's `save`/`load` primitives are replaced by these.
 
 ### Dict Primitives
 
-See Section 4 (Dicts) for the full dict primitive set (`dict-get`, `dict-set`, `dict-keys`, etc.).
+See §4 (Dicts) for the full dict primitive set (`dict-get`, `dict-set`, `dict-keys`, etc.).
 
 ### Networking Primitives
 
@@ -1120,7 +1128,7 @@ Named **`init`**. Automatically called when an object is instantiated. Equivalen
 
 **Design change from original Prograph:** The original used `<<>>` as the constructor name, which was cryptic and hard to remember. Phograph uses `init`, consistent with Swift and Objective-C conventions.
 
-The `/finalize` method (see Section 4, Memory Management) serves as the destructor, called automatically when the object's reference count reaches zero.
+The `/finalize` method (see §4, Memory Management) serves as the destructor, called automatically when the object's reference count reaches zero.
 
 ### Get and Set Operators
 
@@ -1284,7 +1292,7 @@ Enum "Direction" has 4 variants:
   east
   west
 
-Enum "LoadState" has 3 variants:
+Enum "LoadState" has 4 variants:
   idle                 -- no data
   loading(progress: Real)   -- carries progress 0.0-1.0
   loaded(data: Data)        -- carries the loaded data
@@ -1395,7 +1403,7 @@ Cases are tried in order (1, 2, 3, ...). The first case whose patterns all match
 
 ### Observation and Reactive Bindings (Phograph Extension)
 
-For the canvas-based UI system (Section 11), Phograph needs a way to automatically update the display when data changes. The original ABCs had no observation mechanism -- all updates were manual.
+For the canvas-based UI system (§11), Phograph needs a way to automatically update the display when data changes. The original ABCs had no observation mechanism -- all updates were manual.
 
 #### Observable Attributes
 
@@ -2344,6 +2352,8 @@ Type marshaling between Phograph and Swift:
 | Dict | [AnyHashable: Any] |
 | Null | nil (Optional) |
 | Object | Wrapped in a PhographObject container |
+| Error | PhographError (struct with message, code, details) |
+| Enum | Swift enum with associated values |
 | External | The raw Swift/ObjC object reference |
 
 The `External` type holds an opaque reference to a Swift or Objective-C object. It can be passed to other external methods but not inspected from Phograph code. To extract data from an External, call an external method that returns Phograph-native types.
@@ -2427,7 +2437,7 @@ These sections wrap Swift/platform APIs into Phograph primitives with Phograph-n
 Documented weaknesses of the original Prograph, with their status in Phograph:
 
 ### 1. Unlabeled Inputs/Outputs
-No inline labels on wires or nodes. Understanding a method requires reading comments or memorizing arity conventions. **Status: open.** Allow optional labels on input/output nodes in the Phograph editor. Optional type annotations (Section 4) add labels when used.
+No inline labels on wires or nodes. Understanding a method requires reading comments or memorizing arity conventions. **Status: open.** Allow optional labels on input/output nodes in the Phograph editor. Optional type annotations (§4) add labels when used.
 
 ### 2. Non-Routable Wiring
 Wires could not be manually routed around obstacles, creating visual "spaghetti" for complex methods. **Status: partially addressed.** Automatic wire routing with manual override in the Phograph editor. Reroute/knot nodes (§5) allow explicit wire path control.
@@ -2436,7 +2446,7 @@ Wires could not be manually routed around obstacles, creating visual "spaghetti"
 No mechanism to group operations without creating a full named method. **Status: partially addressed.** Inline expression nodes (§5) handle simple cases. Anonymous grouping / visual regions for larger groups remain open for the IDE.
 
 ### 4. Confusing Conditionals -- PARTIALLY ADDRESSED
-The if-then-else pattern via case structure and control annotations was "far and away the most confusing construct in the language." **Status: partially addressed.** Pattern matching on cases (Section 9) makes the case system dramatically more intuitive by letting cases declare what they expect (type, value, structure) rather than imperatively testing for it. The underlying control annotation system is retained for advanced use.
+The if-then-else pattern via case structure and control annotations was "far and away the most confusing construct in the language." **Status: partially addressed.** Pattern matching on cases (§9) makes the case system dramatically more intuitive by letting cases declare what they expect (type, value, structure) rather than imperatively testing for it. The underlying control annotation system is retained for advanced use.
 
 ### 5. Window Proliferation (IDE)
 Opening methods, classes, and subclasses in the original generated many overlapping windows. **Status: open.** The Phograph IDE should use tabbed interface, split views, and breadcrumb navigation.
@@ -2448,64 +2458,64 @@ Code could not be easily shared via email or text. **Status: addressed.** Phogra
 Large projects with many side-effects were difficult to reason about. **Status: partially addressed.** Execution wires (§2) make side-effect ordering explicit and visible. Managed effects (§7.3) enable pure dataflow graphs. Error cluster wiring (§7.1) makes error paths visible. Actor-based concurrency (§9) isolates mutable state. Remaining IDE work: effect highlighting, data flow path tracing.
 
 ### 8. No Access Control -- ADDRESSED
-All attributes were effectively public. **Status: replaced.** Phograph adds public/private/protected/read-only visibility modifiers on attributes and methods (Section 9). Attributes default to private; methods default to public.
+All attributes were effectively public. **Status: replaced.** Phograph adds public/private/protected/read-only visibility modifiers on attributes and methods (§9). Attributes default to private; methods default to public.
 
 ### 9. No Destructors / Cleanup -- ADDRESSED
-No automatic cleanup mechanism for objects. **Status: replaced.** Phograph uses ARC with cycle detection and adds `/finalize` methods called automatically on deallocation (Section 4, Memory Management).
+No automatic cleanup mechanism for objects. **Status: replaced.** Phograph uses ARC with cycle detection and adds `/finalize` methods called automatically on deallocation (§4, Memory Management).
 
 ### 10. Window System / UI Framework -- ADDRESSED
-The original ABCs (147 classes wrapping Mac Toolbox widgets) were platform-locked, over-engineered, and the Behavior/Inject indirection for event handling was confusing. **Status: replaced.** Phograph uses a canvas-based scene graph with ~25 classes (Section 11), unified pointer/gesture input (Section 12), direct drawing via DrawContext, automatic layout, and first-class touch support. No OS-native widgets. No Behavior Editor. No inject indirection. Works on both macOS and iOS from one codebase.
+The original ABCs (147 classes wrapping Mac Toolbox widgets) were platform-locked, over-engineered, and the Behavior/Inject indirection for event handling was confusing. **Status: replaced.** Phograph uses a canvas-based scene graph with ~25 classes (§11), unified pointer/gesture input (§12), direct drawing via DrawContext, automatic layout, and first-class touch support. No OS-native widgets. No Behavior Editor. No inject indirection. Works on both macOS and iOS from one codebase.
 
 ### 11. No Error Information -- ADDRESSED
-The Fail mechanism propagated a bare boolean with no message or context. **Status: replaced.** Phograph adds Error values with message/code/details, try annotations for error capture, and `fail-with` for error propagation (Section 7.1).
+The Fail mechanism propagated a bare boolean with no message or context. **Status: replaced.** Phograph adds Error values with message/code/details, try annotations for error capture, and `fail-with` for error propagation (§7.1).
 
 ### 12. No Concurrency/Async Model -- ADDRESSED
-Thread primitives were mentioned but never specified. **Status: replaced.** Phograph defines Futures, dispatch, channels, and async variants of blocking primitives. The dataflow firing rule handles async waiting naturally (Section 7.2).
+Thread primitives were mentioned but never specified. **Status: replaced.** Phograph defines Futures, dispatch, channels, and async variants of blocking primitives. The dataflow firing rule handles async waiting naturally (§7.2).
 
 ### 13. No Dict/Map Data Type -- ADDRESSED
-The original used lists of lists for key-value data. **Status: replaced.** Phograph adds a first-class Dict type with full primitive support and list-annotation compatibility (Section 4).
+The original used lists of lists for key-value data. **Status: replaced.** Phograph adds a first-class Dict type with full primitive support and list-annotation compatibility (§4).
 
 ### 14. Three Confusing "Nothing" Values -- ADDRESSED
-NULL, NONE, and Undefined had overlapping, unclear semantics. **Status: replaced.** Phograph has a single `null` value (Section 4).
+NULL, NONE, and Undefined had overlapping, unclear semantics. **Status: replaced.** Phograph has a single `null` value (§4).
 
 ### 15. Broken Persistence Model -- ADDRESSED
-The interpreter embedded persistent values in the program file (mixing code and data). Compiled programs had no automatic persistence. **Status: replaced.** Phograph stores persistents in a separate data file. Persistence works identically in interpreter and compiled modes (Section 10).
+The interpreter embedded persistent values in the program file (mixing code and data). Compiled programs had no automatic persistence. **Status: replaced.** Phograph stores persistents in a separate data file. Persistence works identically in interpreter and compiled modes (§10).
 
 ### 16. External Code Integration Obsolete -- ADDRESSED
-Mac Toolbox / Pascal / 68K integration is irrelevant on modern Apple platforms. **Status: replaced.** Phograph targets Swift interop with type marshaling, bidirectional calling, and optional platform API sections (Section 14).
+Mac Toolbox / Pascal / 68K integration is irrelevant on modern Apple platforms. **Status: replaced.** Phograph targets Swift interop with type marshaling, bidirectional calling, and optional platform API sections (§14).
 
 ### 17. Modal I/O Primitives -- ADDRESSED
-`show`, `ask`, `answer` were blocking modal dialogs incompatible with modern UI and iOS. **Status: replaced.** Phograph uses `log`/`inspect` for debug output and canvas-based `alert`/`prompt`/`confirm` for user interaction (Section 6, Section 12.8).
+`show`, `ask`, `answer` were blocking modal dialogs incompatible with modern UI and iOS. **Status: replaced.** Phograph uses `log`/`inspect` for debug output and canvas-based `alert`/`prompt`/`confirm` for user interaction (§6, §12.8).
 
 ### 18. No Networking -- ADDRESSED
-No primitives for HTTP, JSON, or network communication. **Status: replaced.** Phograph adds `http-get`, `http-post`, `http-request`, `json-parse`, `json-encode`, and related primitives with async Future returns (Section 6).
+No primitives for HTTP, JSON, or network communication. **Status: replaced.** Phograph adds `http-get`, `http-post`, `http-request`, `json-parse`, `json-encode`, and related primitives with async Future returns (§6).
 
 ### 19. Single Inheritance Only -- ADDRESSED
-No mechanism to compose behavior from multiple sources without deep inheritance chains. **Status: replaced.** Phograph adds protocols (Section 9) -- named sets of method signatures that any class can conform to regardless of its inheritance chain. A class can conform to multiple protocols while inheriting from one superclass.
+No mechanism to compose behavior from multiple sources without deep inheritance chains. **Status: replaced.** Phograph adds protocols (§9) -- named sets of method signatures that any class can conform to regardless of its inheritance chain. A class can conform to multiple protocols while inheriting from one superclass.
 
 ### 20. No First-Class Method References -- ADDRESSED
-The inject construct uses stringly-typed dispatch (pass a method name as a string). No validation, no captured state, no type safety. **Status: replaced.** Phograph adds method references (Section 5) -- first-class values that can be passed on wires, stored in attributes, and invoked with `call`. Bound references capture `self` for closure-like behavior. Inject is retained for dynamic cases.
+The inject construct uses stringly-typed dispatch (pass a method name as a string). No validation, no captured state, no type safety. **Status: replaced.** Phograph adds method references (§5) -- first-class values that can be passed on wires, stored in attributes, and invoked with `call`. Bound references capture `self` for closure-like behavior. Inject is retained for dynamic cases.
 
 ### 21. Fixed Arity, No Optional Parameters -- ADDRESSED
-Every method had a fixed number of inputs with no defaults. This forced proliferation of methods with slight variations. **Status: replaced.** Phograph adds optional inputs with default values and variadic inputs (Section 3).
+Every method had a fixed number of inputs with no defaults. This forced proliferation of methods with slight variations. **Status: replaced.** Phograph adds optional inputs with default values and variadic inputs (§3).
 
 ### 22. No Pattern Matching -- ADDRESSED
-The case system was a chain of imperative guards. No type matching, value matching, or destructuring. **Status: replaced.** Phograph adds type patterns, value patterns, list destructuring `(head | tail)`, and dict destructuring `{key1, key2, ...rest}` on case inputs (Section 9).
+The case system was a chain of imperative guards. No type matching, value matching, or destructuring. **Status: replaced.** Phograph adds type patterns, value patterns, list destructuring `(head | tail)`, and dict destructuring `{key1, key2, ...rest}` on case inputs (§9).
 
 ### 23. No Reactive Observation -- ADDRESSED
-No mechanism to react to data changes. UI updates were entirely manual. **Status: replaced.** Phograph adds observable attributes, the `observe` primitive, and reactive bindings (`bind`, `bind-two-way`) that automatically propagate data changes to UI shapes (Section 9).
+No mechanism to react to data changes. UI updates were entirely manual. **Status: replaced.** Phograph adds observable attributes, the `observe` primitive, and reactive bindings (`bind`, `bind-two-way`) that automatically propagate data changes to UI shapes (§9).
 
 ### 24. Cryptic Constructor Name -- ADDRESSED
-The constructor was named `<<>>`. **Status: replaced.** Renamed to `init` (Section 9).
+The constructor was named `<<>>`. **Status: replaced.** Renamed to `init` (§9).
 
 ### 25. Incomplete String Primitives -- ADDRESSED
-Missing split, replace, trim, case conversion, and other basic string operations. **Status: replaced.** Phograph adds `string-split`, `string-replace`, `string-trim`, `uppercase`, `lowercase`, `string-contains?`, `string-starts-with?`, `string-ends-with?`, `char-at`, `string-repeat` (Section 6).
+Missing split, replace, trim, case conversion, and other basic string operations. **Status: replaced.** Phograph adds `string-split`, `string-replace`, `string-trim`, `uppercase`, `lowercase`, `string-contains?`, `string-starts-with?`, `string-ends-with?`, `char-at`, `string-repeat` (§6).
 
 ### 26. Missing Type Introspection -- ADDRESSED
-Could check `integer?` but not get the class of an object or test protocol conformance. **Status: replaced.** Phograph adds `type-of`, `class-of`, `instance-of?`, `responds-to?`, `conforms-to?` (Section 6).
+Could check `integer?` but not get the class of an object or test protocol conformance. **Status: replaced.** Phograph adds `type-of`, `class-of`, `instance-of?`, `responds-to?`, `conforms-to?` (§6).
 
 ### 27. `log` Name Collision -- ADDRESSED
-Debug output primitive and natural logarithm both named `log`. **Status: replaced.** Debug output is `log`; logarithm is `ln` (natural), `log10`, `log2` (Section 6).
+Debug output primitive and natural logarithm both named `log`. **Status: replaced.** Debug output is `log`; logarithm is `ln` (natural), `log10`, `log2` (§6).
 
 ### 28. Obsolete Compiler Target -- ADDRESSED
 Original compiler targeted 68K Motorola. **Status: replaced.** Phograph compiler targets ARM64 via Swift intermediate, producing universal macOS binaries and iOS .ipa bundles (§13).

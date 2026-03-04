@@ -144,9 +144,34 @@ When a method is called:
 3. If a control annotation causes a "next case" jump, execution moves to the next case
 4. Data produced at the output bar's terminal nodes flows back to the caller
 
-### Method Arity
+### Method Arity and Optional Parameters
 
-Every method has a fixed **arity** -- a specific number of inputs and outputs. Connecting the wrong number of wires produces an arity error. The arity is displayed/enforced by the visual editor.
+Every method has a defined **arity** -- a specific number of inputs and outputs. The visual editor displays and enforces this.
+
+**Phograph extension -- optional inputs:** An input node can be marked as **optional** (visually: a dashed circle instead of solid). Optional inputs have a **default value** specified in the node's properties. If no wire is connected to an optional input, the default value is used. This reduces method proliferation -- instead of writing three methods for different argument counts, write one with optional parameters.
+
+```
+Method "draw-circle" (3 required, 2 optional):
+  Input: ctx          (required)
+  Input: center       (required)
+  Input: radius       (required)
+  Input: fill-color   (optional, default: black)
+  Input: stroke-width (optional, default: 0.0)
+```
+
+**Rules:**
+- Optional inputs must come after all required inputs
+- When calling, wires to optional inputs can be omitted
+- The editor shows optional inputs with dashed circles and default values annotated
+- Output nodes cannot be optional
+
+**Phograph extension -- variadic inputs:** An input node can be marked as **variadic** (visually: ellipsis inside the circle). A variadic input accepts any number of wires; the values are collected into a list. Only one variadic input is allowed per method, and it must be the last input.
+
+```
+Method "concat" (variadic):
+  Input: strings... (variadic)
+  Output: result
+```
 
 ### Local Methods
 
@@ -295,6 +320,33 @@ An **inject** determines at runtime which method to call. Instead of a fixed met
 - Callback patterns
 - Plugin/extension architectures where behavior is selected dynamically
 
+### Method References (Phograph Extension)
+
+The original inject construct takes a method name as a **string** -- stringly-typed dispatch with no validation. Phograph adds **method references**: first-class values that refer to a specific method and can carry captured state.
+
+A **method reference** is created with the `method-ref` icon (rectangle with an arrow). It produces a value on its output wire that refers to the named method. This value can flow along wires, be stored in lists or attributes, and be invoked later.
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `method-ref` | method-name | reference | Create a reference to a universal method by name |
+| `method-ref-class` | class-name, method-name | reference | Create a reference to a class method |
+| `method-ref-bound` | object, method-name | reference | Create a reference bound to a specific object (captures `self`) |
+| `call` | reference, args-list | result | Invoke a method reference with arguments |
+| `call-async` | reference, args-list | future | Invoke a method reference asynchronously, returns a Future |
+
+Method references replace stringly-typed inject for most uses. The editor validates that the referenced method exists at edit time (though the check is advisory, not enforced until runtime).
+
+**Bound references** capture the target object, enabling closures-like behavior:
+
+```
+[method-ref-bound] my-button, "on-tap" → ref
+[timer-after] 2.0, ref → timer
+```
+
+This replaces the inject pattern of passing a method name string and hoping it resolves correctly at runtime.
+
+**Design note:** The original inject construct is retained for backward compatibility and for cases where the method name genuinely must be computed at runtime (e.g., from user input). Method references are the preferred mechanism.
+
 ---
 
 ## 6. Primitives Reference
@@ -335,7 +387,9 @@ The original Prograph `show`/`ask`/`answer` primitives were blocking modal dialo
 | `floor` | n | floor | Floor |
 | `ceiling` | n | ceiling | Ceiling |
 | `truncate` | n | truncated | Truncate to integer |
-| `log` | n | log | Natural logarithm |
+| `ln` | n | natural-log | Natural logarithm |
+| `log10` | n | log-base-10 | Base-10 logarithm |
+| `log2` | n | log-base-2 | Base-2 logarithm |
 
 ### Comparison / Relational Primitives
 
@@ -346,6 +400,8 @@ The original Prograph `show`/`ask`/`answer` primitives were blocking modal dialo
 | `>` | a, b | boolean | Greater than |
 | `<=` (`≤`) | a, b | boolean | Less than or equal |
 | `>=` (`≥`) | a, b | boolean | Greater than or equal |
+
+| `!=` (`≠`) | a, b | boolean | Not equal (polymorphic) |
 
 All comparison primitives automatically carry a **control annotation** for use in matches.
 
@@ -383,7 +439,18 @@ All comparison primitives automatically carry a **control annotation** for use i
 | `to-codepoints` | string | list of ints | String to list of Unicode code points |
 | `from-codepoints` | list of ints | string | List of Unicode code points to string |
 | `length` | string | integer | String length |
-| `string-search` | haystack, needle | position | Find substring |
+| `string-search` | haystack, needle | position | Find substring (fails if not found) |
+| `string-contains?` | haystack, needle | boolean | Test if string contains substring |
+| `string-replace` | string, target, replacement | string | Replace all occurrences of target |
+| `string-replace-first` | string, target, replacement | string | Replace first occurrence |
+| `string-split` | string, separator | list of strings | Split string by separator |
+| `string-trim` | string | string | Remove leading/trailing whitespace |
+| `string-starts-with?` | string, prefix | boolean | Test if string starts with prefix |
+| `string-ends-with?` | string, suffix | boolean | Test if string ends with suffix |
+| `uppercase` | string | string | Convert to uppercase |
+| `lowercase` | string | string | Convert to lowercase |
+| `string-repeat` | string, count | string | Repeat string N times |
+| `char-at` | string, index | string | Character at position (1-indexed, returns single-char string) |
 
 ### List Primitives
 
@@ -396,8 +463,10 @@ All comparison primitives automatically carry a **control annotation** for use i
 | `detach-l` | list | first, rest | Remove and return leftmost element |
 | `detach-r` | list | rest, last | Remove and return rightmost element |
 | `sort` | list | sorted list | Sort in ascending order |
+| `sort-by` | list, method-ref | sorted list | Sort using a comparison method (see Section 5, Method References) |
 | `make-list` | count, initial-value | list | Create list of N elements initialized to value |
-| `in` | list, element | index | Find element; returns index or 0 if not found |
+| `in` | list, element | index | Find element index (1-indexed). **Fails** if not found (use with try or control annotation). |
+| `contains?` | list, element | boolean | Test if list contains element (non-failing alternative to `in`) |
 | `split-nth` | list, position | left, right | Partition list at position |
 | `copy` | value | deep copy | Deep copy of any value including objects |
 | `length` | list | integer | Number of elements |
@@ -407,7 +476,7 @@ All comparison primitives automatically carry a **control annotation** for use i
 | `reverse` | list | reversed | Reverse list order |
 | `empty?` | list | boolean | Test if list is empty |
 
-### Type-Checking Primitives
+### Type-Checking and Introspection Primitives
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
@@ -415,7 +484,17 @@ All comparison primitives automatically carry a **control annotation** for use i
 | `real?` | value | boolean | Test if value is a real |
 | `string?` | value | boolean | Test if value is a string |
 | `list?` | value | boolean | Test if value is a list |
+| `dict?` | value | boolean | Test if value is a dict |
 | `boolean?` | value | boolean | Test if value is a boolean |
+| `null?` | value | boolean | Test if value is null |
+| `object?` | value | boolean | Test if value is a class instance |
+| `error?` | value | boolean | Test if value is an error |
+| `external?` | value | boolean | Test if value is an external reference |
+| `type-of` | value | string | Returns type name: `"integer"`, `"real"`, `"string"`, `"list"`, `"dict"`, `"boolean"`, `"null"`, `"error"`, `"external"`, or the class name for objects |
+| `class-of` | object | string | Returns the class name of an object instance |
+| `instance-of?` | object, class-name | boolean | Test if object is an instance of the named class (including superclasses) |
+| `responds-to?` | object, method-name | boolean | Test if object has a method with the given name |
+| `conforms-to?` | object, protocol-name | boolean | Test if object conforms to a protocol (see Section 9) |
 
 ### File Primitives
 
@@ -445,8 +524,8 @@ See Section 4 (Dicts) for the full dict primitive set (`dict-get`, `dict-set`, `
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
-| `timer-after` | seconds, method-name, target | timer | Call method on target after delay. Returns a timer handle. |
-| `timer-every` | seconds, method-name, target | timer | Call method on target repeatedly at interval. |
+| `timer-after` | seconds, method-ref | timer | Call method reference after delay. Returns a timer handle. |
+| `timer-every` | seconds, method-ref | timer | Call method reference repeatedly at interval. |
 | `timer-cancel` | timer | -- | Cancel a pending timer. |
 
 ---
@@ -597,7 +676,7 @@ This means async behavior is implicit in the wiring: connect a Future to a downs
 |-----------|--------|---------|-------------|
 | `future-value` | future | value | Block until the future resolves and return its value. (Usually implicit -- just connect the wire.) |
 | `future-resolved?` | future | boolean | Non-blocking check: has the future resolved yet? |
-| `future-then` | future, method-name | future | When future resolves, call method with result. Returns a new future for the method's output. |
+| `future-then` | future, method-ref | future | When future resolves, call method ref with result. Returns a new future for the method's output. |
 | `future-error` | future | error or null | If the future resolved with failure, return the error. |
 | `future-all` | list of futures | future of list | A future that resolves when all input futures resolve. |
 | `future-any` | list of futures | future | A future that resolves when the first input future resolves. |
@@ -622,8 +701,8 @@ For CPU-bound work that should run off the main thread:
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
-| `dispatch` | method-name, args-list | future | Execute method on a background thread. Returns a future for the result. |
-| `dispatch-main` | method-name, args-list | future | Execute method on the main thread (required for UI updates). |
+| `dispatch` | method-ref, args-list | future | Execute method reference on a background thread. Returns a future for the result. |
+| `dispatch-main` | method-ref, args-list | future | Execute method reference on the main thread (required for UI updates). |
 
 #### Channels (Inter-method Communication)
 
@@ -741,7 +820,11 @@ An object is created with an **instance generator** icon (octagon). It has:
 
 ### Initialization Methods (Constructors)
 
-Named `<<>>`. Automatically called when an object is instantiated. Equivalent to constructors in C++/Java. There are no destructors -- cleanup must be done manually.
+Named **`init`**. Automatically called when an object is instantiated. Equivalent to constructors in C++/Java.
+
+**Design change from original Prograph:** The original used `<<>>` as the constructor name, which was cryptic and hard to remember. Phograph uses `init`, consistent with Swift and Objective-C conventions.
+
+The `/finalize` method (see Section 4, Memory Management) serves as the destructor, called automatically when the object's reference count reaches zero.
 
 ### Get and Set Operators
 
@@ -800,6 +883,157 @@ One class contains an instance of another class as an attribute ("has-a" relatio
 ### Class Aliases
 
 A class alias marks that you want to reference or subclass a class from another section without moving it. Created via `Convert To Alias...`. Enables subclasses to live in their own sections.
+
+### Protocols (Phograph Extension)
+
+The original Prograph had single inheritance only. If a `Shape` and a `DatabaseRecord` both need to be `Serializable`, the only option was to put `Serializable` high in the inheritance chain -- but `Shape` and `DatabaseRecord` have no common ancestor. This forces artificial hierarchies.
+
+Phograph adds **protocols** -- named sets of method signatures that any class can declare conformance to, regardless of its inheritance chain. Protocols are similar to interfaces (Java), protocols (Swift), or traits (Rust).
+
+#### Defining a Protocol
+
+A protocol is created in the Classes window of a section, like a class, but with a distinct icon (diamond shape). A protocol defines:
+
+- **Required methods**: method names and arities that conforming classes must implement
+- **Optional methods**: methods that conforming classes may implement (with a default behavior of doing nothing / failing)
+- **No attributes**: protocols cannot define instance or class attributes
+- **No implementation**: protocol methods have no code -- they are signatures only
+
+#### Declaring Conformance
+
+A class declares conformance to a protocol by drawing a visual link from the class icon to the protocol icon (similar to the inheritance link but dashed). The editor verifies that the class implements all required methods.
+
+A class can conform to **multiple protocols** while inheriting from only one superclass:
+
+```
+    Shape (superclass)
+      │
+      ▼ inherits
+  MyWidget ···▷ Serializable (protocol)
+           ···▷ Animatable (protocol)
+```
+
+#### Using Protocols
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `conforms-to?` | object, protocol-name | boolean | Test if object conforms to a protocol |
+
+Protocol names can be used as type annotations on method inputs: `widget: Serializable`. At runtime, the system verifies the object conforms to the protocol.
+
+Data-determined dispatch (`/MethodName`) works across protocol boundaries: if multiple unrelated classes conform to the same protocol and implement the same method, sending that method to any conforming object dispatches correctly.
+
+**Example built-in protocols:**
+
+| Protocol | Required Methods | Description |
+|----------|-----------------|-------------|
+| `Equatable` | `/equals` | Can be compared for equality |
+| `Comparable` | `/compare` | Can be ordered (returns -1, 0, 1) |
+| `Serializable` | `/serialize`, `/deserialize` | Can be saved to / loaded from data |
+| `Printable` | `/to-string` | Has a human-readable string representation |
+
+### Pattern Matching on Cases (Phograph Extension)
+
+The original case system is essentially a chain of if/else guards. Phograph extends it with **pattern matching** -- cases can match on the type, structure, and value of their inputs without explicit test operations.
+
+#### Type Patterns
+
+A case's input bar can specify a **type constraint** on each input. The case only executes if all inputs match their type constraints. If they don't, execution falls through to the next case automatically.
+
+```
+Method "process" has 3 cases:
+
+Case 1:3  -- input is an Integer
+  Input: value: Integer
+  [...handle integer...]
+
+Case 2:3  -- input is a String
+  Input: value: String
+  [...handle string...]
+
+Case 3:3  -- input is anything else
+  Input: value
+  [...default handling...]
+```
+
+This replaces the pattern of writing `integer?` / `string?` tests with next-case-on-failure annotations.
+
+#### Value Patterns
+
+A case's input bar can specify a **literal value**. The case only executes if the input matches:
+
+```
+Method "describe-color" has 4 cases:
+
+Case 1:4  Input: color = "red"     → "warm"
+Case 2:4  Input: color = "blue"    → "cool"
+Case 3:4  Input: color = "green"   → "natural"
+Case 4:4  Input: color             → "unknown"
+```
+
+#### List Destructuring
+
+A case can destructure a list input into head and tail:
+
+```
+Method "sum-list" has 2 cases:
+
+Case 1:2  Input: ()           → 0          (empty list: base case)
+Case 2:2  Input: (head | tail) → head + [sum-list] tail   (cons pattern)
+```
+
+The `(head | tail)` pattern binds the first element to `head` and the remaining list to `tail`. This makes recursive list processing natural.
+
+#### Dict Destructuring
+
+A case can destructure a dict by specifying required keys:
+
+```
+Case 1:1  Input: {name, age, ...rest}
+  -- name, age are bound to their values
+  -- rest is a dict of remaining keys
+```
+
+#### Pattern Matching Order
+
+Cases are tried in order (1, 2, 3, ...). The first case whose patterns all match executes. If no case matches, the method **fails** (which can be caught by a try annotation or control annotation on the caller).
+
+**Design rationale:** Pattern matching makes the case system dramatically more useful. The original's "most confusing construct" becomes intuitive when cases declare what they expect rather than imperatively testing for it.
+
+### Observation and Reactive Bindings (Phograph Extension)
+
+For the canvas-based UI system (Section 11), Phograph needs a way to automatically update the display when data changes. The original ABCs had no observation mechanism -- all updates were manual.
+
+#### Observable Attributes
+
+Any class attribute can be marked as **observable** (distinct visibility symbol: concentric circles). When an observable attribute's value changes, the system automatically notifies all registered observers.
+
+#### Observer Methods
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `observe` | object, attribute-name, observer, method-ref | observation | Register an observer. When the attribute changes, the method is called with (object, new-value, old-value). Returns an observation handle. |
+| `unobserve` | observation | -- | Remove an observation |
+| `observe-any` | object, observer, method-ref | observation | Observe all observable attributes on object |
+
+#### Reactive Bindings for UI
+
+A **binding** connects a data source to a UI shape, so changes propagate automatically:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `bind` | source-object, attribute-name, target-shape, target-attribute | binding | One-way binding: when source attribute changes, target attribute updates and shape redraws |
+| `bind-two-way` | object, attribute, shape, shape-attribute | binding | Two-way binding: changes in either direction propagate to the other |
+| `unbind` | binding | -- | Remove a binding |
+
+Example: bind a data model's `name` attribute to a `Label`'s `text`:
+
+```
+[bind] my-model, "name", my-label, "text" → binding
+-- Now whenever my-model's name changes, my-label automatically updates
+```
+
+This is the primary mechanism for keeping UI in sync with data, replacing the ABC pattern of manually calling Set Value on window items after every data change.
 
 ---
 
@@ -1567,10 +1801,11 @@ Key capabilities:
 
 ### Stand-Alone Compiler
 
-The compiler produces standalone executables. It:
-- Translates graphical syntax into native machine code (68K for original Mac)
-- Removes unused ABC classes to reduce binary size
-- Does NOT support automatic persistence (must use `save`/`load` explicitly)
+The compiler produces standalone applications. It:
+- Translates the visual program into native ARM64 code (Apple Silicon / iOS) via LLVM or Swift intermediate output
+- Tree-shakes unused classes and methods to reduce binary size
+- Supports automatic persistence (same behavior as interpreter -- see Section 10)
+- Produces universal binaries for macOS (Apple Silicon + Intel) or iOS .ipa bundles
 
 ### Debugging
 
@@ -1697,8 +1932,8 @@ Wires could not be manually routed around obstacles, creating visual "spaghetti"
 ### 3. No Inline Grouping
 No mechanism to group operations without creating a full named method. **Status: open.** Anonymous grouping / visual regions in the Phograph editor.
 
-### 4. Confusing Conditionals
-The if-then-else pattern via case structure and control annotations was "far and away the most confusing construct in the language." **Status: open.** Consider more intuitive visual if/else/switch blocks while preserving the case/control system for power users.
+### 4. Confusing Conditionals -- PARTIALLY ADDRESSED
+The if-then-else pattern via case structure and control annotations was "far and away the most confusing construct in the language." **Status: partially addressed.** Pattern matching on cases (Section 9) makes the case system dramatically more intuitive by letting cases declare what they expect (type, value, structure) rather than imperatively testing for it. The underlying control annotation system is retained for advanced use.
 
 ### 5. Window Proliferation (IDE)
 Opening methods, classes, and subclasses in the original generated many overlapping windows. **Status: open.** The Phograph IDE should use tabbed interface, split views, and breadcrumb navigation.
@@ -1741,6 +1976,36 @@ Mac Toolbox / Pascal / 68K integration is irrelevant on modern Apple platforms. 
 
 ### 18. No Networking -- ADDRESSED
 No primitives for HTTP, JSON, or network communication. **Status: replaced.** Phograph adds `http-get`, `http-post`, `http-request`, `json-parse`, `json-encode`, and related primitives with async Future returns (Section 6).
+
+### 19. Single Inheritance Only -- ADDRESSED
+No mechanism to compose behavior from multiple sources without deep inheritance chains. **Status: replaced.** Phograph adds protocols (Section 9) -- named sets of method signatures that any class can conform to regardless of its inheritance chain. A class can conform to multiple protocols while inheriting from one superclass.
+
+### 20. No First-Class Method References -- ADDRESSED
+The inject construct uses stringly-typed dispatch (pass a method name as a string). No validation, no captured state, no type safety. **Status: replaced.** Phograph adds method references (Section 5) -- first-class values that can be passed on wires, stored in attributes, and invoked with `call`. Bound references capture `self` for closure-like behavior. Inject is retained for dynamic cases.
+
+### 21. Fixed Arity, No Optional Parameters -- ADDRESSED
+Every method had a fixed number of inputs with no defaults. This forced proliferation of methods with slight variations. **Status: replaced.** Phograph adds optional inputs with default values and variadic inputs (Section 3).
+
+### 22. No Pattern Matching -- ADDRESSED
+The case system was a chain of imperative guards. No type matching, value matching, or destructuring. **Status: replaced.** Phograph adds type patterns, value patterns, list destructuring `(head | tail)`, and dict destructuring `{key1, key2, ...rest}` on case inputs (Section 9).
+
+### 23. No Reactive Observation -- ADDRESSED
+No mechanism to react to data changes. UI updates were entirely manual. **Status: replaced.** Phograph adds observable attributes, the `observe` primitive, and reactive bindings (`bind`, `bind-two-way`) that automatically propagate data changes to UI shapes (Section 9).
+
+### 24. Cryptic Constructor Name -- ADDRESSED
+The constructor was named `<<>>`. **Status: replaced.** Renamed to `init` (Section 9).
+
+### 25. Incomplete String Primitives -- ADDRESSED
+Missing split, replace, trim, case conversion, and other basic string operations. **Status: replaced.** Phograph adds `string-split`, `string-replace`, `string-trim`, `uppercase`, `lowercase`, `string-contains?`, `string-starts-with?`, `string-ends-with?`, `char-at`, `string-repeat` (Section 6).
+
+### 26. Missing Type Introspection -- ADDRESSED
+Could check `integer?` but not get the class of an object or test protocol conformance. **Status: replaced.** Phograph adds `type-of`, `class-of`, `instance-of?`, `responds-to?`, `conforms-to?` (Section 6).
+
+### 27. `log` Name Collision -- ADDRESSED
+Debug output primitive and natural logarithm both named `log`. **Status: replaced.** Debug output is `log`; logarithm is `ln` (natural), `log10`, `log2` (Section 6).
+
+### 28. Obsolete Compiler Target -- ADDRESSED
+Original compiler targeted 68K Motorola. **Status: replaced.** Phograph compiler targets ARM64 via LLVM, producing universal macOS binaries and iOS .ipa bundles (Section 13).
 
 ---
 

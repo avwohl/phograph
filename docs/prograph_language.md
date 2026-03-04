@@ -1,0 +1,1448 @@
+# Prograph Language Specification
+
+A comprehensive reference for implementing a modern Prograph-based visual dataflow programming language for macOS and iOS.
+
+---
+
+## Table of Contents
+
+1. [History and Origins](#1-history-and-origins)
+2. [Core Language Model](#2-core-language-model)
+3. [Program Structure](#3-program-structure)
+4. [Data Types](#4-data-types)
+5. [Operations and Icons](#5-operations-and-icons)
+6. [Primitives Reference](#6-primitives-reference)
+7. [Control Flow](#7-control-flow)
+8. [Loops and List Annotations](#8-loops-and-list-annotations)
+9. [Classes and Object-Orientation](#9-classes-and-object-orientation)
+10. [Persistents and Global State](#10-persistents-and-global-state)
+11. [Canvas, Drawing, and Scene Graph](#11-canvas-drawing-and-scene-graph)
+12. [Input: Pointer, Gesture, and Keyboard Events](#12-input-pointer-gesture-and-keyboard-events)
+13. [Execution Model and Debugging](#13-execution-model-and-debugging)
+14. [External Code Integration](#14-external-code-integration)
+15. [Known Limitations and Status](#15-known-limitations-of-the-original-and-how-phograph-addresses-them)
+16. [References](#16-references)
+
+---
+
+## 1. History and Origins
+
+### Academic Beginnings (1982-1985)
+
+Research on Prograph began at **Acadia University** (Nova Scotia, Canada) in 1982 as a general investigation into dataflow languages, stimulated by a seminar on functional languages conducted by Michael Levin. Diagrams were used to clarify discussions, leading to the central insight: *"since the diagrams are clearer than the code, why not make the diagrams themselves executable!"*
+
+Key researchers:
+
+- **Tomasz Pietrzykowski** -- primary visionary; formed The Gunakara Sun Systems (TGS) consulting firm at Acadia University
+- **Stan Matwin** -- co-authored the 1985 preliminary report
+- **Philip T. Cox** -- joined from the Technical University of Nova Scotia; later became CTO and President/CEO
+
+The 1985 paper by Matwin and Pietrzykowski formally described PROGRAPH as "a functional, data flow oriented language, expressed graphically in the form of pictographs" that includes "a database subsystem which is also functional in nature."
+
+In 1985, work began on a commercializable prototype for the Macintosh, chosen because it was "the only widely available, low-priced computer with high-level graphics support."
+
+### Commercialization: TGS Systems (1986-1990)
+
+In early 1986, The Gunakara Sun Systems took over the prototype for commercialization.
+
+In **1987**, **Mark Szpakowski** suggested the merger of object-orientation with visual dataflow, creating an "objectflow" system -- a pivotal conceptual development.
+
+**Version timeline:**
+
+| Version | Date | Notes |
+|---------|------|-------|
+| 1.0 | October 1988 | First release |
+| 1.1 | March 1989 | Numerous additions |
+| 1.2 | September 1989 | Near-complete Mac Toolbox coverage; 1989 MacUser Editor's Choice Award for Best Development Tool |
+| 2.0 | July 1990 | Added a compiler (previously interpreter-only); TGS renamed to Prograph International |
+| 2.5 | October 1991 | Included a sparse class library (System Classes, Essentials, Goodies) |
+
+### Prograph CPX (1992-1995)
+
+**Prograph CPX** (Cross-Platform eXtensions) was released in 1993. CPX consisted of three parts:
+
+1. **Editor/Interpreter** -- an incremental compiler approximately 10x faster than the Prograph 2.5 interpreter
+2. **Compiler** -- produces standalone executables
+3. **Application Builder Classes (ABCs)** -- a complete application framework
+
+Despite increasing sales, Prograph International was unable to sustain operating costs and went into receivership in early 1995.
+
+### Pictorius and Later (1995-2002)
+
+Management and employees formed **Pictorius**, which acquired PI's assets. A Windows version of CPX was begun but never formally released. In April 2002, the web development part was acquired by Paragon Technology Group. The Prograph source code rights were retained by McLean Watson Capital.
+
+### Marten by Andescotia (2010s-present)
+
+**Andescotia Software** released **Marten IDE**, a macOS-native revival of Prograph. Marten is a multi-process, multi-threaded Carbon application (~500 classes) supporting Carbon and Cocoa frameworks, database APIs (MySQL, Postgres), and C code export. Available as a free download.
+
+---
+
+## 2. Core Language Model
+
+### The Dataflow Paradigm
+
+Prograph is a **visual, object-oriented, dataflow, multiparadigm programming language** that uses iconic symbols to represent actions taken on data. Programs are entirely graphical -- text is used only for naming operations, classes, methods, and for comments. There is no textual source code representation.
+
+The fundamental execution model:
+
+- **Data flows from top to bottom** through a directed acyclic graph of operation icons
+- Operations execute **when all their input data is available** (data-driven firing rule)
+- Execution order depends solely on data dependencies, not spatial position
+- This model is **inherently parallelizable**: independent operations with no data dependencies between them can execute concurrently
+
+Prograph is acknowledged as **not a pure dataflow language** -- data flowing through diagrams can include class instances subject to side-effects. It is formally "a class-based, single inheritance object-oriented language with dynamic typing and a garbage collection mechanism based on reference counting."
+
+### Visual Syntax
+
+The visual syntax is the **only** representation of Prograph code. There are no syntax errors possible in the traditional sense -- the editor enforces structural validity by construction. The approximately twenty operation icon types each have:
+
+- **Input nodes** (terminals): small circles at the **top** of the icon
+- **Output nodes** (roots): small circles at the **bottom** of the icon
+- **Data links** (wires): lines connecting the root (output) of one icon to the terminal (input) of another
+
+Data flows top-to-bottom through wires. In debug/step mode, data can be observed "coursing through a method like balls falling through a Pachinko machine."
+
+### No Local Variables
+
+There are no named local variables. Data exists only as values flowing through wires between operations. This eliminates an entire category of bugs (uninitialized variables, naming conflicts) and makes data dependencies immediately visible.
+
+---
+
+## 3. Program Structure
+
+### Hierarchy: Project > Section > Classes / Methods / Persistents
+
+A **Project** is the top-level container, displayed in a Project Window. It contains one or more **Sections**, which are independent units of compilation saved as separate files, reusable across multiple projects.
+
+Each Section has three compartments (visually represented as a three-part icon):
+
+1. **Classes** (left) -- object-oriented code and data
+2. **Universal Methods** (middle) -- standalone functions not tied to any class
+3. **Persistents** (right) -- global persistent variables
+
+**Rules:**
+- A class must be entirely contained within a single section
+- A method must be entirely contained within a single section
+- Class names, universal method names, and persistent names must be unique within a project
+- Inheritance chains can span any number of sections
+- The same section may be used in any number of projects
+
+### Methods and Cases
+
+A **method** consists of one or more **cases**. Each case is a separate dataflow diagram (directed graph) displayed in its own window. The window title shows `case_number:total_cases` (e.g., "2:3" = case 2 of 3 cases).
+
+Each case contains:
+
+- An **input bar** at the top with root nodes (representing method parameters)
+- An **output bar** at the bottom with terminal nodes (representing return values)
+- **Operation icons** in the body
+- **Data links** (wires) connecting outputs to inputs
+
+When a method is called:
+1. Data values from the calling operation's input wires are copied to the first case's input bar roots
+2. Operations in the case execute as their inputs become available
+3. If a control annotation causes a "next case" jump, execution moves to the next case
+4. Data produced at the output bar's terminal nodes flows back to the caller
+
+### Method Arity
+
+Every method has a fixed **arity** -- a specific number of inputs and outputs. Connecting the wrong number of wires produces an arity error. The arity is displayed/enforced by the visual editor.
+
+### Local Methods
+
+A **local method** groups operations within a parent method for readability. Visually distinct icon (vertical lines on left and right sides). Zero function-call overhead. Not callable from outside the containing method. Can be promoted to a universal method.
+
+Created by selecting operations and choosing "Opers To Local." Can be reversed with "Local To Method."
+
+### Creating Methods at Runtime (Prototyping)
+
+During interpretation, if a called method doesn't exist, an alert offers to create it on-the-fly. This enables **top-down prototyping**: write high-level skeleton code, run it, and fill in details incrementally as the interpreter prompts for missing implementations.
+
+---
+
+## 4. Data Types
+
+Prograph has **ten data types**:
+
+| Type | Description |
+|------|-------------|
+| **Integer** | Whole numbers (32-bit in Marten) |
+| **Real** | Floating-point numbers |
+| **String** | Text data (treated as a unit, not a character array) |
+| **Boolean** | `true` / `false` |
+| **List** | Ordered collection; elements can be of any type; nesting supported |
+| **Object** | Instance of a user-defined class |
+| **External Structure** | Reference to OS/platform data structures |
+| **NULL** | Explicit null value |
+| **NONE** | Absence of a value |
+| **Undefined** | Uninitialized state |
+
+### Dynamic Typing
+
+Prograph is **dynamically typed** (late-binding, duck-typed, comparable to Python). Types are checked at runtime, not compile time. Variables, persistents, and class attributes can hold any data type and can change types during execution. Declaring a type in a class definition sets only the default initial value.
+
+### Constants
+
+Depicted as a horizontal line with a root node and the value displayed above. Immutable. Types include integers, reals, strings, lists, booleans, and null.
+
+### Strings
+
+- Entire blocks of text treated as a single entity, not character arrays
+- Number base representation: decimal (plain digits), hex (`"16#<digits>"`), octal (`"8#<digits>"`), binary (`"2#<digits>"`)
+
+### Lists
+
+- Flexible arrays; elements need not be the same type; size not pre-declared
+- Literal syntax in dialogs: `(1 2 3 4)`
+- Nested lists (2D or higher): `((1 2 3)(4 5 6))`
+- No risk of out-of-bounds access in the way C arrays have
+- 1-indexed (not 0-indexed)
+
+### Evaluations
+
+Small formula-like constructs embedded in an operation icon. Hold a single mathematical equation with up to 26 inputs named `a` through `z` sequentially. No function-call overhead. Example: `b*b - 4*a*c` with inputs `a`, `b`, `c`.
+
+### Memory Management
+
+Garbage collection based on **reference counting**. A separate heap is used for Prograph instances and simple data types, distinct from the platform memory manager.
+
+---
+
+## 5. Operations and Icons
+
+### Icon Taxonomy
+
+| Icon Type | Visual Appearance | Description |
+|-----------|-------------------|-------------|
+| **Plain operation** | Rectangle | Unnamed placeholder; becomes typed once named |
+| **Universal method** | Rectangle with name | Call to a standalone method |
+| **Primitive** | Rectangle with single line at bottom edge | Built-in operation supplied by the runtime |
+| **External method** | Rectangle with lines at top and bottom edges | Call to C/Pascal/OS routine |
+| **Local method** | Rectangle with vertical lines on left and right | Grouped operations within a parent method |
+| **Instance generator** | Octagon | Creates a new instance of a class |
+| **Persistent** | Oval | Accesses a global persistent variable |
+| **Get operator** | Special icon | Reads an attribute value from an object |
+| **Set operator** | Special icon | Writes an attribute value to an object |
+| **Constant** | Horizontal line with root and value label | Supplies a fixed value |
+| **Evaluation** | Similar to method but with equation inside | Inline formula |
+| **Inject** | Rectangle with inject input node | Dynamic dispatch: method name supplied at runtime |
+| **Match** | Operation with attached control annotation | Conditional test |
+
+### Node Types
+
+- **Root nodes** (outputs): circles at the bottom of an icon; data exits here
+- **Terminal nodes** (inputs): circles at the top of an icon; data enters here
+
+### Data Links (Wires)
+
+Lines connecting a root of one icon to a terminal of another. Data flows along these links from producer to consumer. Multiple wires can originate from a single root (fan-out / data duplication). A terminal can receive from at most one root.
+
+### Synchro Links
+
+**Synchro links** override data-driven execution order, forcing one operation to complete before another begins. Visually depicted as semicircular connectors "pointing" in the direction of required execution order. The visual equivalent of sequential statement ordering in textual languages.
+
+Used when two operations have no data dependency but must execute in a specific order (e.g., one has side effects the other depends on).
+
+### Inject Construct
+
+An **inject** determines at runtime which method to call. Instead of a fixed method name, a blank operation icon receives the method name as data input via a special inject node. This enables:
+
+- Runtime dispatch based on user selection
+- Function-pointer-like behavior
+- Callback patterns
+- The ABC framework's behavior system relies heavily on injection
+
+---
+
+## 6. Primitives Reference
+
+Prograph CPX contains approximately **307 built-in primitives**. Key categories:
+
+### I/O Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `show` | value(s) | -- | Display value(s) in a dialog; polymorphic, accepts any type |
+| `ask` | prompt string | user input string | Prompt user for text input |
+| `answer` | question, button1, button2 | button clicked | Present a two-button dialog |
+| `answer-v` | question, button1, button2, ... | button name | Present a multi-button dialog; returns name of clicked button |
+| `select` | prompt | file path | File selection dialog |
+
+### Arithmetic Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `+` | a, b | sum | Addition |
+| `-` | a, b | difference | Subtraction |
+| `*` | a, b | product | Multiplication |
+| `/` | a, b | quotient | Division |
+| `div-mod` (`÷÷`) | a, b | quotient, remainder | Integer division with remainder (two outputs) |
+| `abs` | n | \|n\| | Absolute value |
+| `round` | n | rounded | Round to nearest integer |
+| `sqrt` | n | root | Square root |
+| `power` | base, exp | result | Exponentiation |
+| `pi` | -- | 3.14159... | Pi constant |
+| `sin` | radians | sine | Sine |
+| `cos` | radians | cosine | Cosine |
+| `tan` | radians | tangent | Tangent |
+| `rand` | -- | random real | Random number [0, 1) |
+| `+1` | n | n+1 | Increment by one |
+| `min` | a, b | minimum | Minimum of two values |
+| `max` | a, b | maximum | Maximum of two values |
+| `floor` | n | floor | Floor |
+| `ceiling` | n | ceiling | Ceiling |
+| `truncate` | n | truncated | Truncate to integer |
+| `log` | n | log | Natural logarithm |
+
+### Comparison / Relational Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `=` | a, b | boolean | Equality (polymorphic) |
+| `<` | a, b | boolean | Less than |
+| `>` | a, b | boolean | Greater than |
+| `<=` (`≤`) | a, b | boolean | Less than or equal |
+| `>=` (`≥`) | a, b | boolean | Greater than or equal |
+
+All comparison primitives automatically carry a **control annotation** for use in matches.
+
+### Logical / Boolean Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `and` | a, b | boolean | Logical AND |
+| `or` | a, b | boolean | Logical OR |
+| `not` | a | boolean | Logical NOT |
+
+### Bitwise Primitives
+
+| Primitive | Description |
+|-----------|-------------|
+| `bit-and` | Bitwise AND |
+| `bit-or` | Bitwise OR |
+| `bit-not` | Bitwise NOT |
+| `bit-xor` | Bitwise XOR |
+| `bit-shift-left` | Left bit shift |
+| `bit-shift-right` | Right bit shift |
+| `bit-test` | Test specific bit |
+
+### String Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `"join"` | str1, str2, ... | concatenated | Concatenate strings (quotes in name signal string-only) |
+| `prefix` | string, count | prefix | First N characters |
+| `suffix` | string, count | suffix | Last N characters |
+| `middle` | string, start, count | substring | Extract substring |
+| `to-string` | value | string | Convert any type to string representation (polymorphic) |
+| `from-string` | string | value | Parse string to number/other type |
+| `format` | value, format-spec | formatted string | Printf-like formatting |
+| `to-ascii` | string | list of ints | String to list of ASCII code points |
+| `from-ascii` | list of ints | string | List of ASCII code points to string |
+| `length` | string | integer | String length |
+| `string-search` | haystack, needle | position | Find substring |
+
+### List Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `get-nth` | list, index | element | Get element at position (1-indexed) |
+| `get-nth` (3 inputs) | list, row, col | element | Access nested list element (2D) |
+| `set-nth` | list, index, value | modified list | Set element (returns new list) |
+| `set-nth!` | list, index, value | -- | Set element in place (mutating) |
+| `detach-l` | list | first, rest | Remove and return leftmost element |
+| `detach-r` | list | rest, last | Remove and return rightmost element |
+| `sort` | list | sorted list | Sort in ascending order |
+| `make-list` | count, initial-value | list | Create list of N elements initialized to value |
+| `in` | list, element | index | Find element; returns index or 0 if not found |
+| `split-nth` | list, position | left, right | Partition list at position |
+| `copy` | value | deep copy | Deep copy of any value including objects |
+| `length` | list | integer | Number of elements |
+| `first` | list | element | First element |
+| `rest` | list | list | All elements except the first |
+| `append` | list1, list2 | combined | Concatenate two lists |
+| `reverse` | list | reversed | Reverse list order |
+| `empty?` | list | boolean | Test if list is empty |
+
+### Type-Checking Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `integer?` | value | boolean | Test if value is an integer |
+| `real?` | value | boolean | Test if value is a real |
+| `string?` | value | boolean | Test if value is a string |
+| `list?` | value | boolean | Test if value is a list |
+| `boolean?` | value | boolean | Test if value is a boolean |
+
+### File Primitives
+
+| Primitive | Description |
+|-----------|-------------|
+| `save` | Save a persistent or object to disk |
+| `load` | Load a persistent or object from disk |
+
+---
+
+## 7. Control Flow
+
+Control flow is "the most unusual aspect of the Prograph language." It combines **annotations on operations** with the **case structure** to implement all standard control patterns.
+
+### Success and Failure
+
+Every operation execution has one of three outcomes:
+
+1. **Success** -- the operation completed normally and produced output
+2. **Failure** -- a controlled outcome that triggers a control annotation (not an error)
+3. **Error** -- an unrecoverable problem that halts execution
+
+Failure is a first-class concept in Prograph's control flow, distinct from errors. It is the mechanism by which conditional branching occurs.
+
+### The Ten Control Annotations
+
+Each operation can carry a control annotation that specifies what happens on success or failure. There are **ten control conditions**, grouped into five pairs:
+
+| Annotation | On Success | On Failure |
+|------------|-----------|------------|
+| **Continue** | Continue to next operation (DEFAULT, no icon) | Continue despite failure (ignore it) |
+| **Next Case** | Jump to next case of this method | Jump to next case of this method |
+| **Fail** | Propagate failure to caller | Propagate failure to caller |
+| **Terminate** | Exit current loop immediately | Exit current loop immediately |
+| **Finish** | Complete current iteration, then exit loop | Complete current iteration, then exit loop |
+
+**Default behavior:** An operation with no annotation has "continue on success." If it fails without a failure annotation, execution halts with an error.
+
+### Visual Representation of Controls
+
+| Control | Icon Symbol | Description |
+|---------|-------------|-------------|
+| Next Case on Failure | **X** | Default match annotation |
+| Next Case on Success | **checkmark** | Inverted match |
+| Continue | Two bars (top and bottom) | Execution continues regardless |
+| Terminate | One bar at top only | Immediately exit loop |
+| Finish | One bar at bottom only | Finish current iteration, then exit |
+| Fail | Propagates to caller's control | Sets failure flag for caller |
+
+### If-Then-Else Pattern
+
+Conditional branching uses **multiple cases** with guard tests:
+
+```
+Method "example" has 3 cases:
+
+Case 1:3  -- if condition A
+  [test A] --X-- (next case on failure)
+  [code for condition A]
+
+Case 2:3  -- else if condition B
+  [test B] --X-- (next case on failure)
+  [code for condition B]
+
+Case 3:3  -- else (default)
+  [default code]
+```
+
+When a test fails and has "next case on failure" (X), execution abandons the current case entirely and begins the next case from its input bar.
+
+### Match Operations
+
+A **match** combines a comparison primitive with a control annotation. Comparison primitives (`=`, `<`, `>`, `<=`, `>=`) automatically carry a control. The control determines what happens when the comparison result indicates the condition being tested.
+
+### The Fail Mechanism
+
+The **Fail** control is used inside local methods or subordinate methods. When activated, it sets a failure flag that propagates upward to the calling method. The calling method's operation icon can then have its own control annotation to respond to the failure. This provides a limited form of exception handling.
+
+---
+
+## 8. Loops and List Annotations
+
+### Loop Construct (Counted Loop)
+
+Equivalent to a `for` loop. Created by highlighting the input and output nodes of a method icon and selecting Loop. The icon displays stacked arrows showing the feedback path.
+
+Behavior:
+1. The output of each iteration feeds back as the input for the next iteration
+2. A match test inside the loop method checks the termination condition
+3. A **Terminate** or **Finish** control on the match ends the loop
+4. The final value exits the loop to downstream operations
+
+### Repeat Construct (Indefinite Loop)
+
+Equivalent to `while` or `do-while`. Created by highlighting a method icon and selecting Repeat.
+
+Behavior:
+1. The method executes repeatedly with no counter
+2. No feedback value required (though data can be threaded through)
+3. Continues until a **Terminate** or **Finish** control fires inside the repeated method
+
+### List Annotation (Ellipsis / Autoindexing)
+
+Any input or output node can be marked with an **ellipsis annotation**:
+
+- **Ellipsis on input**: The operation expects a list; it automatically executes once for each element (map/for-each)
+- **Ellipsis on output** (with ellipsis input): Results are gathered into a list (map with collect)
+- This converts "any elementary operation" into a loop
+
+This is one of Prograph's most powerful features. A single annotated `+` operation with a list input will add a value to every element, producing a new list -- no explicit loop needed.
+
+### Partition Annotation
+
+Applied via `Controls Menu > Partition` on a logical test. The operation processes every element of an input list and produces **two output lists**: one where the test succeeded and one where it failed. Equivalent to a `partition` or `filter` in functional languages.
+
+### Inject/Accumulate Annotation (Fold/Reduce)
+
+An annotation that "winds an output back to the top" to become an input on the next iteration. Implements fold/inject/reduce behavior: an accumulator value is threaded through each iteration.
+
+### Loop Modifier Annotation
+
+Attached to an operation to make it iterate. The loop continues until a control annotation (terminate/finish) fires. When loop, partition, or list annotations are added, the icon takes on a **"stack of icons" appearance** to indicate multiple executions.
+
+### Nested Loops
+
+Loops and repeats can be nested: a repeat containing a loop, a loop containing another loop, etc. Each nested construct is visually distinct in its own method/case window.
+
+---
+
+## 9. Classes and Object-Orientation
+
+### Class Definition
+
+Classes are created in the Classes window of a section. Each class icon is a **hexagon** split in two:
+
+- **Left half**: Attributes (data) -- click to open the Class Attribute Window
+- **Right half**: Methods (behavior) -- click to open the Methods Window
+
+### Attributes
+
+The Class Attribute Window has two regions separated by a horizontal line:
+
+| Region | Type | Symbol | Description |
+|--------|------|--------|-------------|
+| Above the line | **Class attributes** | Hexagon | Shared by all instances (like `static` in C++) |
+| Below the line | **Instance attributes** | Triangle | Unique per instance |
+
+Inherited attributes show an arrow in their symbol. Default values are set in the Attributes window and automatically applied when instances are created.
+
+**Access control:** In original Prograph CPX, all attributes are effectively public. This was a noted shortcoming.
+
+### Instance Generation
+
+An object is created with an **instance generator** icon (octagon). It has:
+- One root node (outputs the new object)
+- One optional terminal node (receives a list of attribute initialization values)
+
+### Initialization Methods (Constructors)
+
+Named `<<>>`. Automatically called when an object is instantiated. Equivalent to constructors in C++/Java. There are no destructors -- cleanup must be done manually.
+
+### Get and Set Operators
+
+| Operator | Created By | Behavior |
+|----------|-----------|----------|
+| **Get** | `Opers Menu > Get` | Retrieves attribute value; left output passes self, right passes value |
+| **Set** | `Opers Menu > Set` | Assigns a new value to an attribute |
+
+**Custom vs. built-in access:**
+
+- `/attributeName` -- calls a **custom Get/Set method** you wrote (if one exists)
+- `attributeName` (no slash) -- calls the **built-in Get/Set operation** directly
+
+This allows writing custom Set methods that perform validation before setting the attribute value.
+
+### Three Method Call Syntaxes
+
+| Syntax | Name | Description |
+|--------|------|-------------|
+| `/MethodName` | **Data-determined** | First input must be an instance; method dispatched based on instance's class. Enables polymorphism. |
+| `//MethodName` | **Context-determined** | Called from within another method of the same class. No instance input needed. |
+| `ClassName/MethodName` | **Explicit** | Explicitly names the target class. No instance input needed. Used for class-level operations. |
+
+### Single Inheritance
+
+Prograph implements **class-based single inheritance only** (no multiple inheritance). Subclasses are created by:
+1. Highlighting the parent class icon
+2. Option-clicking to create a new class below it
+3. Naming the subclass
+
+A visual link between class icons shows the inheritance relationship. All parent methods and attributes are automatically inherited.
+
+### Method Overriding
+
+Create a method in the subclass with the same name as a parent method. The subclass version is called for instances of that subclass.
+
+**Super calls:** To call the parent's version from within an override, highlight the method call icon and select `Opers Menu > Super`.
+
+### Abstract Superclasses
+
+Classes intended never to be instantiated directly. Made abstract by omitting the initialization method (`<<>>`). Provide shared code to subclasses.
+
+### Polymorphism
+
+When the same method name exists in multiple classes in an inheritance chain:
+- Prograph determines at runtime which class the object belongs to
+- The appropriate version executes
+- The caller doesn't need to know the specific subclass
+
+Especially powerful with **list annotations**: send the same method to every object in a mixed-type list, and each object executes its own version.
+
+### Composition
+
+One class contains an instance of another class as an attribute ("has-a" relationship). The containing object's methods delegate to the contained object's methods.
+
+### Class Aliases
+
+A class alias marks that you want to reference or subclass a class from another section without moving it. Created via `Convert To Alias...`. Enables subclasses to live in their own sections.
+
+---
+
+## 10. Persistents and Global State
+
+### Persistent Variables
+
+Persistents are Prograph's global variables with automatic persistence:
+
+- **Icon shape:** Oval
+- **Created via:** `Opers Menu > Persistent` on a blank operation, then named
+- **No nodes by default.** Add a root node to read; add a terminal node to write
+- **Value dialog** shows current type and value; type selected from popup (null, integer, real, string, list, boolean, etc.)
+
+### Persistence Behavior
+
+| Environment | Behavior |
+|-------------|----------|
+| Interpreter | Value automatically saved to disk when program exits and restored on next run (modifies the program file itself) |
+| Compiled | Automatic persistence does NOT work. Must use `save` and `load` primitives explicitly |
+
+### Class Attributes as Persistents
+
+Class attributes (shared across all instances) behave similarly to persistents in the interpreter: they retain their values between executions. In compiled programs, they behave as regular global variables unless explicitly saved.
+
+### Object Persistence / Database
+
+Objects can be made persistent, effectively functioning as an object database. The 1985 preliminary report noted that PROGRAPH contained "a database subsystem which is also functional in nature." This enabled database-like applications without external database systems.
+
+---
+
+## 11. Canvas, Drawing, and Scene Graph
+
+This section replaces the original Prograph ABCs (147 classes wrapping Mac Toolbox widgets) with a simpler, more direct system inspired by GPU-accelerated canvas rendering with an in-language scene graph. No OS-native widgets are used. Everything is drawn by the language runtime into a pixel buffer, composited by the GPU, and displayed on screen.
+
+### 11.1 Design Principles
+
+1. **Single canvas, not OS widgets.** The application renders into a GPU-backed pixel buffer. There are no platform-native buttons, checkboxes, or scroll bars. Every visual element is drawn by Phograph code.
+2. **Scene graph, not ownership hierarchy.** UI is a tree of `Shape` objects with parent/child relationships, transforms, styles, and event handlers. Not a 60-class "Owner" chain.
+3. **Drawing is dataflow.** Drawing operations are Phograph methods that receive a `DrawContext` and issue commands. Data flows in; pixels flow out.
+4. **Events are methods, not injections.** Event handlers are ordinary class methods on Shape subclasses (`/on-pointer-down`, `/on-tap`). No separate Behavior Editor, no inject indirection.
+5. **Touch and mouse are unified.** A single `Pointer` event model covers both, with platform-specific gesture recognizers layered on top.
+6. **Small class count.** ~25 core classes replace ~147 ABCs. Users build complex UIs by composing simple shapes, not by navigating a deep inheritance forest.
+
+### 11.2 The Canvas
+
+A **Canvas** is a GPU-accelerated rendering surface. It owns:
+
+- A **pixel buffer** (pre-allocated, BGRA8, sized to maximum expected resolution)
+- A **scene graph root** (the top-level `Shape`)
+- An **event queue** (thread-safe)
+- A **display link** tied to screen refresh
+
+```
+Canvas
+  ├── pixel buffer (BGRA8, Metal-backed)
+  ├── root Shape (the scene graph)
+  ├── event queue
+  └── display link (renders at screen refresh rate)
+```
+
+**On macOS:** Each Canvas lives inside an OS window. Multiple canvases are supported (multiple windows). Created via `create-canvas` which returns a Canvas and opens a window.
+
+**On iOS:** A single full-screen Canvas is the norm. The Canvas fills the screen below the status bar (or the entire screen in full-screen mode). Additional canvases can be created for multi-window iPad support.
+
+**Rendering loop:** On each display-link tick:
+1. If the scene graph is dirty (any shape marked for redraw), traverse the tree and call each dirty shape's `/draw` method with a `DrawContext`
+2. Upload the pixel buffer to a GPU texture
+3. Render a fullscreen quad to the screen
+
+Partial redraw is supported: only dirty regions of the pixel buffer are re-rendered and re-uploaded.
+
+#### Canvas Primitives
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `create-canvas` | width, height, title | canvas | Create a new canvas (and OS window on macOS) |
+| `canvas-size` | canvas | width, height | Get canvas dimensions |
+| `canvas-set-title` | canvas, title | -- | Set window title (macOS only) |
+| `canvas-set-size` | canvas, width, height | -- | Resize canvas |
+| `canvas-close` | canvas | -- | Close canvas and its window |
+| `canvas-root` | canvas | shape | Get the root shape of the scene graph |
+| `canvas-set-root` | canvas, shape | -- | Replace the root shape |
+| `canvas-invalidate` | canvas | -- | Mark entire canvas for redraw |
+| `canvas-scale-factor` | canvas | real | Display scale factor (1.0, 2.0 for Retina, 3.0) |
+
+### 11.3 The Scene Graph
+
+The scene graph is a tree of **Shape** objects. Every visible element -- a button, a line of text, a chart, a game sprite -- is a Shape or a subclass of Shape.
+
+#### The Shape Base Class
+
+`Shape` is the root class of the scene graph hierarchy. All visual elements inherit from it.
+
+**Instance attributes:**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `bounds` | Rect | (0, 0, 0, 0) | Position and size in parent coordinates |
+| `transform` | Transform | identity | Affine transform (translate, rotate, scale, skew) |
+| `children` | List | () | Ordered list of child shapes (drawn back-to-front) |
+| `parent` | Shape or NULL | NULL | Parent shape (set automatically on add) |
+| `style` | Style | default | Visual style (fill, stroke, shadow, opacity, corner-radius) |
+| `visible` | Boolean | true | Whether this shape and its children are drawn |
+| `interactive` | Boolean | true | Whether this shape receives pointer/key events |
+| `clips-children` | Boolean | false | Whether children are clipped to this shape's bounds |
+| `needs-redraw` | Boolean | true | Dirty flag; set automatically when attributes change |
+| `tag` | String | "" | Optional identifier for finding shapes in the tree |
+| `cursor` | String | "default" | Cursor to show on hover (macOS: arrow, pointer, crosshair, text, etc.) |
+
+**Key methods:**
+
+| Method | Description |
+|--------|-------------|
+| `/draw` | Called with a `DrawContext` when the shape needs rendering. Default draws background fill and stroke per `style`. Override for custom drawing. |
+| `/layout` | Called before drawing when bounds have changed. Override to position children. |
+| `/hit-test` | Given a point in local coordinates, returns true/false. Default checks `bounds`. Override for non-rectangular hit areas (e.g., circles, paths). |
+| `/add-child` | Append a child shape. Sets child's `parent`. Marks dirty. |
+| `/remove-child` | Remove a child shape. Clears child's `parent`. Marks dirty. |
+| `/find-by-tag` | Recursively search children for a shape with the given tag string. |
+| `/local-to-global` | Convert a point from this shape's coordinate space to canvas coordinates. |
+| `/global-to-local` | Convert a point from canvas coordinates to this shape's local space. |
+| `/invalidate` | Mark this shape (and ancestors) as needing redraw. |
+
+#### Coordinate System
+
+- Origin is **top-left** (consistent with iOS/macOS screen coordinates)
+- Each shape's `bounds` are in its **parent's coordinate space**
+- The `transform` is applied on top of `bounds` positioning
+- Children draw in their parent's coordinate space, offset by the parent's bounds origin
+- `clips-children` controls whether children can draw outside the parent's bounds
+
+#### Shape Subclasses
+
+| Class | Inherits | Description |
+|-------|----------|-------------|
+| `Shape` | -- | Base class. Draws a rectangle with style. |
+| `Oval` | Shape | Ellipse/circle. `/hit-test` uses ellipse math. |
+| `Path` | Shape | Arbitrary bezier path (move-to, line-to, curve-to, close). |
+| `TextShape` | Shape | Renders text. Attributes: `text`, `font`, `font-size`, `text-color`, `alignment`, `wraps`. |
+| `ImageShape` | Shape | Displays a bitmap image. Attributes: `image`, `scale-mode` (fill, fit, stretch, center). |
+| `Group` | Shape | Pure container. No drawing of its own. Useful for grouping and applying a shared transform. |
+| `Stack` | Shape | Layout container: arranges children in a line. Attributes: `direction` (horizontal/vertical), `spacing`, `alignment` (start/center/end/stretch). |
+| `Grid` | Shape | Layout container: arranges children in a grid. Attributes: `columns`, `row-spacing`, `column-spacing`. |
+| `ScrollShape` | Shape | Scrollable container. Attributes: `content-size`, `scroll-offset`, `shows-scrollbars`. Handles scroll/pan events internally. |
+| `ClipShape` | Shape | Clips children to an arbitrary `Path`. |
+
+### 11.4 Style
+
+Every Shape has a `Style` object controlling its visual appearance. Style attributes cascade: if a child's style attribute is NONE, it inherits from its parent.
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `fill-color` | Color or NONE | NONE | Background fill color |
+| `fill-gradient` | Gradient or NONE | NONE | Linear or radial gradient fill (overrides fill-color) |
+| `stroke-color` | Color or NONE | NONE | Border/outline color |
+| `stroke-width` | Real | 0.0 | Border/outline thickness |
+| `corner-radius` | Real | 0.0 | Rounded corner radius |
+| `opacity` | Real | 1.0 | Opacity (0.0 transparent, 1.0 opaque). Applied to shape and all children. |
+| `shadow-color` | Color or NONE | NONE | Drop shadow color |
+| `shadow-offset` | Point | (0, 0) | Drop shadow offset |
+| `shadow-blur` | Real | 0.0 | Drop shadow blur radius |
+| `padding` | Insets | (0,0,0,0) | Internal padding (top, right, bottom, left) |
+
+#### Color
+
+A `Color` is a data type with four components: red, green, blue, alpha (each 0.0 to 1.0).
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `rgb` | r, g, b | color | Create an opaque color |
+| `rgba` | r, g, b, a | color | Create a color with alpha |
+| `hsb` | hue, saturation, brightness | color | Create from HSB |
+| `color-components` | color | r, g, b, a | Decompose a color |
+| `color-blend` | color1, color2, fraction | color | Interpolate between two colors |
+
+Named color constants: `black`, `white`, `red`, `green`, `blue`, `yellow`, `cyan`, `magenta`, `orange`, `purple`, `brown`, `gray`, `light-gray`, `dark-gray`, `clear` (fully transparent).
+
+On macOS/iOS, system semantic colors are also available: `system-background`, `system-label`, `system-accent`, `system-separator`, `system-grouped-background`. These adapt to light/dark mode automatically.
+
+#### Gradient
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `linear-gradient` | color-stops, start-point, end-point | gradient | Linear gradient. Color-stops is a list of (position, color) pairs. |
+| `radial-gradient` | color-stops, center, radius | gradient | Radial gradient. |
+
+#### Transform
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `translate` | dx, dy | transform | Translation |
+| `rotate` | radians | transform | Rotation around origin |
+| `scale` | sx, sy | transform | Scale |
+| `transform-concat` | t1, t2 | transform | Concatenate two transforms |
+| `transform-invert` | t | transform | Invert a transform |
+| `transform-point` | t, point | point | Apply transform to a point |
+
+### 11.5 The DrawContext
+
+When a Shape's `/draw` method is called, it receives a **DrawContext** as input. The DrawContext provides immediate-mode drawing commands that render into the canvas pixel buffer.
+
+The DrawContext maintains a **graphics state stack** (fill color, stroke color, line width, font, clipping, transform). Push/pop to save and restore state.
+
+#### Drawing Primitives
+
+**Rectangles:**
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `draw-fill-rect` | ctx, rect | ctx | Fill a rectangle with current fill color |
+| `draw-stroke-rect` | ctx, rect | ctx | Stroke a rectangle outline |
+| `draw-round-rect` | ctx, rect, radius | ctx | Fill a rounded rectangle |
+| `draw-stroke-round-rect` | ctx, rect, radius | ctx | Stroke a rounded rectangle outline |
+
+**Ovals:**
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `draw-fill-oval` | ctx, rect | ctx | Fill an ellipse inscribed in rect |
+| `draw-stroke-oval` | ctx, rect | ctx | Stroke an ellipse outline |
+
+**Paths:**
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `draw-fill-path` | ctx, path | ctx | Fill a path |
+| `draw-stroke-path` | ctx, path | ctx | Stroke a path |
+| `path-move-to` | path, x, y | path | Move current point |
+| `path-line-to` | path, x, y | path | Line from current point to (x,y) |
+| `path-curve-to` | path, cp1x, cp1y, cp2x, cp2y, x, y | path | Cubic bezier curve |
+| `path-quad-to` | path, cpx, cpy, x, y | path | Quadratic bezier curve |
+| `path-arc` | path, cx, cy, radius, start-angle, end-angle | path | Circular arc |
+| `path-close` | path | path | Close the current subpath |
+| `path-create` | -- | path | Create a new empty path |
+
+**Text:**
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `draw-text` | ctx, string, point | ctx | Draw text at point with current font and fill color |
+| `draw-text-in-rect` | ctx, string, rect, alignment | ctx | Draw text wrapped within a rectangle |
+| `measure-text` | ctx, string | width, height | Measure text size with current font |
+
+**Images:**
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `draw-image` | ctx, image, rect | ctx | Draw image scaled to rect |
+| `draw-image-at` | ctx, image, point | ctx | Draw image at natural size at point |
+| `load-image` | path-string | image | Load an image from file |
+| `image-size` | image | width, height | Get image dimensions |
+| `create-image` | width, height | image | Create a blank image (for offscreen drawing) |
+
+**Lines:**
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `draw-line` | ctx, x1, y1, x2, y2 | ctx | Draw a line |
+
+**State:**
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `draw-set-fill` | ctx, color | ctx | Set fill color |
+| `draw-set-stroke` | ctx, color | ctx | Set stroke color |
+| `draw-set-line-width` | ctx, width | ctx | Set line width |
+| `draw-set-font` | ctx, font-name, size | ctx | Set font |
+| `draw-set-font-bold` | ctx, bold? | ctx | Toggle bold |
+| `draw-set-font-italic` | ctx, italic? | ctx | Toggle italic |
+| `draw-push-state` | ctx | ctx | Push graphics state onto stack |
+| `draw-pop-state` | ctx | ctx | Pop and restore graphics state |
+| `draw-push-transform` | ctx, transform | ctx | Apply transform and push state |
+| `draw-clip-rect` | ctx, rect | ctx | Intersect clipping region with rect |
+| `draw-clip-path` | ctx, path | ctx | Intersect clipping region with path |
+
+**Note:** All draw primitives take the `DrawContext` as first input and pass it through as output. This enables chaining in the dataflow graph: the context flows through a pipeline of drawing operations, with synchro links ensuring correct ordering when the same context passes through independent branches.
+
+#### Retained vs. Immediate Drawing
+
+Most UIs should be built with the **retained** scene graph (compose Shape objects, let the runtime draw them). Override `/draw` for **custom rendering** -- charts, games, visualizations, or any shape that needs procedural drawing.
+
+The default `/draw` method on Shape renders the shape's `style` (fill, stroke, corner radius, shadow). Subclass implementations call the default first (via super), then add custom drawing on top.
+
+### 11.6 Layout System
+
+Layout in the original ABCs required manual pixel positioning. Phograph uses automatic layout via container shapes.
+
+#### Stack Layout
+
+`Stack` arranges its children sequentially along one axis:
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `direction` | Symbol | `vertical` | `horizontal` or `vertical` |
+| `spacing` | Real | 0.0 | Gap between children |
+| `alignment` | Symbol | `start` | Cross-axis alignment: `start`, `center`, `end`, `stretch` |
+| `distribution` | Symbol | `packed` | Main-axis distribution: `packed`, `space-between`, `space-around`, `space-evenly` |
+
+#### Grid Layout
+
+`Grid` arranges children in a grid:
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `columns` | Integer | 2 | Number of columns |
+| `row-spacing` | Real | 0.0 | Gap between rows |
+| `column-spacing` | Real | 0.0 | Gap between columns |
+| `cell-alignment` | Symbol | `center` | Alignment of items within each cell |
+
+#### Size Constraints
+
+Any Shape can specify size constraints that the layout system respects:
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `min-width` | Real or NONE | NONE | Minimum width |
+| `max-width` | Real or NONE | NONE | Maximum width |
+| `min-height` | Real or NONE | NONE | Minimum height |
+| `max-height` | Real or NONE | NONE | Maximum height |
+| `flex` | Real | 0.0 | Flex grow factor within a Stack (0 = fixed size, >0 = proportional share of remaining space) |
+
+Layout is computed in the `/layout` method, which runs top-down before drawing. A shape's `/layout` is called only when its bounds or children have changed (dirty flag).
+
+---
+
+## 12. Input: Pointer, Gesture, and Keyboard Events
+
+The original ABCs used a rigid hierarchy of Behavior/Inject indirection for event handling. Phograph replaces this with a direct, unified event system that treats mouse and touch as variants of the same **Pointer** abstraction, adds first-class **Gesture** recognition, and dispatches events as ordinary method calls on shapes.
+
+### 12.1 Design Principles
+
+1. **Mouse and touch are both pointers.** A mouse click and a finger tap both produce `pointer-down` → `pointer-up`. The event carries metadata distinguishing them (button identity, pressure, is-touch flag), but handlers that don't care can treat them identically.
+2. **Gestures layer on top of raw pointers.** Tap, long-press, pan, pinch, rotate, and scroll are recognized from raw pointer streams and dispatched as separate, higher-level events.
+3. **Events are class methods.** No Behavior Editor, no inject indirection. You handle a tap on a button by writing a `/on-tap` method on your Button subclass (or on that specific instance's class). Data flows in via the method's inputs; you act on it with normal Phograph operations.
+4. **Hit testing walks the scene graph.** The deepest visible, interactive shape under the pointer receives the event first. If it doesn't handle it (no matching method), the event propagates up to the parent, and so on to the root.
+5. **Pointer capture.** A shape can claim a pointer (by pointer-id) on `pointer-down`. All subsequent move/up events for that pointer go directly to the capturing shape, bypassing hit-testing. Released on `pointer-up` or explicitly.
+
+### 12.2 The Pointer Event
+
+A `PointerEvent` is a data type flowing through event-handler methods.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | Symbol | `down`, `move`, `up`, `cancel` |
+| `x` | Real | X position in the **target shape's** local coordinate space |
+| `y` | Real | Y position in the target shape's local coordinate space |
+| `canvas-x` | Real | X position in canvas (global) coordinates |
+| `canvas-y` | Real | Y position in canvas (global) coordinates |
+| `button` | Symbol | `primary`, `secondary`, `middle` (mouse) or `touch` (finger) |
+| `pointer-id` | Integer | Unique ID for this pointer (enables multi-touch tracking) |
+| `pressure` | Real | 0.0 to 1.0 (Apple Pencil / Force Touch; 1.0 for mouse clicks) |
+| `is-touch` | Boolean | true for finger/pencil, false for mouse |
+| `modifiers` | List | Active modifier keys: sublists of `shift`, `control`, `option`, `command` |
+| `timestamp` | Real | Event timestamp in seconds |
+| `click-count` | Integer | 1 for single click, 2 for double, 3 for triple (mouse only) |
+
+#### Pointer Event Handler Methods
+
+Shapes handle pointer events by implementing these class methods:
+
+| Method | Inputs | When Called |
+|--------|--------|------------|
+| `/on-pointer-down` | self, event | Pointer pressed on this shape |
+| `/on-pointer-move` | self, event | Pointer moved while over this shape (or while captured) |
+| `/on-pointer-up` | self, event | Pointer released on this shape (or while captured) |
+| `/on-pointer-cancel` | self, event | Pointer sequence cancelled by system |
+| `/on-pointer-enter` | self, event | Pointer entered this shape's bounds (hover) |
+| `/on-pointer-exit` | self, event | Pointer exited this shape's bounds (hover) |
+
+**Pointer capture:**
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `capture-pointer` | shape, pointer-id | -- | Capture all events for this pointer-id to this shape |
+| `release-pointer` | shape, pointer-id | -- | Release capture; resume hit-testing |
+
+Example -- a draggable shape:
+```
+MyDraggable/on-pointer-down (case 1:1)
+  Input: self, event
+  [capture-pointer] ← self, event.pointer-id
+  [//set drag-origin] ← (event.x, event.y)
+
+MyDraggable/on-pointer-move (case 1:1)
+  Input: self, event
+  [//get drag-origin] → (ox, oy)
+  [//get bounds] → rect
+  [-] event.x - ox → dx
+  [-] event.y - oy → dy
+  [offset-rect] rect, dx, dy → new-rect
+  [//set bounds] ← new-rect
+  [//set drag-origin] ← (event.x, event.y)
+
+MyDraggable/on-pointer-up (case 1:1)
+  Input: self, event
+  [release-pointer] ← self, event.pointer-id
+```
+
+### 12.3 Gesture Events
+
+Gesture recognizers convert raw pointer streams into semantic events. They run concurrently with raw pointer dispatch and can **consume** pointer events (preventing the raw handlers from firing) or coexist.
+
+#### Built-in Gesture Recognizers
+
+| Gesture | Trigger | Available On |
+|---------|---------|--------------|
+| **Tap** | Quick press-and-release | Both |
+| **Double-Tap** | Two quick taps | Both |
+| **Long-Press** | Press held for 0.5s | Both (on Mac: also right-click) |
+| **Pan** | Press and drag | Both |
+| **Scroll** | Scroll wheel / two-finger trackpad scroll / two-finger touch pan | Both |
+| **Pinch** | Two-finger pinch (touch) or Cmd+scroll (Mac) | Both |
+| **Rotate** | Two-finger rotation | iOS primarily; Option+drag on Mac |
+
+#### GestureEvent Data Type
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | Symbol | `tap`, `double-tap`, `long-press`, `pan`, `scroll`, `pinch`, `rotate` |
+| `state` | Symbol | `began`, `changed`, `ended`, `cancelled` |
+| `x` | Real | Position in target shape's local coordinates |
+| `y` | Real | Position in target shape's local coordinates |
+| `modifiers` | List | Active modifier keys |
+| `velocity-x` | Real | Pan/scroll velocity X (points/sec) |
+| `velocity-y` | Real | Pan/scroll velocity Y (points/sec) |
+| `delta-x` | Real | Pan/scroll delta since last event |
+| `delta-y` | Real | Pan/scroll delta since last event |
+| `scale` | Real | Pinch scale factor (1.0 = no change) |
+| `rotation` | Real | Rotation in radians |
+| `pressure` | Real | Force Touch / Pencil pressure |
+
+#### Gesture Handler Methods
+
+| Method | Inputs | When Called |
+|--------|--------|------------|
+| `/on-tap` | self, event | Quick press-and-release |
+| `/on-double-tap` | self, event | Two quick taps |
+| `/on-long-press` | self, event | Press held 0.5s |
+| `/on-pan` | self, event | Press-and-drag (state: began/changed/ended) |
+| `/on-scroll` | self, event | Scroll wheel or two-finger scroll |
+| `/on-pinch` | self, event | Pinch to zoom |
+| `/on-rotate` | self, event | Two-finger rotation |
+
+#### Attaching Gesture Recognizers
+
+Gestures are enabled per-shape. By default, all shapes respond to any gesture for which they implement the handler method. To explicitly control gesture recognition:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `enable-gesture` | shape, gesture-type | -- | Enable a specific gesture on this shape |
+| `disable-gesture` | shape, gesture-type | -- | Disable a specific gesture |
+| `set-gesture-option` | shape, gesture-type, option, value | -- | Configure a gesture (e.g., long-press duration) |
+
+#### Touch-to-Mouse Mapping (iOS)
+
+On iOS, where there is no mouse, touch gestures map to the traditional Prograph button model:
+
+| Touch Gesture | Maps To |
+|---------------|---------|
+| Single-finger tap/drag | Primary button (left-click) |
+| Long-press (0.5s hold) | Secondary button (right-click); haptic feedback |
+| Two-finger tap | Secondary button (right-click); light haptic |
+| Two-finger pan | Scroll event |
+| Pinch | Scroll event with `command` modifier (zoom) |
+
+This mapping is built into the runtime and fires automatically. Shapes that only handle `/on-pointer-down` and `/on-pointer-up` work identically on Mac and iOS without any platform-specific code.
+
+### 12.4 Keyboard Events
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | Symbol | `key-down`, `key-up` |
+| `key-code` | Integer | Platform key code |
+| `character` | String | The typed character (empty for modifier-only keys) |
+| `modifiers` | List | Active modifiers |
+| `is-repeat` | Boolean | true if this is an auto-repeat event |
+
+#### Keyboard Handler Methods
+
+| Method | Inputs | When Called |
+|--------|--------|------------|
+| `/on-key-down` | self, event | Key pressed while this shape has keyboard focus |
+| `/on-key-up` | self, event | Key released |
+| `/on-text-input` | self, string | Committed text input (handles IME, dead keys, etc.) |
+
+#### Keyboard Focus
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `request-focus` | shape | -- | Give keyboard focus to this shape |
+| `resign-focus` | shape | -- | Release keyboard focus |
+| `has-focus?` | shape | boolean | Check if this shape has keyboard focus |
+
+Focus methods on shapes:
+
+| Method | Inputs | When Called |
+|--------|--------|------------|
+| `/on-focus` | self | This shape received keyboard focus |
+| `/on-blur` | self | This shape lost keyboard focus |
+
+### 12.5 Event Propagation
+
+Events propagate through the scene graph using a **bubble** model:
+
+1. **Hit test:** Find the deepest visible, interactive shape whose bounds (or `/hit-test` override) contain the pointer position.
+2. **Dispatch:** Call the appropriate handler method (e.g., `/on-tap`) on the hit shape.
+3. **Propagate:** If the shape does not implement the handler (no matching method exists), the event propagates to the parent shape. This continues up to the root.
+4. **Consume:** If a handler method exists and executes successfully, the event is consumed. The handler can explicitly pass the event to the parent by calling `/propagate-event` with self and the event.
+
+This is simpler than the ABCs' Commander chain. No Behavior objects, no inject indirection. You write a method on a shape; the event reaches it.
+
+### 12.6 Modifier Strip (iOS)
+
+On iOS, where there is no physical keyboard for modifier keys, a floating **ModifierStrip** can be displayed at the screen edge. It provides toggle buttons for Shift, Control, Option, and Command. When toggled on, subsequent pointer events include the corresponding modifier in their `modifiers` list.
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `show-modifier-strip` | canvas | -- | Show the modifier key strip |
+| `hide-modifier-strip` | canvas | -- | Hide the modifier key strip |
+| `modifier-strip-visible?` | canvas | boolean | Check visibility |
+
+### 12.7 Menus
+
+Menus are not a separate 8-class hierarchy. They are `Shape` subclasses with built-in event handling.
+
+#### MenuShape
+
+A `MenuShape` is a vertical list of `MenuItemShape` children. It appears as a popup when triggered, disappears when an item is selected or the user clicks outside.
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `menu-create` | items-list | menu | Create a menu from a list of (label, tag) pairs |
+| `menu-show` | menu, canvas, x, y | -- | Show menu as popup at position |
+| `menu-add-item` | menu, label, tag | -- | Add an item |
+| `menu-add-separator` | menu | -- | Add a separator line |
+| `menu-add-submenu` | menu, label, submenu | -- | Add a submenu |
+
+`MenuItemShape` delivers events via `/on-menu-select` on the target shape:
+
+| Method | Inputs | When Called |
+|--------|--------|------------|
+| `/on-menu-select` | self, tag | A menu item with this tag was selected in a menu owned by this shape |
+
+#### Menu Bar (macOS)
+
+On macOS, the system menu bar is exposed via platform primitives:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `menubar-set` | menu-structure | -- | Set the application menu bar from a nested list structure |
+| `menubar-set-item-enabled` | menu-title, item-title, enabled? | -- | Enable/disable a menu item |
+| `menubar-set-item-checked` | menu-title, item-title, checked? | -- | Check/uncheck a menu item |
+
+The menu-structure is a list of lists: `(("File" ("New" "new") ("Open" "open") ("---") ("Quit" "quit")) ("Edit" ("Cut" "cut") ...))`. Tags are delivered via a global `/on-menu-command` method.
+
+On iOS, the menu bar is not used. Contextual actions use `MenuShape` popups triggered by long-press or secondary tap.
+
+### 12.8 Built-in Control Shapes
+
+A small set of ready-made interactive shapes. Each is a Shape subclass with appropriate event handlers and drawing. Users can subclass these or build entirely custom controls from scratch.
+
+| Class | Inherits | Description |
+|-------|----------|-------------|
+| `Button` | Shape | Push button with label. Attributes: `label` (string), `enabled` (boolean). Fires `/on-tap` on the button itself; the button's parent receives `/on-button-tap` with the button as input. |
+| `Toggle` | Shape | Checkbox / switch. Attributes: `checked` (boolean), `label` (string). Fires `/on-toggle-changed` on parent with self and new value. |
+| `Slider` | Shape | Value slider. Attributes: `value` (real, 0-1), `min-value`, `max-value`. Fires `/on-slider-changed` on parent. |
+| `TextField` | Shape | Text input (single-line). Attributes: `text` (string), `placeholder` (string), `editable` (boolean). Requests keyboard focus on tap. Fires `/on-text-changed` and `/on-text-committed` on parent. |
+| `TextArea` | Shape | Multi-line text input with scrolling. Same events as TextField. |
+| `Label` | TextShape | Non-interactive text display. Convenience subclass of TextShape with `interactive` defaulting to false. |
+| `ListView` | ScrollShape | Efficient scrolling list with view recycling. Attributes: `item-count` (integer), `item-height` (real). Calls `/on-list-item` to request drawing of each visible item. Fires `/on-list-select` when an item is tapped. |
+| `ProgressBar` | Shape | Progress indicator. Attributes: `progress` (real, 0-1), `indeterminate` (boolean). |
+| `ModalOverlay` | Shape | Semi-transparent overlay that captures all events. For dialogs and alerts. |
+
+#### Dialogs
+
+Simple modal dialogs are provided as primitives (these block execution, similar to old Prograph `ask`/`answer`):
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `alert` | title, message, button-labels | selected-label | Show a modal alert with 1-3 buttons; returns which was tapped |
+| `prompt` | title, message, default-text | text or NULL | Show a text-input dialog; returns entered text or NULL if cancelled |
+| `confirm` | title, message | boolean | Show OK/Cancel dialog; returns true/false |
+
+### 12.9 Clipboard
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `clipboard-get-text` | -- | string or NULL | Get text from system clipboard |
+| `clipboard-set-text` | string | -- | Set text on system clipboard |
+| `clipboard-get-image` | -- | image or NULL | Get image from system clipboard |
+| `clipboard-set-image` | image | -- | Set image on system clipboard |
+| `clipboard-has-text?` | -- | boolean | Check if clipboard contains text |
+| `clipboard-has-image?` | -- | boolean | Check if clipboard contains image |
+
+### 12.10 Cursor (macOS)
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `set-cursor` | cursor-name | -- | Set cursor: `arrow`, `pointer`, `crosshair`, `text`, `grab`, `grabbing`, `resize-ns`, `resize-ew`, `resize-nwse`, `resize-nesw`, `not-allowed`, `wait` |
+| `push-cursor` | cursor-name | -- | Push cursor onto stack |
+| `pop-cursor` | -- | -- | Restore previous cursor |
+| `hide-cursor` | -- | -- | Hide cursor |
+| `show-cursor` | -- | -- | Show cursor |
+
+Per-shape cursors are also supported: set the `cursor` attribute on any Shape, and the runtime automatically changes the cursor on hover.
+
+### 12.11 Animation
+
+Shapes can be animated by interpolating attribute values over time.
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `animate` | shape, attribute, from, to, duration, easing | animation | Animate an attribute from one value to another |
+| `animate-delay` | animation, delay | animation | Add a start delay |
+| `animate-on-complete` | animation, method-name | animation | Call a method when animation completes |
+| `animate-cancel` | animation | -- | Cancel a running animation |
+| `animate-group` | animations-list | animation | Run multiple animations in parallel |
+| `animate-sequence` | animations-list | animation | Run animations in sequence |
+
+Easing functions: `linear`, `ease-in`, `ease-out`, `ease-in-out`, `spring`.
+
+Example: fade in a shape over 0.3 seconds with ease-out:
+```
+[animate] my-shape, "opacity", 0.0, 1.0, 0.3, "ease-out" → anim
+```
+
+### 12.12 Files and Documents
+
+File I/O is handled by simple primitives, not a 9-class hierarchy:
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `file-read-text` | path | string | Read entire file as text |
+| `file-write-text` | path, string | -- | Write string to file |
+| `file-read-data` | path | data | Read file as raw byte data |
+| `file-write-data` | path, data | -- | Write raw data to file |
+| `file-read-object` | path | object | Deserialize an object from file |
+| `file-write-object` | path, object | -- | Serialize an object to file |
+| `file-exists?` | path | boolean | Check if file exists |
+| `file-delete` | path | -- | Delete a file |
+| `file-list` | directory-path | list of strings | List files in a directory |
+| `file-pick` | title, file-types | path or NULL | System file picker dialog |
+| `file-pick-save` | title, default-name | path or NULL | System save dialog |
+
+### 12.13 Printing
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `print-shape` | shape | -- | Print a shape tree using the system print dialog |
+| `print-to-pdf` | shape, path | -- | Render a shape tree to PDF file |
+
+### 12.14 Platform Integration
+
+| Primitive | Inputs | Outputs | Description |
+|-----------|--------|---------|-------------|
+| `platform` | -- | string | Returns `"macos"` or `"ios"` |
+| `screen-size` | -- | width, height | Screen dimensions in points |
+| `screen-scale` | -- | real | Display scale factor |
+| `is-dark-mode?` | -- | boolean | System dark mode state |
+| `open-url` | url-string | -- | Open URL in system browser |
+| `haptic-feedback` | intensity | -- | Trigger haptic (iOS only; no-op on Mac) |
+| `status-bar-style` | style | -- | Set iOS status bar: `default`, `light`, `dark`, `hidden` |
+| `safe-area-insets` | canvas | top, right, bottom, left | Safe area insets (notch, home indicator, etc.) |
+
+### 12.15 Rendering Pipeline Summary
+
+The complete rendering pipeline, from scene graph to pixels on screen:
+
+```
+Scene Graph (Shape tree, Phograph objects)
+    │
+    ▼  layout pass (top-down, dirty shapes only)
+Shape/layout methods compute child positions
+    │
+    ▼  draw pass (back-to-front tree traversal, dirty regions only)
+Shape/draw methods issue DrawContext commands
+    │
+    ▼  rasterization
+DrawContext → pixel buffer (BGRA8, pre-allocated, in-language memory)
+    │
+    ▼  GPU upload (dirty regions only)
+pixel buffer → Metal texture (texture.replace)
+    │
+    ▼  GPU composite
+Metal renders fullscreen quad with texture
+    │
+    ▼
+Screen
+```
+
+**Thread model:**
+- The Phograph interpreter runs on a dedicated background thread
+- Metal rendering runs on the main thread (Apple requirement)
+- The event queue bridges them with a mutex
+- The pixel buffer uses its own mutex for resize safety
+
+### 12.16 Comparison: Original ABCs vs. Phograph Canvas System
+
+| Aspect | Original ABCs | Phograph Canvas |
+|--------|---------------|-----------------|
+| Class count | ~147 classes | ~25 classes |
+| Widget model | OS-native wrappers (Mac Toolbox) | In-language scene graph; everything drawn by Phograph |
+| Event handling | Behavior objects + inject indirection | Direct method calls on shape subclasses |
+| Drawing | Mac Toolbox QuickDraw | DrawContext primitives into GPU-backed pixel buffer |
+| Layout | Manual pixel positioning | Automatic: Stack, Grid, constraints, flex |
+| Platform | Mac Toolbox only | macOS + iOS from one codebase |
+| Touch support | None | First-class: unified pointer model, gestures, haptics |
+| Animation | None built-in | Built-in attribute animation with easing |
+| Conditionals for UI state | Behavior Editor GUI | Standard Phograph case/control flow |
+| Menus | 8 separate classes | One MenuShape class + primitives |
+| Documents/Files | 9 classes (Document, Document Data, File, etc.) | File I/O primitives |
+| Printing | 2 classes (Printer, Print Layout) | `print-shape` primitive |
+| Windowing | Desktop > Window > View > WindowItem hierarchy | Canvas with Shape tree; thin OS window wrapper on Mac |
+| Clipboard | Clipboard class | Clipboard primitives |
+| WYSIWYG editors | 15 separate ABE editor processes | Not needed; shapes are composed programmatically or via a visual scene builder (future) |
+
+---
+
+## 13. Execution Model and Debugging
+
+### Interpreter / Incremental Compiler
+
+The CPX development environment uses an **incremental compiler** that is approximately 10x faster than the Prograph 2.5 interpreter. Programs can be edited while running. The environment is tightly integrated: editor, compiler, and debugger are unified.
+
+Key capabilities:
+- Methods can be created while executing (via the "method does not exist" alert)
+- Individual methods can be executed in isolation (`Execute Method`)
+- Execution can be resumed after creating missing methods (`Resume` from Exec menu)
+- Abort infinite loops: Command+Period, then Return
+
+### Stand-Alone Compiler
+
+The compiler produces standalone executables. It:
+- Translates graphical syntax into native machine code (68K for original Mac)
+- Removes unused ABC classes to reduce binary size
+- Does NOT support automatic persistence (must use `save`/`load` explicitly)
+
+### Debugging
+
+Prograph's debugging is visual and deeply integrated:
+
+| Feature | Description |
+|---------|-------------|
+| **Visual execution** | Each operation highlights as it executes; stippled background on active case window |
+| **Data inspection** | Tooltip-like popups show data values on any wire when stopped |
+| **Value modification** | Change data values mid-execution and resume |
+| **Live code editing** | Modify code while stopped in debugger; no recompile needed |
+| **Breakpoints** | Standard breakpoint support |
+| **Single-step** | Step operation by operation |
+| **Roll-back** | Step backward through execution history |
+| **Roll-forward** | Step forward after rolling back |
+| **Execution stack** | Visual display of the call stack |
+
+The debugging experience was considered one of Prograph's strongest features: "for many users the visual execution aspects of the language were as important as its edit-time graphical facilities."
+
+### Threads
+
+Prograph CPX supports **multiple threads of execution** in both the interpreter and compiled runtime. Thread-related primitives are available for thread management.
+
+---
+
+## 14. External Code Integration
+
+### C Tools Kit
+
+The C Tools kit from Prograph International enables writing C functions that link into Prograph programs. External methods appear in code windows with a distinctive icon (two horizontal lines, one at top and one at bottom).
+
+### Mac Toolbox Access
+
+All Mac Toolbox ROM routines are accessible as **External Primitives**:
+- Named constants (e.g., `blackColor -> 33`)
+- Global variables
+- Field accessors for structures (e.g., BitMap fields)
+- New external primitives can be added for any C or Pascal library
+
+### Callback Primitive
+
+The **callback primitive** passes a reference to a Prograph method to an external routine (e.g., Mac Toolbox's `TrackControl`). This enables bidirectional interaction between Prograph and native code.
+
+Implementation detail: All Prograph data items reside in Handles, and the interpreter uses a linked list of its own stack frames rather than the platform stack. The callback mechanism bridges these two execution models.
+
+---
+
+## 15. Known Limitations of the Original and How Phograph Addresses Them
+
+Documented weaknesses of the original Prograph, with their status in Phograph:
+
+### 1. Unlabeled Inputs/Outputs
+No inline labels on wires or nodes. Understanding a method requires reading comments or memorizing arity conventions. **Status: open.** Allow optional labels on input/output nodes in the Phograph editor.
+
+### 2. Non-Routable Wiring
+Wires could not be manually routed around obstacles, creating visual "spaghetti" for complex methods. **Status: open.** Automatic wire routing with manual override in the Phograph editor.
+
+### 3. No Inline Grouping
+No mechanism to group operations without creating a full named method. **Status: open.** Anonymous grouping / visual regions in the Phograph editor.
+
+### 4. Confusing Conditionals
+The if-then-else pattern via case structure and control annotations was "far and away the most confusing construct in the language." **Status: open.** Consider more intuitive visual if/else/switch blocks while preserving the case/control system for power users.
+
+### 5. Window Proliferation (IDE)
+Opening methods, classes, and subclasses in the original generated many overlapping windows. **Status: open.** The Phograph IDE should use tabbed interface, split views, and breadcrumb navigation.
+
+### 6. Non-Textual Sharing
+Code could not be easily shared via email or text. **Status: open.** Phograph should define a serialization format (JSON) for visual diffs, code review, and sharing.
+
+### 7. Static Complexity
+Large projects with many side-effects were difficult to reason about. **Status: open.** Better visualization of data flow paths, effect tracking, module-level isolation.
+
+### 8. No Access Control
+All attributes are effectively public. **Status: open.** Add public/private/protected visibility modifiers on attributes and methods.
+
+### 9. No Destructors
+No automatic cleanup mechanism for objects. **Status: open.** Use ARC-style automatic resource management.
+
+### 10. Window System / UI Framework -- ADDRESSED
+The original ABCs (147 classes wrapping Mac Toolbox widgets) were platform-locked, over-engineered, and the Behavior/Inject indirection for event handling was confusing. **Status: replaced.** Phograph uses a canvas-based scene graph with ~25 classes (Section 11), unified pointer/gesture input (Section 12), direct drawing via DrawContext, automatic layout, and first-class touch support. No OS-native widgets. No Behavior Editor. No inject indirection. Works on both macOS and iOS from one codebase.
+
+---
+
+## 16. References
+
+### Primary Book
+
+- Steinman, Scott B. & Carver, Kevin G. *Visual Programming With Prograph CPX*. Manning Publications / Prentice-Hall, 1995. ISBN 0-13-441163-3 / 1-884777-05-8.
+
+### Academic Papers
+
+- Matwin, S. & Pietrzykowski, T. "PROGRAPH: A preliminary report." *Computer Languages*, Vol. 10, No. 2, 1985, pp. 91-126.
+- Pietrzykowski, T., Matwin, S. & Muldner, T. "The programming language PROGRAPH: Yet another application of graphics." January 1983.
+- Cox, P.T., Giles, F.R. & Pietrzykowski, T. "Prograph: a step towards liberating programming from textual conditioning." *IEEE Workshop on Visual Languages*, October 1989.
+- Cox, P.T. & Pietrzykowski, T. "Using a Pictorial Representation to combine DataFlow and Object-orientation in a language independent programming mechanism." *Proceedings of the International Computer Science Conference*, 1988.
+- Cox, P.T. et al. "A Visual Development Environment for Parallel Applications." VL98.
+- "Controlled dataflow visual programming languages." ACM, 2011.
+- "Static analysis for distributed Prograph." University of Southampton (PhD thesis).
+
+### Magazine Articles
+
+- MacTech Magazine Vol. 8 Issue 1: Prograph 2.5 review
+- MacTech Magazine Vol. 10 Issue 3: Prograph CPX review
+- MacTech Magazine Vol. 10 Issue 11: Prograph CPX tutorial
+- MacTech Magazine Vol. 11 Issue 5: MacApp and Prograph CPX comparison
+- *Journal of Visual Languages and Computing*, Vol. 1, 1990: Prograph 2.0 tool review
+
+### Software
+
+- Andescotia Software. Marten IDE 1.6. https://andescotia.com/products/marten/
+- Prograph CPX. Macintosh Repository. https://www.macintoshrepository.org/2029-prograph-cpx
+
+### Online Resources
+
+- Wikipedia: Prograph. https://en.wikipedia.org/wiki/Prograph
+- Philip T. Cox faculty page, Dalhousie University. https://web.cs.dal.ca/~pcox/
+- Noel Rappin: "Prograph." https://noelrappin.com/blog/2018/11/prograph/
+- C2 Wiki: PrographLanguage. https://kidneybone.com/c2/wiki/PrographLanguage

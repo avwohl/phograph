@@ -16,8 +16,10 @@ struct InspectorPanelView: View {
                 }
             }
             .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .navigationTitle("Inspector")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 
     private var noSelectionView: some View {

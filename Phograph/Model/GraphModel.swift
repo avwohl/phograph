@@ -113,11 +113,13 @@ class GraphModel: ObservableObject {
             }
         }
 
-        // Compute topological depth for layout
+        // Compute topological depth for layout (top-to-bottom)
+        // Input bar is always row 0; everything else starts at row 1+
         var depth: [Int: Int] = [:]
-        for rn in rawNodes { depth[rn.nodeId] = 0 }
+        for rn in rawNodes {
+            depth[rn.nodeId] = (rn.nodeId == inputBarId) ? 0 : 1
+        }
 
-        // Iterate to propagate depths
         for _ in 0..<rawNodes.count {
             for w in wiresRaw {
                 let srcDepth = depth[w.src] ?? 0
@@ -128,21 +130,39 @@ class GraphModel: ObservableObject {
             }
         }
 
-        // Group by depth for column layout
-        var columns: [Int: [RawNode]] = [:]
+        // Pull leaf nodes (no incoming wires, not input bar) to 1 row above their consumer
+        let nodesWithIncoming = Set(wiresRaw.map { $0.dst })
         for rn in rawNodes {
-            let d = depth[rn.nodeId] ?? 0
-            columns[d, default: []].append(rn)
+            if rn.nodeId != inputBarId && !nodesWithIncoming.contains(rn.nodeId) {
+                let consumerDepths = wiresRaw
+                    .filter { $0.src == rn.nodeId }
+                    .compactMap { depth[$0.dst] }
+                if let minConsumer = consumerDepths.min() {
+                    depth[rn.nodeId] = max(1, minConsumer - 1)
+                }
+            }
         }
 
-        let colSpacing: CGFloat = 220
-        let rowSpacing: CGFloat = 100
+        // Output bar is always the last row
+        let maxDepth = depth.values.max() ?? 0
+        depth[outputBarId] = max(maxDepth, (depth[outputBarId] ?? 0))
+
+        // Group by depth for row layout (top-to-bottom like real Prograph)
+        var rows: [Int: [RawNode]] = [:]
+        for rn in rawNodes {
+            let d = depth[rn.nodeId] ?? 0
+            rows[d, default: []].append(rn)
+        }
+
+        let rowSpacing: CGFloat = 130
+        let colSpacing: CGFloat = 200
         let startX: CGFloat = 40
         let startY: CGFloat = 40
 
         // Create GraphNodeModels with auto-layout positions
-        for (col, nodesInCol) in columns.sorted(by: { $0.key < $1.key }) {
-            for (row, rn) in nodesInCol.enumerated() {
+        // depth = row (Y), nodes at same depth spread horizontally (X)
+        for (row, nodesInRow) in rows.sorted(by: { $0.key < $1.key }) {
+            for (col, rn) in nodesInRow.enumerated() {
                 let x = startX + CGFloat(col) * colSpacing
                 let y = startY + CGFloat(row) * rowSpacing
 
@@ -236,13 +256,14 @@ class GraphNodeModel: ObservableObject, Identifiable {
     }
 
     func computeHeight() -> CGFloat {
-        let headerHeight: CGFloat = 30
-        let maxPins = max(inputPins.count, outputPins.count)
-        if maxPins == 0 {
-            return headerHeight + 10 // minimal body for bars with no pins
-        }
-        // 8px vertical padding (4 top + 4 bottom) + 26px per pin row (22px + 4px spacing)
-        return headerHeight + 8 + CGFloat(maxPins) * 26
+        // Top-to-bottom Prograph layout: pin circles on top/bottom edges
+        // pinRadius(6) top + header(30+padding) + pinRadius(6) bottom
+        let pinSpace: CGFloat = 6
+        let headerHeight: CGFloat = 34
+        var h = headerHeight
+        if inputPins.count > 0 { h += pinSpace }
+        if outputPins.count > 0 { h += pinSpace }
+        return h
     }
 }
 

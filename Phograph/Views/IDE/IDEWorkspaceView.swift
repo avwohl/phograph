@@ -13,20 +13,26 @@ struct IDEWorkspaceView: View {
                 welcomeView
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var projectView: some View {
-        HSplitView {
+        HStack(spacing: 0) {
             ClassBrowserView(viewModel: viewModel)
-                .frame(minWidth: 180, idealWidth: 220, maxWidth: 280)
+                .frame(width: 220)
+
+            Divider()
 
             GraphCanvasView(viewModel: viewModel)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
+            Divider()
+
             InspectorPanelView(viewModel: viewModel)
-                .frame(minWidth: 180, idealWidth: 220, maxWidth: 280)
+                .frame(width: 220)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(nsColor: .windowBackgroundColor))
         .toolbar {
             ToolbarView(viewModel: viewModel)
         }

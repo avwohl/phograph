@@ -125,66 +125,63 @@ struct GraphCanvasView: View {
 
     // MARK: - Node rendering
 
+    /// Pin spacing constant: pins are evenly distributed across node width.
+    /// Pin X for pin index i of count n: node.x + (i+1) * node.width / (n+1)
+    private static let pinRadius: CGFloat = 6
+
     private func nodeView(node: GraphNodeModel, isSelected: Bool) -> some View {
         let colors = nodeColors(for: node.nodeType)
 
-        return VStack(spacing: 0) {
-            // Header
-            HStack {
+        return ZStack {
+            // Node body
+            VStack(spacing: 0) {
+                // Input pin row (top) - circles drawn as overlay
+                if node.inputPins.count > 0 {
+                    Spacer().frame(height: Self.pinRadius)
+                }
+
+                // Header with label
                 Text(node.label)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(colors.headerText)
                     .lineLimit(1)
-                Spacer()
-            }
-            .padding(.horizontal, 10)
-            .frame(height: 30)
-            .background(colors.header)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .background(colors.header)
 
-            // Pin area
-            if node.inputPins.count > 0 || node.outputPins.count > 0 {
-                HStack(alignment: .top) {
-                    // Input pins (left side)
-                    VStack(alignment: .leading, spacing: 4) {
-                        ForEach(node.inputPins) { pin in
-                            HStack(spacing: 5) {
-                                Circle()
-                                    .fill(Color(red: 0.2, green: 0.5, blue: 0.9))
-                                    .frame(width: 10, height: 10)
-                                Text(pin.name)
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                            }
-                            .frame(height: 22)
-                        }
-                    }
-                    Spacer()
-                    // Output pins (right side)
-                    VStack(alignment: .trailing, spacing: 4) {
-                        ForEach(node.outputPins) { pin in
-                            HStack(spacing: 5) {
-                                Text(pin.name)
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                                Circle()
-                                    .fill(Color(red: 0.9, green: 0.3, blue: 0.2))
-                                    .frame(width: 10, height: 10)
-                            }
-                            .frame(height: 22)
-                        }
-                    }
+                // Output pin row (bottom) - circles drawn as overlay
+                if node.outputPins.count > 0 {
+                    Spacer().frame(height: Self.pinRadius)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+            }
+            .frame(width: node.width, height: node.height)
+            .background(colors.body)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(isSelected ? Color.blue : colors.border, lineWidth: isSelected ? 2.5 : 1)
+            )
+
+            // Input pins along top edge
+            ForEach(Array(node.inputPins.enumerated()), id: \.element.id) { i, pin in
+                let px = pinX(index: i, count: node.inputPins.count, nodeWidth: node.width)
+                Circle()
+                    .fill(Color(red: 0.2, green: 0.5, blue: 0.9))
+                    .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
+                    .position(x: px, y: 0)
+            }
+
+            // Output pins along bottom edge
+            ForEach(Array(node.outputPins.enumerated()), id: \.element.id) { i, pin in
+                let px = pinX(index: i, count: node.outputPins.count, nodeWidth: node.width)
+                Circle()
+                    .fill(Color(red: 0.9, green: 0.3, blue: 0.2))
+                    .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
+                    .position(x: px, y: node.height)
             }
         }
         .frame(width: node.width, height: node.height)
-        .background(colors.body)
-        .clipShape(RoundedRectangle(cornerRadius: 4))
-        .overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(isSelected ? Color.blue : colors.border, lineWidth: isSelected ? 2.5 : 1)
-        )
         .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
         .position(x: node.x + node.width / 2, y: node.y + node.height / 2)
         .gesture(
@@ -259,7 +256,14 @@ struct GraphCanvasView: View {
         }
     }
 
-    // MARK: - Wire rendering
+    // MARK: - Pin positioning
+
+    /// X position for pin at index i out of count pins, distributed across nodeWidth
+    private func pinX(index: Int, count: Int, nodeWidth: CGFloat) -> CGFloat {
+        CGFloat(index + 1) * nodeWidth / CGFloat(count + 1)
+    }
+
+    // MARK: - Wire rendering (vertical: output bottom -> input top)
 
     private func wireView(wire: GraphWireModel, graph: GraphModel) -> some View {
         let sourceNode = graph.nodes.first { $0.id == wire.sourceNodeId }
@@ -267,19 +271,20 @@ struct GraphCanvasView: View {
 
         return Group {
             if let src = sourceNode, let dst = destNode {
-                // Pin Y: header(30) + padding(4) + pinIndex*26 + center(11)
-                let startX = src.x + src.width
-                let startY = src.y + 30 + 4 + CGFloat(wire.sourcePin) * 26 + 11
-                let endX = dst.x
-                let endY = dst.y + 30 + 4 + CGFloat(wire.destPin) * 26 + 11
+                // Source: output pin on bottom edge
+                let startX = src.x + pinX(index: wire.sourcePin, count: src.outputPins.count, nodeWidth: src.width)
+                let startY = src.y + src.height
+                // Dest: input pin on top edge
+                let endX = dst.x + pinX(index: wire.destPin, count: dst.inputPins.count, nodeWidth: dst.width)
+                let endY = dst.y
 
                 Path { path in
                     path.move(to: CGPoint(x: startX, y: startY))
-                    let dx = max(abs(endX - startX) * 0.4, 30)
+                    let dy = max(abs(endY - startY) * 0.4, 30)
                     path.addCurve(
                         to: CGPoint(x: endX, y: endY),
-                        control1: CGPoint(x: startX + dx, y: startY),
-                        control2: CGPoint(x: endX - dx, y: endY)
+                        control1: CGPoint(x: startX, y: startY + dy),
+                        control2: CGPoint(x: endX, y: endY - dy)
                     )
                 }
                 .stroke(Color.black.opacity(0.55), lineWidth: 1.5)

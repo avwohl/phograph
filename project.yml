@@ -1,0 +1,38 @@
+name: Phograph
+options:
+  bundleIdPrefix: com.phograph
+  deploymentTarget:
+    macOS: "13.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    CLANG_CXX_LANGUAGE_STANDARD: c++17
+
+targets:
+  Phograph:
+    type: application
+    platform: macOS
+    sources:
+      - path: Phograph
+      - path: phograph_core/src
+        excludes:
+          - "pho_platform_stub.cc"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.phograph.app
+        PRODUCT_NAME: Phograph
+        GENERATE_INFOPLIST_FILE: YES
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: 1
+        SWIFT_OBJC_BRIDGING_HEADER: Phograph/Bridge/Phograph-Bridging-Header.h
+        HEADER_SEARCH_PATHS:
+          - $(SRCROOT)/phograph_core/src
+        CLANG_CXX_LANGUAGE_STANDARD: c++17
+    entitlements:
+      path: Phograph/Phograph.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-write: true
+        com.apple.security.network.client: true

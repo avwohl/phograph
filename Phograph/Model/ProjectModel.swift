@@ -14,12 +14,12 @@ class ProjectModel: ObservableObject, Identifiable {
     }
 
     enum LoadError: LocalizedError {
-        case invalidJSON
+        case invalidJSON(String)
         case noSections
 
         var errorDescription: String? {
             switch self {
-            case .invalidJSON: return "Invalid JSON"
+            case .invalidJSON(let detail): return "Invalid JSON: \(detail)"
             case .noSections: return "Project has no \"sections\" array"
             }
         }
@@ -27,9 +27,17 @@ class ProjectModel: ObservableObject, Identifiable {
 
     /// Load project from JSON string
     func loadFromJSON(_ json: String) throws {
-        guard let data = json.data(using: .utf8),
-              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw LoadError.invalidJSON
+        guard let data = json.data(using: .utf8) else {
+            throw LoadError.invalidJSON("string is not valid UTF-8")
+        }
+        let parsed: Any
+        do {
+            parsed = try JSONSerialization.jsonObject(with: data)
+        } catch {
+            throw LoadError.invalidJSON(error.localizedDescription)
+        }
+        guard let root = parsed as? [String: Any] else {
+            throw LoadError.invalidJSON("root is not a JSON object")
         }
 
         guard let sectionsArray = root["sections"] as? [[String: Any]] else {
@@ -62,8 +70,14 @@ class ProjectModel: ObservableObject, Identifiable {
                         parentName: classDict["parent"] as? String
                     )
                     if let attrs = classDict["attributes"] as? [[String: Any]] {
-                        classDef.attributes = attrs.map {
-                            $0["name"] as? String ?? ""
+                        classDef.attributes = attrs.map { attrDict in
+                            let name = attrDict["name"] as? String ?? ""
+                            var defaultStr = ""
+                            if let defDict = attrDict["default"] as? [String: Any],
+                               let val = defDict["value"] {
+                                defaultStr = "\(val)"
+                            }
+                            return ClassAttributeModel(name: name, defaultValue: defaultStr)
                         }
                     }
                     if let classMethods = classDict["methods"] as? [[String: Any]] {
@@ -147,16 +161,30 @@ class MethodModel: ObservableObject, Identifiable {
     }
 }
 
+/// Attribute info for front panel display
+struct ClassAttributeModel: Identifiable {
+    let id = UUID()
+    let name: String
+    let defaultValue: String
+}
+
 class ClassModel: ObservableObject, Identifiable {
     let id = UUID()
     @Published var name: String
     @Published var parentName: String?
-    @Published var attributes: [String] = []
+    @Published var attributes: [ClassAttributeModel] = []
     @Published var methods: [MethodModel] = []
     @Published var isExpanded: Bool = true
 
     init(name: String, parentName: String? = nil) {
         self.name = name
         self.parentName = parentName
+    }
+}
+
+extension ProjectModel {
+    /// All classes across all sections
+    var classes: [ClassModel] {
+        sections.flatMap { $0.classes }
     }
 }

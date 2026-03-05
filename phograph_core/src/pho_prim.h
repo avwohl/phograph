@@ -87,6 +87,10 @@ void register_image_prims();
 void register_bitmap_prims();
 void register_net_prims();
 
+// Phase 13-14 primitives
+void register_date_prims();
+void register_methodref_prims();
+
 void register_all_phase1_prims();
 void register_all_prims();
 

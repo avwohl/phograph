@@ -72,7 +72,6 @@ struct JsonParser {
                     case 'b': out.str += '\b'; break;
                     case 'f': out.str += '\f'; break;
                     case 'u': {
-                        // Skip unicode escapes for now (4 hex digits)
                         for (int i = 0; i < 4 && !at_end(); i++) advance();
                         out.str += '?';
                         break;
@@ -198,6 +197,12 @@ static NodeType parse_node_type(const std::string& s) {
     return NodeType::Primitive;
 }
 
+static Access parse_access(const std::string& s) {
+    if (s == "private") return Access::Private;
+    if (s == "protected") return Access::Protected;
+    return Access::Public;
+}
+
 static Value parse_constant_value(const JsonValue& jv) {
     if (jv.is_null()) return Value::null_val();
     if (jv.type == JsonType::Boolean) return Value::boolean(jv.boolean);
@@ -227,6 +232,27 @@ static Value parse_constant_value(const JsonValue& jv) {
     return Value::null_val();
 }
 
+// Forward declaration for recursive local method loading
+static bool load_case(const JsonValue& jc, Case& out_case, std::string& error);
+
+static bool load_method_from_json(const JsonValue& jm, Method& method, std::string& error) {
+    method.name = jm.get_string("name");
+    method.num_inputs = static_cast<uint32_t>(jm.get_int("num_inputs"));
+    method.num_outputs = static_cast<uint32_t>(jm.get_int("num_outputs"));
+    auto access_str = jm.get_string("access", "");
+    if (!access_str.empty()) method.access = parse_access(access_str);
+
+    auto* cases = jm.get("cases");
+    if (cases && cases->is_array()) {
+        for (auto& jc : cases->array) {
+            Case c;
+            if (!load_case(jc, c, error)) return false;
+            method.cases.push_back(std::move(c));
+        }
+    }
+    return true;
+}
+
 static bool load_case(const JsonValue& jc, Case& out_case, std::string& error) {
     auto* nodes = jc.get("nodes");
     if (!nodes || !nodes->is_array()) { error = "case missing nodes array"; return false; }
@@ -244,6 +270,47 @@ static bool load_case(const JsonValue& jc, Case& out_case, std::string& error) {
 
         auto* cv = jn.get("value");
         if (cv) node.constant_value = parse_constant_value(*cv);
+
+        // Phase 11: execution flags
+        node.has_execution_in = jn.get_bool("has_execution_in", false);
+        node.has_execution_out = jn.get_bool("has_execution_out", false);
+
+        // Phase 12: input definitions
+        auto* input_defs = jn.get("input_defs");
+        if (input_defs && input_defs->is_array()) {
+            for (auto& jpd : input_defs->array) {
+                PinDef pd;
+                pd.name = jpd.get_string("name");
+                pd.is_optional = jpd.get_bool("optional", false);
+                pd.is_hot = jpd.get_bool("hot", true);
+                auto* def_val = jpd.get("default");
+                if (def_val) pd.default_value = parse_constant_value(*def_val);
+                node.input_defs.push_back(std::move(pd));
+            }
+        }
+
+        // Phase 15/16: annotations
+        auto ann_str = jn.get_string("annotation");
+        if (ann_str == "loop") node.is_loop = true;
+        if (ann_str == "listMap") node.list_map = true;
+        if (ann_str == "partition") node.partition = true;
+
+        // Phase 17: try
+        node.has_try = jn.get_bool("has_try", false);
+        auto error_pin = jn.get_int("error_out_pin", -1);
+        if (error_pin >= 0) node.error_out_pin = static_cast<uint32_t>(error_pin);
+
+        // Phase 20: expression
+        auto expr_str = jn.get_string("expression");
+        if (!expr_str.empty()) node.expression = expr_str;
+
+        // Phase 19: local method body
+        auto* local_method_json = jn.get("local_method");
+        if (local_method_json && local_method_json->is_object()) {
+            auto lm = std::make_shared<Method>();
+            if (!load_method_from_json(*local_method_json, *lm, error)) return false;
+            node.local_method = lm;
+        }
 
         if (node.id >= out_case.next_node_id) out_case.next_node_id = node.id + 1;
 
@@ -264,9 +331,41 @@ static bool load_case(const JsonValue& jc, Case& out_case, std::string& error) {
             w.target.node_id = static_cast<NodeId>(jw.get_int("target_node"));
             w.target.index = static_cast<uint32_t>(jw.get_int("target_pin"));
             w.target.is_output = false;
+            // Phase 11: execution wire flag
+            w.is_execution = jw.get_bool("is_execution", false);
 
             if (w.id >= out_case.next_wire_id) out_case.next_wire_id = w.id + 1;
             out_case.wires.push_back(w);
+        }
+    }
+
+    // Phase 18: shift registers
+    auto* sr_arr = jc.get("shift_registers");
+    if (sr_arr && sr_arr->is_array()) {
+        for (auto& jsr : sr_arr->array) {
+            ShiftRegister sr;
+            sr.input_pin = static_cast<uint32_t>(jsr.get_int("input_pin"));
+            sr.output_pin = static_cast<uint32_t>(jsr.get_int("output_pin"));
+            auto* init_val = jsr.get("initial");
+            if (init_val) sr.initial = parse_constant_value(*init_val);
+            out_case.shift_registers.push_back(std::move(sr));
+        }
+    }
+
+    // Phase 23: case guards
+    auto* guards_arr = jc.get("guards");
+    if (guards_arr && guards_arr->is_array()) {
+        for (auto& jg : guards_arr->array) {
+            CaseGuard guard;
+            guard.pin = static_cast<uint32_t>(jg.get_int("pin"));
+            auto kind_str = jg.get_string("kind", "wildcard");
+            if (kind_str == "type") guard.kind = CaseGuard::TypeMatch;
+            else if (kind_str == "value") guard.kind = CaseGuard::ValueMatch;
+            else guard.kind = CaseGuard::Wildcard;
+            guard.match_type = jg.get_string("match_type");
+            auto* mv = jg.get("match_value");
+            if (mv) guard.match_val = parse_constant_value(*mv);
+            out_case.guards.push_back(std::move(guard));
         }
     }
 
@@ -295,19 +394,7 @@ bool load_project_from_json(const std::string& json, Project& out_project, std::
         if (methods && methods->is_array()) {
             for (auto& jm : methods->array) {
                 Method method;
-                method.name = jm.get_string("name");
-                method.num_inputs = static_cast<uint32_t>(jm.get_int("num_inputs"));
-                method.num_outputs = static_cast<uint32_t>(jm.get_int("num_outputs"));
-
-                auto* cases = jm.get("cases");
-                if (cases && cases->is_array()) {
-                    for (auto& jc : cases->array) {
-                        Case c;
-                        if (!load_case(jc, c, out_error)) return false;
-                        method.cases.push_back(std::move(c));
-                    }
-                }
-
+                if (!load_method_from_json(jm, method, out_error)) return false;
                 section.methods.push_back(std::move(method));
             }
         }
@@ -319,6 +406,15 @@ bool load_project_from_json(const std::string& json, Project& out_project, std::
                 ClassDef cls;
                 cls.name = jcls.get_string("name");
                 cls.parent_name = jcls.get_string("parent", "");
+                cls.is_actor = jcls.get_bool("is_actor", false);
+
+                // Phase 25: protocol conformance
+                auto* conforms = jcls.get("conforms_to");
+                if (conforms && conforms->is_array()) {
+                    for (auto& cp : conforms->array) {
+                        if (cp.is_string()) cls.conforms_to.push_back(cp.str);
+                    }
+                }
 
                 auto* attrs = jcls.get("attributes");
                 if (attrs && attrs->is_array()) {
@@ -326,6 +422,8 @@ bool load_project_from_json(const std::string& json, Project& out_project, std::
                         AttributeDef attr;
                         attr.name = ja.get_string("name");
                         attr.is_class_attr = ja.get_bool("class_attr", false);
+                        auto access_str = ja.get_string("access", "");
+                        if (!access_str.empty()) attr.access = parse_access(access_str);
                         auto* def_val = ja.get("default");
                         if (def_val) attr.default_value = parse_constant_value(*def_val);
                         cls.attributes.push_back(std::move(attr));
@@ -336,24 +434,29 @@ bool load_project_from_json(const std::string& json, Project& out_project, std::
                 if (cls_methods && cls_methods->is_array()) {
                     for (auto& jm : cls_methods->array) {
                         Method method;
-                        method.name = jm.get_string("name");
-                        method.num_inputs = static_cast<uint32_t>(jm.get_int("num_inputs"));
-                        method.num_outputs = static_cast<uint32_t>(jm.get_int("num_outputs"));
+                        if (!load_method_from_json(jm, method, out_error)) return false;
                         method.class_name = cls.name;
-
-                        auto* cases = jm.get("cases");
-                        if (cases && cases->is_array()) {
-                            for (auto& jc : cases->array) {
-                                Case c;
-                                if (!load_case(jc, c, out_error)) return false;
-                                method.cases.push_back(std::move(c));
-                            }
-                        }
                         cls.methods.push_back(std::move(method));
                     }
                 }
 
                 section.classes.push_back(std::move(cls));
+            }
+        }
+
+        // Phase 25: protocols
+        auto* protocols = js.get("protocols");
+        if (protocols && protocols->is_array()) {
+            for (auto& jp : protocols->array) {
+                ProtocolDef pdef;
+                pdef.name = jp.get_string("name");
+                auto* req_methods = jp.get("required_methods");
+                if (req_methods && req_methods->is_array()) {
+                    for (auto& rm : req_methods->array) {
+                        if (rm.is_string()) pdef.required_methods.push_back(rm.str);
+                    }
+                }
+                section.protocols.push_back(std::move(pdef));
             }
         }
 

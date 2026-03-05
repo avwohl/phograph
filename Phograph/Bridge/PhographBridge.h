@@ -44,6 +44,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)debugAddBreakpoint:(uint32_t)nodeId method:(NSString *)method caseIndex:(int)caseIndex;
 - (void)debugRemoveBreakpoint:(uint32_t)nodeId;
 
+/// Compile loaded project to Swift source code.
+/// entry_method: name of method to use as entry point (e.g. "main")
+/// emitMain: if YES, generates @main struct entry point
+- (nullable NSString *)compileToSwift:(NSString *)entryMethod
+                             emitMain:(BOOL)emitMain
+                                error:(NSError **)error;
+
 /// Input event routing
 - (void)sendPointerDown:(float)x y:(float)y button:(int32_t)button;
 - (void)sendPointerUp:(float)x y:(float)y button:(int32_t)button;

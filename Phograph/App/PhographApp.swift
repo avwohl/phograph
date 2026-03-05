@@ -58,6 +58,14 @@ struct PhographApp: App {
                     viewModel.exportSVG()
                 }
                 .disabled(viewModel.currentGraph == nil)
+
+                Divider()
+
+                Button("Build App...") {
+                    viewModel.showExportSheet = true
+                }
+                .keyboardShortcut("b", modifiers: [.command, .shift])
+                .disabled(viewModel.project == nil)
             }
 
             // Edit menu additions
@@ -210,11 +218,11 @@ struct PhographApp: App {
             A modern implementation of the Prograph
             visual dataflow programming language.
 
-            Author: David Wohl
-            Copyright \u{00A9} 2025-2026 David Wohl.
+            Author: Aaron Wohl
+            Copyright \u{00A9} 2025-2026 Aaron Wohl.
             All rights reserved.
 
-            https://github.com/dwohl/phograph
+            https://github.com/avwohl/phograph
             """
         alert.alertStyle = .informational
         alert.icon = NSApp.applicationIconImage
@@ -227,8 +235,12 @@ struct PhographApp: App {
         panel.allowsMultipleSelection = false
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            if let json = try? String(contentsOf: url) {
+            do {
+                let json = try String(contentsOf: url)
                 viewModel.loadProject(json: json, from: url)
+            } catch {
+                viewModel.consoleOutput += "Failed to read \(url.lastPathComponent): \(error.localizedDescription)\n"
+                viewModel.statusMessage = "Open failed"
             }
         }
     }

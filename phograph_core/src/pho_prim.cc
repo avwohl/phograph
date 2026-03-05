@@ -55,6 +55,10 @@ void register_all_prims() {
     register_image_prims();
     register_bitmap_prims();
     register_net_prims();
+
+    // Phase 13-14 primitives
+    register_date_prims();
+    register_methodref_prims();
 }
 
 } // namespace pho

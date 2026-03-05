@@ -20,6 +20,9 @@ struct IDEWorkspaceView: View {
         .sheet(isPresented: $viewModel.showLibraryManager) {
             LibraryManagerView(viewModel: viewModel)
         }
+        .sheet(isPresented: $viewModel.showExportSheet) {
+            ExportAppSheet(viewModel: viewModel)
+        }
     }
 
     private var projectView: some View {
@@ -91,7 +94,7 @@ struct IDEWorkspaceView: View {
 
             Spacer()
 
-            Text("https://github.com/dwohl/phograph")
+            Text("https://github.com/avwohl/phograph")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 16)
@@ -125,8 +128,12 @@ struct IDEWorkspaceView: View {
         panel.allowsMultipleSelection = false
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            if let json = try? String(contentsOf: url) {
+            do {
+                let json = try String(contentsOf: url)
                 viewModel.loadProject(json: json, from: url)
+            } catch {
+                viewModel.consoleOutput += "Failed to read \(url.lastPathComponent): \(error.localizedDescription)\n"
+                viewModel.statusMessage = "Open failed"
             }
         }
     }

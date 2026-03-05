@@ -34,9 +34,44 @@ add_library(phograph_core STATIC
     src/pho_prim_channel.cc
     src/pho_prim_effect.cc
     src/pho_codegen.cc
+    src/pho_prim_math.cc
+    src/pho_prim_fileio.cc
+    src/pho_prim_socket.cc
+    src/pho_prim_sound.cc
+    src/pho_prim_midi.cc
+    src/pho_prim_locale.cc
+    src/pho_prim_crypto.cc
+    src/pho_prim_image.cc
+    src/pho_prim_bitmap.cc
+    src/pho_prim_net.cc
+    src/pho_prim_date.cc
+    src/pho_prim_methodref.cc
+    src/plugins/SoundPlugin.cpp
+    src/plugins/MIDIPlugin.cpp
 )
 
 target_include_directories(phograph_core PUBLIC src)
+
+if(APPLE)
+    find_library(COREAUDIO_LIB CoreAudio)
+    find_library(AUDIOTOOLBOX_LIB AudioToolbox)
+    find_library(COREMIDI_LIB CoreMIDI)
+    find_library(COREGRAPHICS_LIB CoreGraphics)
+    find_library(IMAGEIO_LIB ImageIO)
+    find_library(CORESERVICES_LIB CoreServices)
+    find_library(SECURITY_LIB Security)
+    find_library(FOUNDATION_LIB Foundation)
+    target_link_libraries(phograph_core
+        ${COREAUDIO_LIB}
+        ${AUDIOTOOLBOX_LIB}
+        ${COREMIDI_LIB}
+        ${COREGRAPHICS_LIB}
+        ${IMAGEIO_LIB}
+        ${CORESERVICES_LIB}
+        ${SECURITY_LIB}
+        ${FOUNDATION_LIB}
+    )
+endif()
 
 # Tests
 enable_testing()
@@ -84,3 +119,11 @@ add_test(NAME test_phase10 COMMAND test_phase10)
 add_executable(test_e2e_compile tests/test_e2e_compile.cc)
 target_link_libraries(test_e2e_compile phograph_core)
 add_test(NAME test_e2e_compile COMMAND test_e2e_compile WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+add_executable(test_comprehensive tests/test_comprehensive.cc)
+target_link_libraries(test_comprehensive phograph_core)
+add_test(NAME test_comprehensive COMMAND test_comprehensive)
+
+add_executable(test_phase11_28 tests/test_phase11_28.cc)
+target_link_libraries(test_phase11_28 phograph_core)
+add_test(NAME test_phase11_28 COMMAND test_phase11_28)

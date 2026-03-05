@@ -69,6 +69,13 @@ void register_dict_prims() {
         return PrimResult::success(Value::integer(static_cast<int64_t>(in[0].as_dict()->size())));
     });
 
+    reg.register_prim("dict-set!", 3, 1, [](const std::vector<Value>& in) -> PrimResult {
+        // Mutating set - modifies the dict in-place
+        auto* d = in[0].as_dict();
+        d->set(in[1], in[2]);
+        return PrimResult::success(in[0]);
+    });
+
     reg.register_prim("dict-merge", 2, 1, [](const std::vector<Value>& in) -> PrimResult {
         auto new_dict = make_ref<PhoDict>();
         for (auto& [k, v] : in[0].as_dict()->entries()) new_dict->set(k, v);

@@ -19,6 +19,7 @@ const char* tag_name(ValueTag tag) {
         case ValueTag::External: return "external";
         case ValueTag::Error: return "error";
         case ValueTag::Enum: return "enum";
+        case ValueTag::MethodRef: return "method-ref";
     }
     return "unknown";
 }
@@ -101,6 +102,14 @@ Value Value::enum_val(Ref<PhoEnum> e) {
     return r;
 }
 
+Value Value::method_ref(Ref<PhoMethodRef> m) {
+    Value r;
+    r.tag_ = ValueTag::MethodRef;
+    r.ptr_ = m.get();
+    r.ptr_->retain();
+    return r;
+}
+
 // -- Copy/move --
 
 void Value::retain_ref() {
@@ -113,6 +122,7 @@ void Value::retain_ref() {
         case ValueTag::Enum:
         case ValueTag::Object:
         case ValueTag::External:
+        case ValueTag::MethodRef:
             if (ptr_) ptr_->retain();
             break;
         default:
@@ -130,6 +140,7 @@ void Value::release_ref() {
         case ValueTag::Enum:
         case ValueTag::Object:
         case ValueTag::External:
+        case ValueTag::MethodRef:
             if (ptr_) ptr_->release();
             break;
         default:
@@ -230,6 +241,11 @@ PhoObject* Value::as_object() const {
     return static_cast<PhoObject*>(ptr_);
 }
 
+PhoMethodRef* Value::as_method_ref() const {
+    assert(tag_ == ValueTag::MethodRef);
+    return static_cast<PhoMethodRef*>(ptr_);
+}
+
 double Value::as_date() const {
     assert(tag_ == ValueTag::Date);
     return f64_;
@@ -280,6 +296,10 @@ std::string Value::to_display_string() const {
         case ValueTag::Enum: return as_enum()->type_name() + "." + as_enum()->variant();
         case ValueTag::Object: return "<object>";
         case ValueTag::External: return "<external>";
+        case ValueTag::MethodRef: {
+            auto* mr = as_method_ref();
+            return "<method-ref:" + mr->class_name() + "/" + mr->method_name() + ">";
+        }
     }
     return "<unknown>";
 }

@@ -75,8 +75,12 @@ struct LibraryManagerView: View {
 
                 if let lib = selectedLibrary, lib.source != .bundled {
                     Button("Remove") {
-                        try? viewModel.libraryManager.removeLibrary(lib)
-                        selectedLibrary = nil
+                        do {
+                            try viewModel.libraryManager.removeLibrary(lib)
+                            selectedLibrary = nil
+                        } catch {
+                            viewModel.consoleOutput += "Failed to remove library \(lib.manifest.name): \(error.localizedDescription)\n"
+                        }
                     }
                 }
 

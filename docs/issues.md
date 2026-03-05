@@ -53,8 +53,9 @@
 
 ## Documentation / Repo
 
-11. README is sparse -- needs screenshots/GIFs, a "Why Phograph" section,
-    tutorial links, library system docs, and contribution guidelines.
+11. ~~README is sparse~~ -- **Resolved.** README now has prerequisites,
+    quick-start instructions, architecture overview, full test list,
+    library docs, and contribution guidelines.
 
 12. GitHub About box is empty -- repo description, topics, and homepage URL
     should be set so the project is discoverable and has a proper summary.

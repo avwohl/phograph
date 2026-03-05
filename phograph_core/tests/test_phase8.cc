@@ -152,32 +152,31 @@ static void test_step_control() {
     dbg.set_breakpoint_hit_callback([&](NodeId node, uint32_t step) {
         hit_count++;
         hit_node = node;
+        // Auto-resume so step_completed doesn't block in wait_for_resume
+        dbg.signal_resume();
     });
 
     // Simulate node executions
     dbg.step_completed(1);
     assert(hit_count == 0); // No breakpoint on node 1
-    assert(!dbg.is_paused());
 
     dbg.step_completed(5);
     assert(hit_count == 1); // Hit breakpoint on node 5
-    assert(dbg.is_paused());
     assert(hit_node == 5);
 
     // Step over: first call arms step mode, second call pauses
-    dbg.set_paused(false);
     dbg.set_action(DebugAction::StepOver);
     dbg.step_completed(6); // arms step_mode_
     // Note: node 6 doesn't have breakpoint, but step_mode is armed
     // The next step_completed will pause
-    dbg.step_completed(7); // should pause here (step_mode was armed)
-    assert(dbg.is_paused());
+    dbg.step_completed(7); // should pause here (step_mode was armed), then auto-resume
+    assert(hit_count == 2);
+    assert(hit_node == 7);
 
     // Continue: should not pause until next breakpoint
-    dbg.set_paused(false);
     dbg.set_action(DebugAction::Continue);
     dbg.step_completed(8);
-    assert(!dbg.is_paused()); // no breakpoint on node 8
+    assert(hit_count == 2); // no breakpoint on node 8
 
     printf("OK\n");
 }

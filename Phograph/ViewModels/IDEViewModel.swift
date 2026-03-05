@@ -22,6 +22,9 @@ class IDEViewModel: ObservableObject {
     @Published var showConsole: Bool = true
     @Published var showExampleBrowser: Bool = false
     @Published var showLibraryManager: Bool = false
+    @Published var showExportSheet: Bool = false
+    @Published var showFrontPanel: Bool = false
+    @Published var frontPanelClassName: String = ""
     @Published var missingLibraries: [LibraryReference] = []
 
     /// Debugger
@@ -135,7 +138,11 @@ class IDEViewModel: ObservableObject {
     }
 
     func saveProject(to url: URL) {
-        guard let json = projectJSON else { return }
+        guard let json = projectJSON else {
+            consoleOutput += "Nothing to save — no project data loaded\n"
+            statusMessage = "Save failed"
+            return
+        }
         do {
             try json.write(to: url, atomically: true, encoding: .utf8)
             project?.filePath = url
@@ -180,8 +187,19 @@ class IDEViewModel: ObservableObject {
         do {
             let resultStr = try bridge.callMethod(name, inputsJSON: nil)
             // Parse the JSON result
-            if let data = resultStr.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            guard let data = resultStr.data(using: .utf8) else {
+                consoleOutput += "> \(name): \(resultStr)\n"
+                statusMessage = "Done"
+                isRunning = false
+                return
+            }
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                    consoleOutput += "> \(name): \(resultStr)\n"
+                    statusMessage = "Done"
+                    isRunning = false
+                    return
+                }
 
                 let status = json["status"] as? String ?? "unknown"
 
@@ -202,9 +220,10 @@ class IDEViewModel: ObservableObject {
                 }
 
                 statusMessage = status == "success" ? "Done" : "Done (\(status))"
-            } else {
-                consoleOutput += "> \(name): \(resultStr)\n"
-                statusMessage = "Done"
+            } catch {
+                consoleOutput += "> \(name): result parse error - \(error.localizedDescription)\n"
+                consoleOutput += "> \(name): raw output: \(resultStr)\n"
+                statusMessage = "Done (parse error)"
             }
         } catch {
             consoleOutput += "> \(name): error - \(error.localizedDescription)\n"
@@ -328,8 +347,21 @@ class IDEViewModel: ObservableObject {
     }
 
     private func handleDebugEvent(_ jsonStr: String) {
-        guard let data = jsonStr.data(using: .utf8),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
+        guard let data = jsonStr.data(using: .utf8) else {
+            consoleOutput += "Debug: received non-UTF8 event data\n"
+            return
+        }
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                consoleOutput += "Debug: event was not a JSON object\n"
+                return
+            }
+            json = parsed
+        } catch {
+            consoleOutput += "Debug: failed to parse event - \(error.localizedDescription)\n"
+            return
+        }
 
         let event = json["event"] as? String ?? ""
 
@@ -374,7 +406,7 @@ class IDEViewModel: ObservableObject {
             statusMessage = "Debug completed (\(status))"
 
         default:
-            break
+            consoleOutput += "Debug: unknown event '\(event)'\n"
         }
     }
 
@@ -468,8 +500,8 @@ class IDEViewModel: ObservableObject {
                 for classDef in section.classes {
                     names.append("new \(classDef.name)")
                     for attr in classDef.attributes {
-                        let getName = "get \(attr)"
-                        let setName = "set \(attr)"
+                        let getName = "get \(attr.name)"
+                        let setName = "set \(attr.name)"
                         if !names.contains(getName) { names.append(getName) }
                         if !names.contains(setName) { names.append(setName) }
                     }

@@ -184,7 +184,7 @@ class GraphModel: ObservableObject {
         }
 
         // Parse wires for topological sorting
-        var wiresRaw: [(src: Int, srcPin: Int, dst: Int, dstPin: Int, name: String)] = []
+        var wiresRaw: [(src: Int, srcPin: Int, dst: Int, dstPin: Int, name: String, isExec: Bool)] = []
         if let wiresArray = caseDict["wires"] as? [[String: Any]] {
             for w in wiresArray {
                 let srcNode = w["source_node"] as? Int ?? 0
@@ -192,7 +192,8 @@ class GraphModel: ObservableObject {
                 let dstNode = w["target_node"] as? Int ?? 0
                 let dstPin = w["target_pin"] as? Int ?? 0
                 let wireName = w["name"] as? String ?? ""
-                wiresRaw.append((srcNode, srcPin, dstNode, dstPin, wireName))
+                let isExec = w["is_execution"] as? Bool ?? false
+                wiresRaw.append((srcNode, srcPin, dstNode, dstPin, wireName, isExec))
             }
         }
 
@@ -333,6 +334,7 @@ class GraphModel: ObservableObject {
                 destNodeId: dstUUID, destPin: w.dstPin
             )
             wire.name = w.name
+            wire.isExecution = w.isExec
             graph.wires.append(wire)
         }
 
@@ -397,10 +399,16 @@ class PinModel: Identifiable {
     let id = UUID()
     let name: String
     let index: Int
+    /// Phase 12: optional pin (dashed circle)
+    var isOptional: Bool = false
+    /// Phase 12: hot pin (default true; cold = hollow fill)
+    var isHot: Bool = true
 
-    init(name: String, index: Int) {
+    init(name: String, index: Int, isOptional: Bool = false, isHot: Bool = true) {
         self.name = name
         self.index = index
+        self.isOptional = isOptional
+        self.isHot = isHot
     }
 }
 
@@ -412,6 +420,8 @@ class GraphWireModel: ObservableObject, Identifiable {
     @Published var destPin: Int?
     @Published var name: String = ""
     @Published var danglingEndpoint: CGPoint?
+    /// Phase 11: execution ordering wire (rendered as dashed gray)
+    var isExecution: Bool = false
 
     init(sourceNodeId: UUID, sourcePin: Int, destNodeId: UUID? = nil, destPin: Int? = nil) {
         self.sourceNodeId = sourceNodeId

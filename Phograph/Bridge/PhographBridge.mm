@@ -151,6 +151,28 @@ static void debugTrampoline(void* ctx, const char* json) {
     pho_engine_debug_remove_breakpoint(_engine, nodeId);
 }
 
+// Codegen / Compile
+
+- (nullable NSString *)compileToSwift:(NSString *)entryMethod
+                             emitMain:(BOOL)emitMain
+                                error:(NSError **)error {
+    const char *result = pho_engine_compile(_engine,
+                                             [entryMethod UTF8String],
+                                             emitMain ? 1 : 0);
+    if (!result) {
+        if (error) {
+            NSString *msg = [NSString stringWithUTF8String:pho_engine_last_error(_engine)];
+            *error = [NSError errorWithDomain:@"PhographBridge"
+                                         code:3
+                                     userInfo:@{NSLocalizedDescriptionKey: msg ?: @"Compile failed"}];
+        }
+        return nil;
+    }
+    NSString *source = [NSString stringWithUTF8String:result];
+    pho_engine_free_string(result);
+    return source;
+}
+
 // Input event routing
 
 - (void)sendPointerDown:(float)x y:(float)y button:(int32_t)button {

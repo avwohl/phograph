@@ -54,6 +54,17 @@ public:
     // Debugger integration
     void set_debugger(Debugger* d) { debugger_ = d; }
 
+    // Phase 22: persistent store
+    std::unordered_map<std::string, Value> persistent_store;
+
+    // Phase 14: thread-local project/evaluator for HOF callbacks
+    static thread_local Project* tl_project;
+    static thread_local Evaluator* tl_evaluator;
+
+    // Public eval_method for method-ref calls
+    EvalResult eval_method(Project& project, const Method& method,
+                           const std::vector<Value>& inputs);
+
 private:
     Debugger* debugger_ = nullptr;
     // Per-node slot storage during case evaluation
@@ -62,14 +73,19 @@ private:
         std::vector<Value> outputs;
         uint32_t inputs_filled = 0;
         bool executed = false;
+        bool execution_triggered = false;  // Phase 11
     };
-
-    // Evaluate a Method object directly (for class method dispatch)
-    EvalResult eval_method(Project& project, const Method& method,
-                           const std::vector<Value>& inputs);
 
     EvalResult exec_node(Project& project, const Case& c, const Node& node,
                          std::unordered_map<NodeId, NodeSlots>& slots);
+
+    // Phase 15: loop evaluation
+    EvalResult eval_loop(Project& project, const Case& c, const Node& node,
+                         std::unordered_map<NodeId, NodeSlots>& slots);
+
+    // Phase 20: expression evaluation
+    Value eval_expression(const std::string& expr,
+                         const std::unordered_map<std::string, Value>& bindings);
 };
 
 } // namespace pho

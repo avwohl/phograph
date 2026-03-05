@@ -78,4 +78,38 @@ double pho_platform_screen_scale(void) {
     return 1.0;
 }
 
+// Phase 24: HTTP stubs
+int pho_platform_http_get_c(const char*, char** out_body, size_t* out_len) {
+    *out_body = nullptr;
+    *out_len = 0;
+    return -1; // Not available in stub
+}
+
+int pho_platform_http_post_c(const char*, const char*, size_t, const char*, char** out_body, size_t* out_len) {
+    *out_body = nullptr;
+    *out_len = 0;
+    return -1;
+}
+
 } // extern "C"
+
+// C++ wrappers
+namespace pho {
+int pho_platform_http_get(const std::string& url, std::string& out_body) {
+    char* body = nullptr;
+    size_t len = 0;
+    int status = pho_platform_http_get_c(url.c_str(), &body, &len);
+    if (body) { out_body.assign(body, len); pho_platform_free(body); }
+    return status;
+}
+
+int pho_platform_http_post(const std::string& url, const std::string& body,
+                           const std::string& content_type, std::string& out_body) {
+    char* resp = nullptr;
+    size_t len = 0;
+    int status = pho_platform_http_post_c(url.c_str(), body.c_str(), body.size(),
+                                           content_type.c_str(), &resp, &len);
+    if (resp) { out_body.assign(resp, len); pho_platform_free(resp); }
+    return status;
+}
+} // namespace pho

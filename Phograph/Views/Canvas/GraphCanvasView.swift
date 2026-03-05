@@ -428,12 +428,29 @@ struct GraphCanvasView: View {
     }
 
     /// Pin circle with larger invisible hit area
-    private func pinCircle(fill: Color, hasWire: Bool) -> some View {
+    private func pinCircle(fill: Color, hasWire: Bool, isOptional: Bool = false, isHot: Bool = true) -> some View {
         ZStack {
-            // Visual circle
-            Circle()
-                .fill(fill)
-                .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
+            if isOptional {
+                // Phase 12: dashed circle for optional pins
+                Circle()
+                    .stroke(fill, style: StrokeStyle(lineWidth: 1.5, dash: [3, 2]))
+                    .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
+                if hasWire {
+                    Circle()
+                        .fill(fill)
+                        .frame(width: Self.pinRadius * 2 - 2, height: Self.pinRadius * 2 - 2)
+                }
+            } else if !isHot {
+                // Phase 12: hollow fill for cold pins
+                Circle()
+                    .stroke(fill, lineWidth: 1.5)
+                    .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
+            } else {
+                // Normal pin
+                Circle()
+                    .fill(fill)
+                    .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
+            }
             // Connected indicator ring
             if hasWire {
                 Circle()
@@ -618,6 +635,9 @@ struct GraphCanvasView: View {
                     path.stroke(Color.blue, lineWidth: 2)
                 } else if isDangling {
                     path.stroke(Color.orange, style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
+                } else if wire.isExecution {
+                    // Phase 11: execution wires rendered as dashed dark gray with arrow
+                    path.stroke(Color.gray.opacity(0.7), style: StrokeStyle(lineWidth: 2, dash: [8, 4]))
                 } else {
                     path.stroke(Color.black.opacity(0.55), lineWidth: 1.5)
                 }
@@ -868,9 +888,9 @@ struct GraphCanvasView: View {
                     let getItem = NSMenuItem(title: "Get", action: nil, keyEquivalent: "")
                     let getSub = NSMenu()
                     for attr in classDef.attributes {
-                        let item = NSMenuItem(title: attr, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+                        let item = NSMenuItem(title: attr.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
                         item.representedObject = { [weak viewModel] in
-                            self.insertGetNode(className: classDef.name, attrName: attr)
+                            self.insertGetNode(className: classDef.name, attrName: attr.name)
                         } as () -> Void
                         item.target = CanvasMenuTarget.shared
                         getSub.addItem(item)
@@ -882,9 +902,9 @@ struct GraphCanvasView: View {
                     let setItem = NSMenuItem(title: "Set", action: nil, keyEquivalent: "")
                     let setSub = NSMenu()
                     for attr in classDef.attributes {
-                        let item = NSMenuItem(title: attr, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+                        let item = NSMenuItem(title: attr.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
                         item.representedObject = { [weak viewModel] in
-                            self.insertSetNode(className: classDef.name, attrName: attr)
+                            self.insertSetNode(className: classDef.name, attrName: attr.name)
                         } as () -> Void
                         item.target = CanvasMenuTarget.shared
                         setSub.addItem(item)

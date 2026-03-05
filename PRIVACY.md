@@ -25,7 +25,7 @@ This app does not use any third-party services that collect user data.
 ## Contact
 
 If you have questions about this privacy policy, please open an issue at:
-https://github.com/dwohl/phograph/issues
+https://github.com/avwohl/phograph/issues
 
 ## Changes
 

@@ -30,11 +30,20 @@ struct Pin {
     }
 };
 
+// Pin definition for optional/hot-cold inputs (Phase 12)
+struct PinDef {
+    std::string name;
+    bool is_optional = false;
+    bool is_hot = true;
+    Value default_value;
+};
+
 // Wire: connects an output pin to an input pin
 struct Wire {
     WireId id = 0;
     Pin source;      // output pin (producer)
     Pin target;      // input pin (consumer)
+    bool is_execution = false;  // Phase 11: execution ordering wire
 };
 
 // Control annotation on a node
@@ -80,6 +89,41 @@ public:
     Value constant_value;       // for Constant nodes
     bool has_execution_in = false;
     bool has_execution_out = false;
+
+    // Phase 12: optional input definitions
+    std::vector<PinDef> input_defs;
+
+    // Phase 16: list annotations
+    bool list_map = false;
+    bool partition = false;
+
+    // Phase 17: try annotation
+    bool has_try = false;
+    uint32_t error_out_pin = UINT32_MAX;
+
+    // Phase 15: loop marker
+    bool is_loop = false;
+
+    // Phase 19: local method body
+    std::shared_ptr<Method> local_method;
+
+    // Phase 20: expression string for Evaluation nodes
+    std::string expression;
+};
+
+// Phase 18: shift register for loop iteration
+struct ShiftRegister {
+    uint32_t input_pin = 0;
+    uint32_t output_pin = 0;
+    Value initial;
+};
+
+// Phase 23: case guard for pattern matching
+struct CaseGuard {
+    uint32_t pin = 0;
+    enum Kind { TypeMatch, ValueMatch, Wildcard } kind = Wildcard;
+    Value match_val;
+    std::string match_type;
 };
 
 // Case: a single dataflow diagram within a method
@@ -94,17 +138,24 @@ public:
     NodeId next_node_id = 1;
     WireId next_wire_id = 1;
 
+    // Phase 18: shift registers
+    std::vector<ShiftRegister> shift_registers;
+
+    // Phase 23: pattern matching guards
+    std::vector<CaseGuard> guards;
+
     NodeId add_node(Node node) {
         node.id = next_node_id++;
         nodes.push_back(std::move(node));
         return nodes.back().id;
     }
 
-    WireId add_wire(Pin source, Pin target) {
+    WireId add_wire(Pin source, Pin target, bool is_exec = false) {
         Wire w;
         w.id = next_wire_id++;
         w.source = source;
         w.target = target;
+        w.is_execution = is_exec;
         wires.push_back(w);
         return w.id;
     }
@@ -135,6 +186,9 @@ public:
     }
 };
 
+// Phase 25: access level
+enum class Access : uint8_t { Public = 0, Protected, Private };
+
 // Method: one or more cases
 class Method {
 public:
@@ -143,6 +197,7 @@ public:
     uint32_t num_outputs = 0;
     std::vector<Case> cases;
     std::string class_name; // empty for universal methods
+    Access access = Access::Public;
 };
 
 // Attribute definition
@@ -150,6 +205,13 @@ struct AttributeDef {
     std::string name;
     Value default_value;
     bool is_class_attr = false; // true = class attribute, false = instance attribute
+    Access access = Access::Public;
+};
+
+// Phase 25: protocol definition
+struct ProtocolDef {
+    std::string name;
+    std::vector<std::string> required_methods;
 };
 
 // Class definition
@@ -159,6 +221,8 @@ public:
     std::string parent_name;        // empty if no parent
     std::vector<AttributeDef> attributes;
     std::vector<Method> methods;
+    std::vector<std::string> conforms_to;  // Phase 25: protocol conformance
+    bool is_actor = false;                  // Phase 27: actor isolation
 
     Method* find_method(const std::string& mname) {
         for (auto& m : methods) {
@@ -188,6 +252,7 @@ public:
     std::string name;
     std::vector<Method> methods;        // universal methods
     std::vector<ClassDef> classes;
+    std::vector<ProtocolDef> protocols;  // Phase 25
 
     Method* find_method(const std::string& mname) {
         for (auto& m : methods) {

@@ -59,6 +59,13 @@ void pho_engine_debug_add_breakpoint(PhoEngineRef engine, uint32_t node_id,
                                       const char* method, int case_idx);
 void pho_engine_debug_remove_breakpoint(PhoEngineRef engine, uint32_t node_id);
 
+// ---- Codegen / Compile ----
+// Compile the loaded project to Swift source code.
+// entry_method: name of the method to use as entry point (e.g. "main")
+// emit_main: if 0, don't generate @main struct (for app embedding)
+// Returns generated Swift source. Caller must free with pho_engine_free_string().
+const char* pho_engine_compile(PhoEngineRef engine, const char* entry_method, int emit_main);
+
 // ---- Input events (Phase 6+) ----
 void pho_engine_send_pointer_down(PhoEngineRef engine, float x, float y, int32_t button);
 void pho_engine_send_pointer_up(PhoEngineRef engine, float x, float y, int32_t button);

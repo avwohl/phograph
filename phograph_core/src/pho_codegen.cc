@@ -191,6 +191,218 @@ std::string SwiftCodegen::emit_prim_call(const std::string& prim_name,
     if (prim_name == "print" && args.size() == 1)
         return "phoPrint(" + args[0] + ")";
 
+    // String extras
+    if (prim_name == "uppercase" && args.size() == 1)
+        return "phoUppercase(" + args[0] + ")";
+    if (prim_name == "lowercase" && args.size() == 1)
+        return "phoLowercase(" + args[0] + ")";
+    if (prim_name == "string-contains" && args.size() == 2)
+        return "phoStringContains(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "string-split" && args.size() == 2)
+        return "phoStringSplit(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "string-replace" && args.size() == 3)
+        return "phoStringReplace(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+    if (prim_name == "string-trim" && args.size() == 1)
+        return "phoStringTrim(" + args[0] + ")";
+    if (prim_name == "substring" && args.size() == 3)
+        return "phoSubstring(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+    if (prim_name == "string-search" && args.size() == 2)
+        return "phoStringSearch(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "char-at" && args.size() == 2)
+        return "phoCharAt(" + args[0] + ", " + args[1] + ")";
+
+    // List extras
+    if (prim_name == "list-first" && args.size() == 1)
+        return "phoListFirst(" + args[0] + ")";
+    if (prim_name == "list-rest" && args.size() == 1)
+        return "phoListRest(" + args[0] + ")";
+    if (prim_name == "list-reverse" && args.size() == 1)
+        return "phoListReverse(" + args[0] + ")";
+    if (prim_name == "list-sort" && args.size() == 1)
+        return "phoListSort(" + args[0] + ")";
+    if (prim_name == "list-contains" && args.size() == 2)
+        return "phoListContains(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "list-empty?" && args.size() == 1)
+        return "phoListEmpty(" + args[0] + ")";
+    if (prim_name == "list-map" && args.size() == 2)
+        return "phoListMap(" + args[0] + ", " + args[1] + ")";
+
+    // Dict
+    if (prim_name == "dict-create" && args.size() == 0)
+        return "phoDictCreate()";
+    if (prim_name == "dict-get" && args.size() == 2)
+        return "phoDictGet(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "dict-set" && args.size() == 3)
+        return "phoDictSet(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+    if (prim_name == "dict-has" && args.size() == 2)
+        return "phoDictHas(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "dict-remove" && args.size() == 2)
+        return "phoDictRemove(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "dict-keys" && args.size() == 1)
+        return "phoDictKeys(" + args[0] + ")";
+    if (prim_name == "dict-values" && args.size() == 1)
+        return "phoDictValues(" + args[0] + ")";
+    if (prim_name == "dict-merge" && args.size() == 2)
+        return "phoDictMerge(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "dict-size" && args.size() == 1)
+        return "phoDictSize(" + args[0] + ")";
+
+    // Math extras
+    if (prim_name == "power" && args.size() == 2)
+        return "phoPower(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "sin" && args.size() == 1)
+        return "phoSin(" + args[0] + ")";
+    if (prim_name == "cos" && args.size() == 1)
+        return "phoCos(" + args[0] + ")";
+    if (prim_name == "tan" && args.size() == 1)
+        return "phoTan(" + args[0] + ")";
+    if (prim_name == "atan2" && args.size() == 2)
+        return "phoAtan2(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "pi" && args.size() == 0)
+        return "phoPi()";
+    if (prim_name == "random" && args.size() == 0)
+        return "phoRandom()";
+
+    // Error
+    if (prim_name == "error-create" && args.size() == 1)
+        return "phoErrorCreate(" + args[0] + ")";
+    if (prim_name == "error-message" && args.size() == 1)
+        return "phoErrorMessage(" + args[0] + ")";
+    if (prim_name == "is-error" && args.size() == 1)
+        return "phoIsError(" + args[0] + ")";
+
+    // Canvas
+    if (prim_name == "create-canvas" && args.size() == 2)
+        return "phoCreateCanvas(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "canvas-width" && args.size() == 1)
+        return "phoCanvasWidth(" + args[0] + ")";
+    if (prim_name == "canvas-height" && args.size() == 1)
+        return "phoCanvasHeight(" + args[0] + ")";
+    if (prim_name == "canvas-clear" && args.size() == 1)
+        return "phoCanvasClear(" + args[0] + ")";
+    if (prim_name == "canvas-render" && args.size() == 1)
+        return "phoCanvasRender(" + args[0] + ")";
+    if (prim_name == "canvas-pixel-at" && args.size() == 3)
+        return "phoCanvasPixelAt(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+    if (prim_name == "canvas-set-root" && args.size() == 2)
+        return "phoCanvasSetRoot(" + args[0] + ", " + args[1] + ")";
+
+    // Shapes
+    if (prim_name == "shape-rect" && args.size() == 4)
+        return "phoShapeRect(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ")";
+    if (prim_name == "shape-oval" && args.size() == 4)
+        return "phoShapeOval(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ")";
+    if (prim_name == "shape-text" && args.size() == 3)
+        return "phoShapeText(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+    if (prim_name == "shape-group")
+        return "phoShapeGroup()";
+    if (prim_name == "shape-set-fill" && args.size() == 2)
+        return "phoShapeSetFill(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "shape-set-stroke" && args.size() == 2)
+        return "phoShapeSetStroke(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "shape-set-corner-radius" && args.size() == 2)
+        return "phoShapeSetCornerRadius(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "shape-set-opacity" && args.size() == 2)
+        return "phoShapeSetOpacity(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "shape-set-bounds" && args.size() == 5)
+        return "phoShapeSetBounds(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ", " + args[4] + ")";
+    if (prim_name == "shape-set-visible" && args.size() == 2)
+        return "phoShapeSetVisible(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "shape-set-tag" && args.size() == 2)
+        return "phoShapeSetTag(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "shape-add-child" && args.size() == 2)
+        return "phoShapeAddChild(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "shape-get-fill" && args.size() == 1)
+        return "phoShapeGetFill(" + args[0] + ")";
+    if (prim_name == "shape-get-bounds" && args.size() == 1)
+        return "phoShapeGetBounds(" + args[0] + ")";
+    if (prim_name == "shape-hit-test" && args.size() == 3)
+        return "phoShapeHitTest(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+    if (prim_name == "shape-find-by-tag" && args.size() == 2)
+        return "phoShapeFindByTag(" + args[0] + ", " + args[1] + ")";
+
+    // Draw
+    if (prim_name == "draw-fill-rect" && args.size() == 5)
+        return "phoDrawFillRect(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ", " + args[4] + ")";
+    if (prim_name == "draw-stroke-rect" && args.size() == 5)
+        return "phoDrawStrokeRect(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ", " + args[4] + ")";
+    if (prim_name == "draw-fill-oval" && args.size() == 5)
+        return "phoDrawFillOval(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ", " + args[4] + ")";
+    if (prim_name == "draw-fill-rounded-rect" && args.size() == 6)
+        return "phoDrawFillRoundedRect(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ", " + args[4] + ", " + args[5] + ")";
+    if (prim_name == "draw-set-pixel" && args.size() == 4)
+        return "phoDrawSetPixel(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ")";
+    if (prim_name == "draw-clear" && args.size() == 2)
+        return "phoDrawClear(" + args[0] + ", " + args[1] + ")";
+
+    // JSON
+    if (prim_name == "json-parse" && args.size() == 1)
+        return "phoJsonParse(" + args[0] + ")";
+    if (prim_name == "json-encode" && args.size() == 1)
+        return "phoJsonEncode(" + args[0] + ")";
+
+    // Date
+    if (prim_name == "date-now" && args.size() == 0)
+        return "phoDateNow()";
+    if (prim_name == "date-create" && args.size() == 6)
+        return "phoDateCreate(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ", " + args[4] + ", " + args[5] + ")";
+    if (prim_name == "date-format" && args.size() == 2)
+        return "phoDateFormat(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "date-add" && args.size() == 2)
+        return "phoDateAdd(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "date-diff" && args.size() == 2)
+        return "phoDateDiff(" + args[0] + ", " + args[1] + ")";
+
+    // String extras
+    if (prim_name == "string-repeat" && args.size() == 2)
+        return "phoStringRepeat(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "string-starts-with?" && args.size() == 2)
+        return "phoStringStartsWith(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "string-ends-with?" && args.size() == 2)
+        return "phoStringEndsWith(" + args[0] + ", " + args[1] + ")";
+
+    // List HOFs
+    if (prim_name == "filter" && args.size() == 2)
+        return "phoFilter(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "reduce" && args.size() == 3)
+        return "phoReduce(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+    if (prim_name == "flat-map" && args.size() == 2)
+        return "phoFlatMap(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "any?" && args.size() == 2)
+        return "phoAny(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "all?" && args.size() == 2)
+        return "phoAll(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "find" && args.size() == 2)
+        return "phoFind(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "sort-by" && args.size() == 2)
+        return "phoSortBy(" + args[0] + ", " + args[1] + ")";
+
+    // Method ref
+    if (prim_name == "method-ref" && args.size() == 1)
+        return "phoMethodRef(" + args[0] + ")";
+    if (prim_name == "call" && args.size() == 2)
+        return "phoCall(" + args[0] + ", " + args[1] + ")";
+
+    // Enum
+    if (prim_name == "enum-create" && args.size() == 3)
+        return "phoEnumCreate(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+    if (prim_name == "enum-variant" && args.size() == 1)
+        return "phoEnumVariant(" + args[0] + ")";
+    if (prim_name == "enum-data" && args.size() == 1)
+        return "phoEnumData(" + args[0] + ")";
+
+    // Phase 26: Observable primitives
+    if (prim_name == "observe" && args.size() == 2)
+        return "phoObserve(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "unobserve" && args.size() == 2)
+        return "phoUnobserve(" + args[0] + ", " + args[1] + ")";
+    if (prim_name == "observe-any" && args.size() == 1)
+        return "phoObserveAny(" + args[0] + ")";
+    if (prim_name == "bind" && args.size() == 4)
+        return "phoBind(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ")";
+    if (prim_name == "unbind" && args.size() == 2)
+        return "phoUnbind(" + args[0] + ", " + args[1] + ")";
+
     // Fallback: generic runtime call
     std::string s = "phoCallPrim(\"" + prim_name + "\", [";
     for (size_t i = 0; i < args.size(); i++) {
@@ -271,10 +483,27 @@ std::vector<std::string> SwiftCodegen::compile_case(
         // Collect input variable names for this node
         std::vector<std::string> input_vars(node->num_inputs, "PhoValue.null");
         for (auto& w : c.wires) {
-            if (w.target.node_id == nid) {
+            if (w.target.node_id == nid && !w.is_execution) {
                 auto it = pin_vars.find(pin_key(w.source.node_id, w.source.index));
                 if (it != pin_vars.end() && w.target.index < node->num_inputs) {
                     input_vars[w.target.index] = it->second;
+                }
+            }
+        }
+
+        // Phase 12: fill optional defaults for unwired pins
+        if (!node->input_defs.empty()) {
+            for (size_t i = 0; i < node->input_defs.size() && i < input_vars.size(); i++) {
+                if (node->input_defs[i].is_optional && input_vars[i] == "PhoValue.null") {
+                    bool has_wire = false;
+                    for (auto& w : c.wires) {
+                        if (!w.is_execution && w.target.node_id == nid && w.target.index == static_cast<uint32_t>(i)) {
+                            has_wire = true; break;
+                        }
+                    }
+                    if (!has_wire) {
+                        input_vars[i] = emit_literal(node->input_defs[i].default_value);
+                    }
                 }
             }
         }
@@ -394,6 +623,77 @@ std::vector<std::string> SwiftCodegen::compile_case(
                 break;
             }
 
+            case NodeType::Evaluation: {
+                // Phase 20: emit expression as Swift code
+                if (node->num_outputs > 0) {
+                    // Substitute input variables into expression
+                    std::string expr = node->expression;
+                    for (size_t i = 0; i < input_vars.size(); i++) {
+                        // Replace positional names: a, b, c, ...
+                        if (i < 26) {
+                            std::string var_name(1, 'a' + static_cast<char>(i));
+                            size_t pos = 0;
+                            while ((pos = expr.find(var_name, pos)) != std::string::npos) {
+                                bool word_boundary_before = (pos == 0 || !isalnum(expr[pos-1]));
+                                bool word_boundary_after = (pos + 1 >= expr.size() || !isalnum(expr[pos+1]));
+                                if (word_boundary_before && word_boundary_after) {
+                                    expr.replace(pos, 1, input_vars[i]);
+                                    pos += input_vars[i].size();
+                                } else {
+                                    pos++;
+                                }
+                            }
+                        }
+                    }
+                    lines.push_back(indent(ind) + "let " + out_vars[0] + " = " + expr);
+                }
+                break;
+            }
+
+            case NodeType::Inject: {
+                // Phase 21: dynamic dispatch
+                std::string func = "phoDispatch(" + input_vars[0] + ", [";
+                for (size_t i = 1; i < input_vars.size(); i++) {
+                    if (i > 1) func += ", ";
+                    func += input_vars[i];
+                }
+                func += "])";
+                if (node->num_outputs > 0) {
+                    lines.push_back(indent(ind) + "let " + out_vars[0] + " = " + func);
+                } else {
+                    lines.push_back(indent(ind) + "_ = " + func);
+                }
+                break;
+            }
+
+            case NodeType::Persistent: {
+                // Phase 22: persistent read/write
+                if (node->num_outputs > 0 && !input_vars.empty()) {
+                    lines.push_back(indent(ind) + "let " + out_vars[0] +
+                                    " = phoPersistent(\"" + node->name + "\", " + input_vars[0] + ")");
+                } else if (node->num_outputs > 0) {
+                    lines.push_back(indent(ind) + "let " + out_vars[0] +
+                                    " = phoPersistentRead(\"" + node->name + "\")");
+                }
+                break;
+            }
+
+            case NodeType::LocalMethod: {
+                // Phase 19: local method call
+                std::string func = "phoLocal_" + sanitize_identifier(node->name) + "(";
+                for (size_t i = 0; i < input_vars.size(); i++) {
+                    if (i > 0) func += ", ";
+                    func += input_vars[i];
+                }
+                func += ")";
+                if (node->num_outputs > 0) {
+                    lines.push_back(indent(ind) + "let " + out_vars[0] + " = " + func);
+                } else {
+                    lines.push_back(indent(ind) + "_ = " + func);
+                }
+                break;
+            }
+
             default:
                 lines.push_back(indent(ind) + "// unsupported node type: " + node->name);
                 break;
@@ -506,15 +806,28 @@ std::string SwiftCodegen::compile_class(const Project& project, const ClassDef& 
     std::string cls_name = swift_class_name(cls.name);
     std::string parent = cls.parent_name.empty() ? "" : swift_class_name(cls.parent_name);
 
-    out << "class " << cls_name;
+    // Phase 27: actor keyword
+    if (cls.is_actor) {
+        out << "actor " << cls_name;
+    } else {
+        out << "class " << cls_name;
+    }
     if (!parent.empty()) out << ": " << parent;
+    // Phase 25: protocol conformance
+    for (size_t i = 0; i < cls.conforms_to.size(); i++) {
+        out << ((!parent.empty() || i > 0) ? ", " : ": ");
+        out << swift_class_name(cls.conforms_to[i]);
+    }
     out << " {\n";
 
     // Instance attributes as properties
     for (auto& attr : cls.attributes) {
         if (attr.is_class_attr) continue;
         std::string var_name = swift_var_name(attr.name);
-        out << indent(1) << "var " << var_name << ": PhoValue = " << emit_literal(attr.default_value) << "\n";
+        std::string access_str;
+        if (attr.access == Access::Private) access_str = "private ";
+        else if (attr.access == Access::Protected) access_str = "internal "; // Swift has no 'protected'
+        out << indent(1) << access_str << "var " << var_name << ": PhoValue = " << emit_literal(attr.default_value) << "\n";
     }
 
     // Class attributes as static properties

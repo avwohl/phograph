@@ -24,6 +24,7 @@ enum class ValueTag : uint8_t {
     External,
     Error,
     Enum,
+    MethodRef,
 };
 
 const char* tag_name(ValueTag tag);
@@ -35,6 +36,7 @@ class PhoData;
 class PhoError;
 class PhoEnum;
 class PhoObject;
+class PhoMethodRef;
 
 // 24-byte tagged union value
 class Value {
@@ -61,6 +63,7 @@ public:
     static Value error(const std::string& msg, const std::string& code);
     static Value enum_val(Ref<PhoEnum> e);
     static Value object(Ref<PhoObject> o);
+    static Value method_ref(Ref<PhoMethodRef> m);
 
     // Copy/move
     Value(const Value& o);
@@ -84,6 +87,7 @@ public:
     bool is_external() const { return tag_ == ValueTag::External; }
     bool is_error() const { return tag_ == ValueTag::Error; }
     bool is_enum() const { return tag_ == ValueTag::Enum; }
+    bool is_method_ref() const { return tag_ == ValueTag::MethodRef; }
     bool is_numeric() const { return tag_ == ValueTag::Integer || tag_ == ValueTag::Real; }
 
     int64_t as_integer() const;
@@ -97,6 +101,7 @@ public:
     PhoError* as_error() const;
     PhoEnum* as_enum() const;
     PhoObject* as_object() const;
+    PhoMethodRef* as_method_ref() const;
     double as_date() const;
 
     // Conversion to string for display
@@ -234,6 +239,10 @@ private:
 };
 
 // Ref-counted object (class instance)
+// Phase 26: observer callback
+using ObserverCallback = std::function<void(const std::string& attr, const Value& old_val, const Value& new_val)>;
+using ObserverId = uint64_t;
+
 class PhoObject : public RefCounted {
 public:
     explicit PhoObject(const std::string& class_name)
@@ -248,7 +257,10 @@ public:
     }
 
     void set_attr(const std::string& name, Value val) {
-        attrs_[name] = std::move(val);
+        Value old_val = get_attr(name);
+        attrs_[name] = val;
+        // Phase 26: fire observers
+        fire_observers(name, old_val, val);
     }
 
     bool has_attr(const std::string& name) const {
@@ -257,9 +269,71 @@ public:
 
     const std::unordered_map<std::string, Value>& attrs() const { return attrs_; }
 
+    // Phase 26: observer API
+    ObserverId add_observer(const std::string& attr, ObserverCallback cb) {
+        ObserverId id = next_observer_id_++;
+        observers_[attr].push_back({id, std::move(cb)});
+        return id;
+    }
+
+    ObserverId add_any_observer(ObserverCallback cb) {
+        ObserverId id = next_observer_id_++;
+        any_observers_.push_back({id, std::move(cb)});
+        return id;
+    }
+
+    void remove_observer(ObserverId id) {
+        for (auto& [attr, list] : observers_) {
+            list.erase(std::remove_if(list.begin(), list.end(),
+                [id](const ObserverEntry& e) { return e.id == id; }), list.end());
+        }
+        any_observers_.erase(std::remove_if(any_observers_.begin(), any_observers_.end(),
+            [id](const ObserverEntry& e) { return e.id == id; }), any_observers_.end());
+    }
+
 private:
     std::string class_name_;
     std::unordered_map<std::string, Value> attrs_;
+
+    // Phase 26: observers
+    struct ObserverEntry {
+        ObserverId id;
+        ObserverCallback callback;
+    };
+    std::unordered_map<std::string, std::vector<ObserverEntry>> observers_;
+    std::vector<ObserverEntry> any_observers_;
+    ObserverId next_observer_id_ = 1;
+
+    void fire_observers(const std::string& attr, const Value& old_val, const Value& new_val) {
+        auto it = observers_.find(attr);
+        if (it != observers_.end()) {
+            for (auto& entry : it->second) {
+                entry.callback(attr, old_val, new_val);
+            }
+        }
+        for (auto& entry : any_observers_) {
+            entry.callback(attr, old_val, new_val);
+        }
+    }
+};
+
+// Ref-counted method reference (Phase 14)
+class PhoMethodRef : public RefCounted {
+public:
+    PhoMethodRef(const std::string& class_name, const std::string& method_name)
+        : class_name_(class_name), method_name_(method_name) {}
+    PhoMethodRef(const std::string& class_name, const std::string& method_name, Ref<PhoObject> bound)
+        : class_name_(class_name), method_name_(method_name), bound_object_(std::move(bound)) {}
+
+    const std::string& class_name() const { return class_name_; }
+    const std::string& method_name() const { return method_name_; }
+    PhoObject* bound_object() const { return bound_object_.get(); }
+    bool has_bound_object() const { return bound_object_.get() != nullptr; }
+
+private:
+    std::string class_name_;
+    std::string method_name_;
+    Ref<PhoObject> bound_object_;
 };
 
 } // namespace pho

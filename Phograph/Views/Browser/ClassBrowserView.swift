@@ -154,15 +154,15 @@ struct ClassBrowserView: View {
             set: { classDef.isExpanded = $0 }
         )) {
             // Attributes
-            ForEach(classDef.attributes, id: \.self) { attr in
+            ForEach(classDef.attributes) { attr in
                 HStack {
                     Circle()
                         .fill(Color.green)
                         .frame(width: 8, height: 8)
-                    Text(attr)
+                    Text(attr.name)
                         .font(.caption)
                     Spacer()
-                    Button(action: { insertGetNode(className: classDef.name, attrName: attr) }) {
+                    Button(action: { insertGetNode(className: classDef.name, attrName: attr.name) }) {
                         Image(systemName: "plus.circle")
                             .font(.caption)
                             .foregroundColor(.secondary)

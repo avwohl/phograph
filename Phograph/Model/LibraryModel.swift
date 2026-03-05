@@ -87,6 +87,7 @@ enum LibraryError: LocalizedError {
     case missingManifest
     case alreadyExists(String)
     case versionConflict(installed: String, required: String)
+    case cannotRemoveBundled
 
     var errorDescription: String? {
         switch self {
@@ -104,6 +105,8 @@ enum LibraryError: LocalizedError {
             return "Library '\(name)' is already installed"
         case .versionConflict(let installed, let required):
             return "Version conflict: installed \(installed), required \(required)"
+        case .cannotRemoveBundled:
+            return "Bundled libraries cannot be removed"
         }
     }
 }

@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <string>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +54,23 @@ void pho_platform_clipboard_set(const char* text);
 const char* pho_platform_name(void);  // "macOS", "iOS"
 double pho_platform_screen_scale(void);
 
+// ---- HTTP Networking (Phase 24) ----
+// HTTP GET. Returns status code (>= 0 success, < 0 error).
+// out_body is allocated by platform, caller must free via pho_platform_free.
+int pho_platform_http_get_c(const char* url, char** out_body, size_t* out_len);
+
+// HTTP POST. Returns status code.
+int pho_platform_http_post_c(const char* url, const char* body, size_t body_len,
+                              const char* content_type, char** out_body, size_t* out_len);
+
 #ifdef __cplusplus
 }
+
+// C++ wrappers in pho namespace
+namespace pho {
+int pho_platform_http_get(const std::string& url, std::string& out_body);
+int pho_platform_http_post(const std::string& url, const std::string& body,
+                           const std::string& content_type, std::string& out_body);
+}
+
 #endif

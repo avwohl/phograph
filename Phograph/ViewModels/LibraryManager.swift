@@ -67,7 +67,11 @@ class LibraryManager: ObservableObject {
         guard fm.fileExists(atPath: url.path) else { return [] }
 
         var results: [LibraryInfo] = []
-        guard let contents = try? fm.contentsOfDirectory(at: url, includingPropertiesForKeys: [.isDirectoryKey]) else {
+        let contents: [URL]
+        do {
+            contents = try fm.contentsOfDirectory(at: url, includingPropertiesForKeys: [.isDirectoryKey])
+        } catch {
+            print("LibraryManager: failed to scan \(url.path): \(error.localizedDescription)")
             return []
         }
 
@@ -76,8 +80,13 @@ class LibraryManager: ObservableObject {
             guard fm.fileExists(atPath: item.path, isDirectory: &isDir), isDir.boolValue else { continue }
 
             let manifestURL = item.appendingPathComponent("library.json")
-            guard let data = try? Data(contentsOf: manifestURL),
-                  let manifest = try? JSONDecoder().decode(LibraryManifest.self, from: data) else {
+            let data: Data
+            let manifest: LibraryManifest
+            do {
+                data = try Data(contentsOf: manifestURL)
+                manifest = try JSONDecoder().decode(LibraryManifest.self, from: data)
+            } catch {
+                print("LibraryManager: skipping \(item.lastPathComponent): \(error.localizedDescription)")
                 continue
             }
 
@@ -203,7 +212,9 @@ class LibraryManager: ObservableObject {
     // MARK: - Remove
 
     func removeLibrary(_ library: LibraryInfo) throws {
-        guard library.source != .bundled else { return }
+        guard library.source != .bundled else {
+            throw LibraryError.cannotRemoveBundled
+        }
         try FileManager.default.removeItem(at: library.directoryURL)
         discoverLibraries()
     }
@@ -241,7 +252,11 @@ class LibraryManager: ObservableObject {
     private func ensureUserLibrariesDir() {
         let fm = FileManager.default
         if !fm.fileExists(atPath: Self.userLibrariesURL.path) {
-            try? fm.createDirectory(at: Self.userLibrariesURL, withIntermediateDirectories: true)
+            do {
+                try fm.createDirectory(at: Self.userLibrariesURL, withIntermediateDirectories: true)
+            } catch {
+                print("LibraryManager: failed to create libraries directory: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -251,18 +266,33 @@ class LibraryManager: ObservableObject {
         let userDir = Self.userLibrariesURL
 
         // Only seed if the libraries directory is empty
-        let contents = (try? fm.contentsOfDirectory(atPath: userDir.path)) ?? []
+        let contents: [String]
+        do {
+            contents = try fm.contentsOfDirectory(atPath: userDir.path)
+        } catch {
+            print("LibraryManager: cannot list user libraries dir: \(error.localizedDescription)")
+            return
+        }
         let libDirs = contents.filter { !$0.hasPrefix(".") }
         guard libDirs.isEmpty else { return }
 
         // Look for bundled libraries in the app bundle
         if let resourceURL = Bundle.main.resourceURL {
             let bundledDir = resourceURL.appendingPathComponent("libraries")
-            if fm.fileExists(atPath: bundledDir.path),
-               let entries = try? fm.contentsOfDirectory(at: bundledDir, includingPropertiesForKeys: nil) {
-                for entry in entries {
-                    let dest = userDir.appendingPathComponent(entry.lastPathComponent)
-                    try? fm.copyItem(at: entry, to: dest)
+            guard fm.fileExists(atPath: bundledDir.path) else { return }
+            let entries: [URL]
+            do {
+                entries = try fm.contentsOfDirectory(at: bundledDir, includingPropertiesForKeys: nil)
+            } catch {
+                print("LibraryManager: cannot list bundled libraries: \(error.localizedDescription)")
+                return
+            }
+            for entry in entries {
+                let dest = userDir.appendingPathComponent(entry.lastPathComponent)
+                do {
+                    try fm.copyItem(at: entry, to: dest)
+                } catch {
+                    print("LibraryManager: failed to seed \(entry.lastPathComponent): \(error.localizedDescription)")
                 }
             }
         }
@@ -276,13 +306,12 @@ class LibraryManager: ObservableObject {
             return dir
         }
         // Check one level deep
-        if let items = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.isDirectoryKey]) {
-            for item in items {
-                var isDir: ObjCBool = false
-                if fm.fileExists(atPath: item.path, isDirectory: &isDir), isDir.boolValue {
-                    if fm.fileExists(atPath: item.appendingPathComponent("library.json").path) {
-                        return item
-                    }
+        let items = try fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.isDirectoryKey])
+        for item in items {
+            var isDir: ObjCBool = false
+            if fm.fileExists(atPath: item.path, isDirectory: &isDir), isDir.boolValue {
+                if fm.fileExists(atPath: item.appendingPathComponent("library.json").path) {
+                    return item
                 }
             }
         }

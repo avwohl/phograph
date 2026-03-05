@@ -24,13 +24,17 @@ targets:
           mkdir -p "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries"
           cp -R "$SRCROOT/libraries/" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries/"
         name: Copy Bundled Libraries
+      - script: |
+          cp "$SRCROOT/Phograph/Runtime/PhographRuntime.swift" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/"
+          cp "$SRCROOT/Phograph/Runtime/PhographSceneRuntime.swift" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/"
+        name: Copy Runtime for Export
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.phograph.app
         PRODUCT_NAME: Phograph
         GENERATE_INFOPLIST_FILE: YES
         MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: 3
+        CURRENT_PROJECT_VERSION: 4
         SWIFT_OBJC_BRIDGING_HEADER: Phograph/Bridge/Phograph-Bridging-Header.h
         HEADER_SEARCH_PATHS:
           - $(SRCROOT)/phograph_core/src

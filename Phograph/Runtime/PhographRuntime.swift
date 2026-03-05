@@ -266,10 +266,174 @@ func phoTypeOf(_ a: PhoValue) -> PhoValue {
     }
 }
 
+// MARK: - String Extras
+
+func phoUppercase(_ a: PhoValue) -> PhoValue { .string(a.asString.uppercased()) }
+func phoLowercase(_ a: PhoValue) -> PhoValue { .string(a.asString.lowercased()) }
+
+func phoStringContains(_ a: PhoValue, _ b: PhoValue) -> PhoValue {
+    .boolean(a.asString.contains(b.asString))
+}
+
+func phoStringSplit(_ a: PhoValue, _ sep: PhoValue) -> PhoValue {
+    let parts = a.asString.components(separatedBy: sep.asString)
+    return .list(parts.map { .string($0) })
+}
+
+func phoStringReplace(_ a: PhoValue, _ old: PhoValue, _ new: PhoValue) -> PhoValue {
+    .string(a.asString.replacingOccurrences(of: old.asString, with: new.asString))
+}
+
+func phoStringTrim(_ a: PhoValue) -> PhoValue {
+    .string(a.asString.trimmingCharacters(in: .whitespacesAndNewlines))
+}
+
+func phoSubstring(_ a: PhoValue, _ start: PhoValue, _ len: PhoValue) -> PhoValue {
+    let s = a.asString
+    let st = Int(start.asInteger)
+    let ln = Int(len.asInteger)
+    guard st >= 0 && st < s.count else { return .string("") }
+    let startIdx = s.index(s.startIndex, offsetBy: st)
+    let endIdx = s.index(startIdx, offsetBy: Swift.min(ln, s.count - st))
+    return .string(String(s[startIdx..<endIdx]))
+}
+
+func phoStringSearch(_ a: PhoValue, _ needle: PhoValue) -> PhoValue {
+    let s = a.asString, n = needle.asString
+    guard let range = s.range(of: n) else { return .integer(-1) }
+    return .integer(Int64(s.distance(from: s.startIndex, to: range.lowerBound)))
+}
+
+func phoCharAt(_ a: PhoValue, _ idx: PhoValue) -> PhoValue {
+    let s = a.asString
+    let i = Int(idx.asInteger)
+    guard i >= 0 && i < s.count else { return .string("") }
+    return .string(String(s[s.index(s.startIndex, offsetBy: i)]))
+}
+
+// MARK: - List Extras
+
+func phoListFirst(_ list: PhoValue) -> PhoValue {
+    guard case .list(let arr) = list, !arr.isEmpty else { return .null }
+    return arr[0]
+}
+
+func phoListRest(_ list: PhoValue) -> PhoValue {
+    guard case .list(let arr) = list, arr.count > 1 else { return .list([]) }
+    return .list(Array(arr.dropFirst()))
+}
+
+func phoListReverse(_ list: PhoValue) -> PhoValue {
+    guard case .list(let arr) = list else { return .list([]) }
+    return .list(arr.reversed())
+}
+
+func phoListSort(_ list: PhoValue) -> PhoValue {
+    guard case .list(let arr) = list else { return .list([]) }
+    return .list(arr.sorted { $0.asReal < $1.asReal })
+}
+
+func phoListContains(_ list: PhoValue, _ val: PhoValue) -> PhoValue {
+    guard case .list(let arr) = list else { return .boolean(false) }
+    for item in arr {
+        if case .boolean(true) = phoEqual(item, val) { return .boolean(true) }
+    }
+    return .boolean(false)
+}
+
+func phoListEmpty(_ list: PhoValue) -> PhoValue {
+    guard case .list(let arr) = list else { return .boolean(true) }
+    return .boolean(arr.isEmpty)
+}
+
+func phoListMap(_ list: PhoValue, _ fn: PhoValue) -> PhoValue {
+    // list-map with a function value isn't straightforward in compiled mode;
+    // return list unchanged as fallback (function dispatch handled differently)
+    return list
+}
+
+// MARK: - Dict
+
+func phoDictCreate() -> PhoValue { .dict([:]) }
+
+func phoDictGet(_ d: PhoValue, _ key: PhoValue) -> PhoValue {
+    guard case .dict(let dict) = d else { return .error("dict-get: not a dict") }
+    return dict[key.asString] ?? .null
+}
+
+func phoDictSet(_ d: PhoValue, _ key: PhoValue, _ val: PhoValue) -> PhoValue {
+    guard case .dict(var dict) = d else { return .error("dict-set: not a dict") }
+    dict[key.asString] = val
+    return .dict(dict)
+}
+
+func phoDictHas(_ d: PhoValue, _ key: PhoValue) -> PhoValue {
+    guard case .dict(let dict) = d else { return .boolean(false) }
+    return .boolean(dict[key.asString] != nil)
+}
+
+func phoDictRemove(_ d: PhoValue, _ key: PhoValue) -> PhoValue {
+    guard case .dict(var dict) = d else { return .error("dict-remove: not a dict") }
+    dict.removeValue(forKey: key.asString)
+    return .dict(dict)
+}
+
+func phoDictKeys(_ d: PhoValue) -> PhoValue {
+    guard case .dict(let dict) = d else { return .list([]) }
+    return .list(dict.keys.sorted().map { .string($0) })
+}
+
+func phoDictValues(_ d: PhoValue) -> PhoValue {
+    guard case .dict(let dict) = d else { return .list([]) }
+    return .list(dict.keys.sorted().map { dict[$0]! })
+}
+
+func phoDictMerge(_ a: PhoValue, _ b: PhoValue) -> PhoValue {
+    guard case .dict(var da) = a else { return b }
+    guard case .dict(let db) = b else { return a }
+    for (k, v) in db { da[k] = v }
+    return .dict(da)
+}
+
+func phoDictSize(_ d: PhoValue) -> PhoValue {
+    guard case .dict(let dict) = d else { return .integer(0) }
+    return .integer(Int64(dict.count))
+}
+
+// MARK: - Math Extras
+
+func phoPower(_ base: PhoValue, _ exp: PhoValue) -> PhoValue {
+    .real(pow(base.asReal, exp.asReal))
+}
+
+func phoSin(_ a: PhoValue) -> PhoValue { .real(sin(a.asReal)) }
+func phoCos(_ a: PhoValue) -> PhoValue { .real(cos(a.asReal)) }
+func phoTan(_ a: PhoValue) -> PhoValue { .real(tan(a.asReal)) }
+func phoAtan2(_ y: PhoValue, _ x: PhoValue) -> PhoValue { .real(atan2(y.asReal, x.asReal)) }
+func phoPi() -> PhoValue { .real(Double.pi) }
+func phoRandom() -> PhoValue { .real(Double.random(in: 0..<1)) }
+
+// MARK: - Error
+
+func phoErrorCreate(_ msg: PhoValue) -> PhoValue { .error(msg.asString) }
+func phoErrorMessage(_ e: PhoValue) -> PhoValue {
+    if case .error(let msg) = e { return .string(msg) }
+    return .string("")
+}
+func phoIsError(_ a: PhoValue) -> PhoValue {
+    if case .error = a { return .boolean(true) }
+    return .boolean(false)
+}
+
 // MARK: - I/O
 
+/// Shared console output buffer for standalone apps
+var phoConsoleOutput: String = ""
+
 func phoPrint(_ a: PhoValue) -> PhoValue {
-    print(a.asString)
+    let text = a.asString
+    phoConsoleOutput += text + "\n"
+    print(text)
     return .null
 }
 

@@ -6,6 +6,7 @@
 #include "pho_serial.h"
 #include "pho_thread.h"
 #include "pho_debug.h"
+#include "pho_codegen.h"
 #include <string>
 #include <cstring>
 #include <cstdlib>
@@ -311,6 +312,34 @@ void pho_engine_debug_add_breakpoint(PhoEngineRef engine, uint32_t node_id,
 
 void pho_engine_debug_remove_breakpoint(PhoEngineRef engine, uint32_t node_id) {
     engine->debugger.remove_breakpoint(node_id);
+}
+
+// ---- Codegen / Compile ----
+
+const char* pho_engine_compile(PhoEngineRef engine, const char* entry_method, int emit_main) {
+    pho::CodegenOptions opts;
+    opts.emit_imports = true;
+    opts.emit_runtime = false;  // runtime is provided as a separate file
+    opts.emit_main = (emit_main != 0);
+    if (entry_method) opts.entry_method = entry_method;
+
+    pho::SwiftCodegen codegen(opts);
+    std::string source;
+    std::vector<pho::CodegenError> errors;
+    codegen.compile(engine->project, source, errors);
+
+    if (!errors.empty()) {
+        std::string err_msg;
+        for (auto& e : errors) {
+            if (!err_msg.empty()) err_msg += "\n";
+            err_msg += e.context + ": " + e.message;
+        }
+        engine->last_error = err_msg;
+    }
+
+    char* result = static_cast<char*>(malloc(source.size() + 1));
+    memcpy(result, source.c_str(), source.size() + 1);
+    return result;
 }
 
 // ---- Input events ----

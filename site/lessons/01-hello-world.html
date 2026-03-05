@@ -34,16 +34,31 @@ dataflow graph works.
 
 <p>The IDE has three panels:</p>
 
-<pre class="diagram">
-+------------------+-------------------------------+------------------+
-|                  |                               |                  |
-|   Class Browser  |       Graph Canvas            |    Inspector     |
-|   (sidebar)      |   (your dataflow diagram)     |    (details)     |
-|                  |                               |                  |
-+------------------+-------------------------------+------------------+
-|                        Console                                      |
-+---------------------------------------------------------------------+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 580 200" width="100%" style="max-width:580px">
+  <defs><filter id="s01a" x="-2%" y="-4%" width="104%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.12"/></filter></defs>
+  <!-- Class Browser -->
+  <rect x="10" y="10" width="140" height="140" rx="4" fill="#edf2f7" filter="url(#s01a)"/>
+  <rect x="10" y="10" width="140" height="28" rx="4" fill="#4a5568"/>
+  <rect x="10" y="34" width="140" height="4" fill="#4a5568"/>
+  <text x="80" y="28" text-anchor="middle" fill="white" font-weight="bold" font-size="12">Class Browser</text>
+  <text x="80" y="90" text-anchor="middle" fill="#718096" font-size="11">(sidebar)</text>
+  <!-- Graph Canvas -->
+  <rect x="160" y="10" width="260" height="140" rx="4" fill="#fff" filter="url(#s01a)" stroke="#e2e8f0"/>
+  <rect x="160" y="10" width="260" height="28" rx="4" fill="#4a5568"/>
+  <rect x="160" y="34" width="260" height="4" fill="#4a5568"/>
+  <text x="290" y="28" text-anchor="middle" fill="white" font-weight="bold" font-size="12">Graph Canvas</text>
+  <text x="290" y="90" text-anchor="middle" fill="#718096" font-size="11">(your dataflow diagram)</text>
+  <!-- Inspector -->
+  <rect x="430" y="10" width="140" height="140" rx="4" fill="#edf2f7" filter="url(#s01a)"/>
+  <rect x="430" y="10" width="140" height="28" rx="4" fill="#4a5568"/>
+  <rect x="430" y="34" width="140" height="4" fill="#4a5568"/>
+  <text x="500" y="28" text-anchor="middle" fill="white" font-weight="bold" font-size="12">Inspector</text>
+  <text x="500" y="90" text-anchor="middle" fill="#718096" font-size="11">(details)</text>
+  <!-- Console -->
+  <rect x="10" y="160" width="560" height="32" rx="4" fill="#edf2f7" filter="url(#s01a)"/>
+  <rect x="10" y="160" width="560" height="28" rx="4" fill="#4a5568"/>
+  <text x="290" y="178" text-anchor="middle" fill="white" font-weight="bold" font-size="12">Console</text>
+</svg>
 
 <p>
 The <strong>Class Browser</strong> on the left lists the project&rsquo;s sections,
@@ -63,24 +78,46 @@ output from your program.
 
 <p>You should see three nodes connected by wires:</p>
 
-<pre class="diagram">
-  +---------+
-  | Inputs  |         (input bar &mdash; no outputs for this method)
-  +---------+
-
-+-----------------+
-| "Hello, World!" |   (constant &mdash; a string value)
-+-----------------+
-        |
-        v
-  +-----------+
-  |    log    |       (primitive &mdash; writes to console)
-  +-----------+
-
-  +---------+
-  | Outputs |         (output bar &mdash; no inputs for this method)
-  +---------+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 400 370" width="100%" style="max-width:400px">
+  <defs><filter id="s01b" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- Inputs bar -->
+  <g filter="url(#s01b)">
+    <rect x="140" y="10" width="120" height="34" rx="4" fill="#d9f2dd"/>
+    <rect x="140" y="10" width="120" height="28" rx="4" fill="#338c4d" clip-path="url(#h01b1)"/>
+    <clipPath id="h01b1"><rect x="140" y="10" width="120" height="28"/></clipPath>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Inputs</text>
+  </g>
+  <!-- Constant "Hello, World!" -->
+  <g filter="url(#s01b)">
+    <rect x="100" y="100" width="200" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="100" y="100" width="200" height="28" rx="4" fill="#807333" clip-path="url(#h01b2)"/>
+    <clipPath id="h01b2"><rect x="100" y="100" width="200" height="28"/></clipPath>
+    <text x="200" y="119" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&quot;Hello, World!&quot;</text>
+    <circle cx="200" cy="140" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wire: constant -> log -->
+  <path d="M 200 140 C 200 170 200 190 200 220" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- log primitive -->
+  <g filter="url(#s01b)">
+    <rect x="140" y="220" width="120" height="40" rx="4" fill="#ebf0fa"/>
+    <rect x="140" y="220" width="120" height="28" rx="4" fill="#405999" clip-path="url(#h01b3)"/>
+    <clipPath id="h01b3"><rect x="140" y="220" width="120" height="28"/></clipPath>
+    <text x="200" y="239" text-anchor="middle" fill="white" font-weight="bold" font-size="13">log</text>
+    <circle cx="200" cy="220" r="6" fill="#3380e6"/>
+  </g>
+  <!-- Outputs bar -->
+  <g filter="url(#s01b)">
+    <rect x="140" y="320" width="120" height="34" rx="4" fill="#f8e1e1"/>
+    <rect x="140" y="320" width="120" height="28" rx="4" fill="#b33333" clip-path="url(#h01b4)"/>
+    <clipPath id="h01b4"><rect x="140" y="320" width="120" height="28"/></clipPath>
+    <text x="200" y="339" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Outputs</text>
+  </g>
+  <!-- Annotations -->
+  <text x="320" y="32" fill="#718096" font-size="11" font-style="italic">input bar</text>
+  <text x="320" y="122" fill="#718096" font-size="11" font-style="italic">constant</text>
+  <text x="275" y="242" fill="#718096" font-size="11" font-style="italic">primitive</text>
+  <text x="275" y="342" fill="#718096" font-size="11" font-style="italic">output bar</text>
+</svg>
 
 <h3>What each node does</h3>
 

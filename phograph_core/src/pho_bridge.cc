@@ -5,15 +5,34 @@
 #include "pho_prim.h"
 #include "pho_serial.h"
 #include "pho_thread.h"
+#include "pho_debug.h"
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <mutex>
+#include <thread>
+
+// Thread-local pointer for console capture
+static thread_local std::string* tl_console = nullptr;
+
+namespace pho {
+void pho_console_write(const std::string& text) {
+    if (tl_console) tl_console->append(text);
+}
+}
 
 struct PhoEngine {
     pho::Project project;
     pho::Evaluator evaluator;
     std::string last_error;
     pho::EngineRunLoop run_loop;
+    std::string console_buffer;
+
+    // Debugger
+    pho::Debugger debugger;
+    PhoDebugCallback debug_cb = nullptr;
+    void* debug_ctx = nullptr;
+    std::thread debug_thread;
 
     // Pixel buffer (Phase 5+)
     std::vector<uint8_t> pixel_buffer;
@@ -75,7 +94,13 @@ const char* pho_engine_call_method(PhoEngineRef engine, const char* method_name,
         }
     }
 
+    // Capture console output during evaluation
+    engine->console_buffer.clear();
+    tl_console = &engine->console_buffer;
+
     auto result = engine->evaluator.call_method(engine->project, method_name, inputs);
+
+    tl_console = nullptr;
 
     // Encode result as JSON
     std::string out = "{\"status\":";
@@ -99,11 +124,44 @@ const char* pho_engine_call_method(PhoEngineRef engine, const char* method_name,
                 break;
             }
             case pho::ValueTag::Boolean: out += v.as_boolean() ? "true" : "false"; break;
-            case pho::ValueTag::String: out += "\"" + v.as_string()->str() + "\""; break;
+            case pho::ValueTag::String: {
+                // Escape string for JSON
+                out += "\"";
+                for (char ch : v.as_string()->str()) {
+                    switch (ch) {
+                        case '"': out += "\\\""; break;
+                        case '\\': out += "\\\\"; break;
+                        case '\n': out += "\\n"; break;
+                        case '\r': out += "\\r"; break;
+                        case '\t': out += "\\t"; break;
+                        default: out += ch; break;
+                    }
+                }
+                out += "\"";
+                break;
+            }
             default: out += "\"" + v.to_display_string() + "\""; break;
         }
     }
-    out += "]}";
+    out += "]";
+
+    // Include console output
+    if (!engine->console_buffer.empty()) {
+        out += ",\"console\":\"";
+        for (char ch : engine->console_buffer) {
+            switch (ch) {
+                case '"': out += "\\\""; break;
+                case '\\': out += "\\\\"; break;
+                case '\n': out += "\\n"; break;
+                case '\r': out += "\\r"; break;
+                case '\t': out += "\\t"; break;
+                default: out += ch; break;
+            }
+        }
+        out += "\"";
+    }
+
+    out += "}";
 
     char* result_str = static_cast<char*>(malloc(out.size() + 1));
     memcpy(result_str, out.c_str(), out.size() + 1);
@@ -133,6 +191,126 @@ void pho_engine_resize(PhoEngineRef engine, int32_t width, int32_t height) {
 
 void pho_engine_tick(PhoEngineRef engine, double dt) {
     engine->run_loop.tick(engine->run_loop.current_time() + dt);
+}
+
+// ---- Console ----
+
+const char* pho_engine_get_console(PhoEngineRef engine) {
+    return engine->console_buffer.c_str();
+}
+
+void pho_engine_clear_console(PhoEngineRef engine) {
+    engine->console_buffer.clear();
+}
+
+// ---- Debug API ----
+
+void pho_engine_debug_set_callback(PhoEngineRef engine, PhoDebugCallback cb, void* ctx) {
+    engine->debug_cb = cb;
+    engine->debug_ctx = ctx;
+}
+
+void pho_engine_debug_run(PhoEngineRef engine, const char* method_name) {
+    // Stop any existing debug session
+    if (engine->debug_thread.joinable()) {
+        engine->debugger.request_stop();
+        engine->debug_thread.join();
+    }
+
+    engine->debugger.reset();
+    engine->debugger.enable_tracing(true);
+    engine->evaluator.set_debugger(&engine->debugger);
+
+    // Set up pause callback that fires debug events
+    engine->debugger.set_breakpoint_hit_callback([engine](pho::NodeId node_id, uint32_t step) {
+        if (engine->debug_cb) {
+            // Build JSON event
+            std::string json = "{\"event\":\"paused\",\"node_id\":";
+            json += std::to_string(node_id);
+            json += ",\"step\":";
+            json += std::to_string(step);
+
+            // Include recent trace entries
+            json += ",\"traces\":[";
+            auto& traces = engine->debugger.traces();
+            size_t start = traces.size() > 20 ? traces.size() - 20 : 0;
+            for (size_t i = start; i < traces.size(); i++) {
+                if (i > start) json += ",";
+                auto& t = traces[i];
+                json += "{\"src\":";
+                json += std::to_string(t.source_node);
+                json += ",\"sp\":";
+                json += std::to_string(t.source_pin);
+                json += ",\"dst\":";
+                json += std::to_string(t.dest_node);
+                json += ",\"dp\":";
+                json += std::to_string(t.dest_pin);
+                json += ",\"val\":\"";
+                json += t.value.to_display_string();
+                json += "\",\"step\":";
+                json += std::to_string(t.step_number);
+                json += "}";
+            }
+            json += "]}";
+
+            engine->debug_cb(engine->debug_ctx, json.c_str());
+        }
+    });
+
+    std::string mname(method_name);
+    engine->debug_thread = std::thread([engine, mname]() {
+        engine->console_buffer.clear();
+        tl_console = &engine->console_buffer;
+
+        auto result = engine->evaluator.call_method(engine->project, mname, {});
+
+        tl_console = nullptr;
+        engine->evaluator.set_debugger(nullptr);
+
+        // Fire completed event
+        if (engine->debug_cb) {
+            std::string json = "{\"event\":\"completed\",\"status\":\"";
+            switch (result.status) {
+                case pho::EvalStatus::Success: json += "success"; break;
+                case pho::EvalStatus::Failure: json += "failure"; break;
+                case pho::EvalStatus::Error: json += "error"; break;
+            }
+            json += "\"}";
+            engine->debug_cb(engine->debug_ctx, json.c_str());
+        }
+    });
+}
+
+void pho_engine_debug_continue(PhoEngineRef engine) {
+    engine->debugger.set_action(pho::DebugAction::Continue);
+    engine->debugger.signal_resume();
+}
+
+void pho_engine_debug_step_over(PhoEngineRef engine) {
+    engine->debugger.set_action(pho::DebugAction::StepOver);
+    engine->debugger.signal_resume();
+}
+
+void pho_engine_debug_step_into(PhoEngineRef engine) {
+    engine->debugger.set_action(pho::DebugAction::StepInto);
+    engine->debugger.signal_resume();
+}
+
+void pho_engine_debug_stop(PhoEngineRef engine) {
+    engine->debugger.request_stop();
+    if (engine->debug_thread.joinable()) {
+        engine->debug_thread.join();
+    }
+    engine->evaluator.set_debugger(nullptr);
+}
+
+void pho_engine_debug_add_breakpoint(PhoEngineRef engine, uint32_t node_id,
+                                      const char* method, int case_idx) {
+    engine->debugger.add_breakpoint(node_id, method ? method : "", case_idx);
+}
+
+void pho_engine_debug_remove_breakpoint(PhoEngineRef engine, uint32_t node_id) {
+    engine->debugger.remove_breakpoint(node_id);
 }
 
 // ---- Input events ----

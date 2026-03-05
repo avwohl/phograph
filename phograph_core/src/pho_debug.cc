@@ -1,5 +1,6 @@
 #include "pho_debug.h"
 #include <algorithm>
+#include <mutex>
 
 namespace pho {
 
@@ -100,26 +101,46 @@ bool Debugger::rollback() {
 }
 
 bool Debugger::should_break_at(NodeId node_id) const {
-    if (step_mode_) return true;
+    if (step_mode_) {
+        // StepOver: only break at same or shallower call depth
+        if (pending_action_ == DebugAction::StepOver && call_depth_ > step_over_depth_) {
+            return false;
+        }
+        return true;
+    }
     return breakpoint_nodes_.count(node_id) > 0;
 }
 
 void Debugger::step_completed(NodeId node_id) {
     step_count_++;
 
-    // Handle step actions first to update step_mode_
+    if (stop_requested_) return;
+
+    bool should_pause = false;
+
+    // Handle step actions
     switch (pending_action_) {
         case DebugAction::StepOver:
-            // After next node executes, pause
             if (step_mode_) {
-                // We're completing the step - pause now
-                step_mode_ = false;
-                paused_ = true;
-                pending_action_ = DebugAction::Continue;
-                if (on_breakpoint_hit_) on_breakpoint_hit_(node_id, step_count_);
-                return;
+                // Only pause if we're at the same or shallower depth
+                if (call_depth_ <= step_over_depth_) {
+                    step_mode_ = false;
+                    should_pause = true;
+                    pending_action_ = DebugAction::Continue;
+                }
+            } else {
+                step_mode_ = true;
+                step_over_depth_ = call_depth_;
             }
-            step_mode_ = true;
+            break;
+        case DebugAction::StepInto:
+            if (step_mode_) {
+                step_mode_ = false;
+                should_pause = true;
+                pending_action_ = DebugAction::Continue;
+            } else {
+                step_mode_ = true;
+            }
             break;
         case DebugAction::Continue:
             step_mode_ = false;
@@ -129,10 +150,37 @@ void Debugger::step_completed(NodeId node_id) {
     }
 
     // Check breakpoints
-    if (breakpoint_nodes_.count(node_id) > 0) {
+    if (!should_pause && breakpoint_nodes_.count(node_id) > 0) {
+        should_pause = true;
+    }
+
+    if (should_pause) {
         paused_ = true;
         if (on_breakpoint_hit_) on_breakpoint_hit_(node_id, step_count_);
+        wait_for_resume();
     }
+}
+
+void Debugger::wait_for_resume() {
+    std::unique_lock<std::mutex> lock(mutex_);
+    cv_.wait(lock, [this] { return !paused_ || stop_requested_; });
+}
+
+void Debugger::signal_resume() {
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        paused_ = false;
+    }
+    cv_.notify_one();
+}
+
+void Debugger::request_stop() {
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        stop_requested_ = true;
+        paused_ = false;
+    }
+    cv_.notify_one();
 }
 
 void Debugger::reset() {
@@ -141,6 +189,9 @@ void Debugger::reset() {
     pending_action_ = DebugAction::Continue;
     paused_ = false;
     step_mode_ = false;
+    stop_requested_ = false;
+    call_depth_ = 0;
+    step_over_depth_ = 0;
 }
 
 } // namespace pho

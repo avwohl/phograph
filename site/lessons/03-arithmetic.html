@@ -40,30 +40,79 @@ lesson focuses on the arithmetic and comparison primitives.
 
 <p>Load the <strong>Basic Arithmetic</strong> example. It computes <code>(3 + 4) * 2 = 14</code>.</p>
 
-<pre class="diagram">
-  +---------+
-  | Inputs  |
-  +---------+
-
-+-----+  +-----+
-|  3  |  |  4  |      (two constants)
-+--o--+  +--o--+
-    \      /
-     v    v
-    +-----+
-    |  +  |            (add: 3 + 4 = 7)
-    +--o--+   +-----+
-       |      |  2  |
-       v      +--o--+
-      +-----+   /
-      |  *  |<-+       (multiply: 7 * 2 = 14)
-      +--o--+
-         |
-         v
-    +---------+
-    | Outputs |        (returns 14)
-    +---------+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 440 420" width="100%" style="max-width:440px">
+  <defs><filter id="s03a" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- Inputs -->
+  <g filter="url(#s03a)">
+    <rect x="150" y="10" width="120" height="34" rx="4" fill="#d9f2dd"/>
+    <rect x="150" y="10" width="120" height="28" rx="4" fill="#338c4d" clip-path="url(#h03a1)"/>
+    <clipPath id="h03a1"><rect x="150" y="10" width="120" height="28"/></clipPath>
+    <text x="210" y="30" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Inputs</text>
+  </g>
+  <!-- Constant 3 -->
+  <g filter="url(#s03a)">
+    <rect x="70" y="80" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="70" y="80" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h03a2)"/>
+    <clipPath id="h03a2"><rect x="70" y="80" width="100" height="28"/></clipPath>
+    <text x="120" y="99" text-anchor="middle" fill="white" font-weight="bold" font-size="13">3</text>
+    <circle cx="120" cy="120" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Constant 4 -->
+  <g filter="url(#s03a)">
+    <rect x="210" y="80" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="210" y="80" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h03a3)"/>
+    <clipPath id="h03a3"><rect x="210" y="80" width="100" height="28"/></clipPath>
+    <text x="260" y="99" text-anchor="middle" fill="white" font-weight="bold" font-size="13">4</text>
+    <circle cx="260" cy="120" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires 3,4 -> + -->
+  <path d="M 120 120 C 120 145 163 150 163 170" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 260 120 C 260 145 217 150 217 170" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- + node -->
+  <g filter="url(#s03a)">
+    <rect x="140" y="170" width="100" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="140" y="170" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h03a4)"/>
+    <clipPath id="h03a4"><rect x="140" y="170" width="100" height="28"/></clipPath>
+    <text x="190" y="189" text-anchor="middle" fill="white" font-weight="bold" font-size="13">+</text>
+    <circle cx="163" cy="170" r="6" fill="#3380e6"/>
+    <circle cx="217" cy="170" r="6" fill="#3380e6"/>
+    <circle cx="190" cy="216" r="6" fill="#e64d33"/>
+  </g>
+  <text x="260" y="195" fill="#718096" font-size="11" font-style="italic">3 + 4 = 7</text>
+  <!-- Constant 2 -->
+  <g filter="url(#s03a)">
+    <rect x="280" y="220" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="280" y="220" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h03a5)"/>
+    <clipPath id="h03a5"><rect x="280" y="220" width="100" height="28"/></clipPath>
+    <text x="330" y="239" text-anchor="middle" fill="white" font-weight="bold" font-size="13">2</text>
+    <circle cx="330" cy="260" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires + and 2 -> * -->
+  <path d="M 190 216 C 190 241 183 250 183 280" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 330 260 C 330 270 237 270 237 280" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- * node -->
+  <g filter="url(#s03a)">
+    <rect x="160" y="280" width="100" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="160" y="280" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h03a6)"/>
+    <clipPath id="h03a6"><rect x="160" y="280" width="100" height="28"/></clipPath>
+    <text x="210" y="299" text-anchor="middle" fill="white" font-weight="bold" font-size="13">*</text>
+    <circle cx="183" cy="280" r="6" fill="#3380e6"/>
+    <circle cx="237" cy="280" r="6" fill="#3380e6"/>
+    <circle cx="210" cy="326" r="6" fill="#e64d33"/>
+  </g>
+  <text x="280" y="305" fill="#718096" font-size="11" font-style="italic">7 * 2 = 14</text>
+  <!-- Wire * -> Outputs -->
+  <path d="M 210 326 C 210 346 210 356 210 370" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- Outputs -->
+  <g filter="url(#s03a)">
+    <rect x="150" y="370" width="120" height="40" rx="4" fill="#f8e1e1"/>
+    <rect x="150" y="370" width="120" height="28" rx="4" fill="#b33333" clip-path="url(#h03a7)"/>
+    <clipPath id="h03a7"><rect x="150" y="370" width="120" height="28"/></clipPath>
+    <text x="210" y="389" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Outputs</text>
+    <circle cx="210" cy="370" r="6" fill="#3380e6"/>
+  </g>
+  <text x="290" y="392" fill="#718096" font-size="11" font-style="italic">returns 14</text>
+</svg>
 
 <h3>Execution order</h3>
 
@@ -120,31 +169,91 @@ control flow, which we&rsquo;ll cover in Lesson 5.</p>
   </ol>
   <details>
     <summary>Solution diagram</summary>
-<pre class="diagram">
-+-----+  +-----+
-| 212 |  |  32 |
-+--o--+  +--o--+
-    \      /
-     v    v
-    +-----+        +-----+
-    |  -  |        |  5  |
-    +--o--+        +--o--+
-        \            /
-         v          v
-        +-----+
-        |  *  |     +-----+
-        +--o--+     |  9  |
-            \       +--o--+
-             v       /
-            +-----+
-            |  /  |
-            +--o--+
-               |
-               v
-          +---------+
-          | Outputs |     (100)
-          +---------+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 440 490" width="100%" style="max-width:440px">
+  <defs><filter id="s03b" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- 212 -->
+  <g filter="url(#s03b)">
+    <rect x="60" y="10" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="60" y="10" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h03b1)"/>
+    <clipPath id="h03b1"><rect x="60" y="10" width="100" height="28"/></clipPath>
+    <text x="110" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">212</text>
+    <circle cx="110" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- 32 -->
+  <g filter="url(#s03b)">
+    <rect x="200" y="10" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="200" y="10" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h03b2)"/>
+    <clipPath id="h03b2"><rect x="200" y="10" width="100" height="28"/></clipPath>
+    <text x="250" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">32</text>
+    <circle cx="250" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires to - -->
+  <path d="M 110 50 C 110 75 153 80 153 100" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 250 50 C 250 75 207 80 207 100" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- - node -->
+  <g filter="url(#s03b)">
+    <rect x="130" y="100" width="100" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="130" y="100" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h03b3)"/>
+    <clipPath id="h03b3"><rect x="130" y="100" width="100" height="28"/></clipPath>
+    <text x="180" y="119" text-anchor="middle" fill="white" font-weight="bold" font-size="13">-</text>
+    <circle cx="153" cy="100" r="6" fill="#3380e6"/>
+    <circle cx="207" cy="100" r="6" fill="#3380e6"/>
+    <circle cx="180" cy="146" r="6" fill="#e64d33"/>
+  </g>
+  <!-- 5 -->
+  <g filter="url(#s03b)">
+    <rect x="280" y="130" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="280" y="130" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h03b4)"/>
+    <clipPath id="h03b4"><rect x="280" y="130" width="100" height="28"/></clipPath>
+    <text x="330" y="149" text-anchor="middle" fill="white" font-weight="bold" font-size="13">5</text>
+    <circle cx="330" cy="170" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires to * -->
+  <path d="M 180 146 C 180 176 183 186 183 206" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 330 170 C 330 188 237 195 237 206" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- * node -->
+  <g filter="url(#s03b)">
+    <rect x="160" y="206" width="100" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="160" y="206" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h03b5)"/>
+    <clipPath id="h03b5"><rect x="160" y="206" width="100" height="28"/></clipPath>
+    <text x="210" y="225" text-anchor="middle" fill="white" font-weight="bold" font-size="13">*</text>
+    <circle cx="183" cy="206" r="6" fill="#3380e6"/>
+    <circle cx="237" cy="206" r="6" fill="#3380e6"/>
+    <circle cx="210" cy="252" r="6" fill="#e64d33"/>
+  </g>
+  <!-- 9 -->
+  <g filter="url(#s03b)">
+    <rect x="280" y="250" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="280" y="250" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h03b6)"/>
+    <clipPath id="h03b6"><rect x="280" y="250" width="100" height="28"/></clipPath>
+    <text x="330" y="269" text-anchor="middle" fill="white" font-weight="bold" font-size="13">9</text>
+    <circle cx="330" cy="290" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires to / -->
+  <path d="M 210 252 C 210 275 203 285 203 310" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 330 290 C 330 300 257 305 257 310" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- / node -->
+  <g filter="url(#s03b)">
+    <rect x="180" y="310" width="100" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="180" y="310" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h03b7)"/>
+    <clipPath id="h03b7"><rect x="180" y="310" width="100" height="28"/></clipPath>
+    <text x="230" y="329" text-anchor="middle" fill="white" font-weight="bold" font-size="13">/</text>
+    <circle cx="203" cy="310" r="6" fill="#3380e6"/>
+    <circle cx="257" cy="310" r="6" fill="#3380e6"/>
+    <circle cx="230" cy="356" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wire to Outputs -->
+  <path d="M 230 356 C 230 376 230 386 230 400" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- Outputs -->
+  <g filter="url(#s03b)">
+    <rect x="170" y="400" width="120" height="40" rx="4" fill="#f8e1e1"/>
+    <rect x="170" y="400" width="120" height="28" rx="4" fill="#b33333" clip-path="url(#h03b8)"/>
+    <clipPath id="h03b8"><rect x="170" y="400" width="120" height="28"/></clipPath>
+    <text x="230" y="419" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Outputs</text>
+    <circle cx="230" cy="400" r="6" fill="#3380e6"/>
+  </g>
+  <text x="310" y="422" fill="#718096" font-size="11" font-style="italic">(100)</text>
+</svg>
   </details>
 </div>
 

@@ -1,0 +1,81 @@
+{
+  "name": "locale",
+  "version": "1.0.0",
+  "description": "Localization and internationalization primitives. Based on iospharo LocalePlugin.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "locale-language",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the user's preferred language code (e.g. \"en\", \"fr\", \"ja\"). Output: language code string."
+    },
+    {
+      "name": "locale-country",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the user's country code (e.g. \"US\", \"GB\", \"JP\"). Output: country code string."
+    },
+    {
+      "name": "locale-currency-symbol",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the local currency symbol (e.g. \"$\", \"\\u00a3\", \"\\u00a5\"). Output: currency symbol string."
+    },
+    {
+      "name": "locale-decimal-sep",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the local decimal separator (e.g. \".\" or \",\"). Output: separator string."
+    },
+    {
+      "name": "locale-thousands-sep",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the local thousands separator (e.g. \",\" or \".\"). Output: separator string."
+    },
+    {
+      "name": "locale-date-format",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the local date format pattern (e.g. \"MM/dd/yyyy\"). Output: format string."
+    },
+    {
+      "name": "locale-time-format",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the local time format pattern (e.g. \"h:mm a\"). Output: format string."
+    },
+    {
+      "name": "locale-timezone",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the local timezone name (e.g. \"America/New_York\"). Output: timezone string."
+    },
+    {
+      "name": "locale-tz-offset",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the UTC offset in minutes for the local timezone. Output: integer minutes."
+    },
+    {
+      "name": "locale-is-dst",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Check if daylight saving time is currently active. Output: boolean."
+    },
+    {
+      "name": "locale-format-number",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Format a number using local conventions (thousands separators, decimal). Input: number. Output: formatted string."
+    },
+    {
+      "name": "locale-format-currency",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Format a number as local currency. Input: number. Output: formatted string (e.g. \"$1,234.56\")."
+    }
+  ]
+}

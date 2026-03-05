@@ -1,0 +1,87 @@
+{
+  "name": "midi",
+  "version": "1.0.0",
+  "description": "MIDI input/output primitives via CoreMIDI. Based on iospharo MIDIPlugin.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "midi-init",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Initialize the MIDI subsystem. Output: success boolean."
+    },
+    {
+      "name": "midi-port-count",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the number of available MIDI ports. Output: port count."
+    },
+    {
+      "name": "midi-port-name",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Get the name of a MIDI port. Input: port index. Output: port name string."
+    },
+    {
+      "name": "midi-open",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Open a MIDI port for communication. Input: port index. Output: handle."
+    },
+    {
+      "name": "midi-close",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Close a MIDI port. Input: handle. Output: success boolean."
+    },
+    {
+      "name": "midi-read",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Read pending MIDI data from a port. Input: handle. Output: data list."
+    },
+    {
+      "name": "midi-write",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Write raw MIDI data to a port. Inputs: handle, data list. Output: success boolean."
+    },
+    {
+      "name": "midi-note-on",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Send a MIDI Note On message. Inputs: handle, note (0-127), velocity (0-127). Output: success boolean."
+    },
+    {
+      "name": "midi-note-off",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Send a MIDI Note Off message. Inputs: handle, note (0-127). Output: success boolean."
+    },
+    {
+      "name": "midi-cc",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Send a MIDI Control Change message. Inputs: handle, controller (0-127), value (0-127). Output: success boolean."
+    },
+    {
+      "name": "midi-program",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Send a MIDI Program Change message. Inputs: handle, program (0-127). Output: success boolean."
+    },
+    {
+      "name": "midi-clock",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the current MIDI clock timestamp in microseconds. Output: timestamp integer."
+    },
+    {
+      "name": "midi-sysex",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Send a MIDI System Exclusive message. Inputs: handle, data list. Output: success boolean."
+    }
+  ]
+}

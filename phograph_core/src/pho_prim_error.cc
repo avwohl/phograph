@@ -33,13 +33,13 @@ void register_error_prims() {
     // Debug/console
     reg.register_prim("log", 1, 0, [](const std::vector<Value>& in) -> PrimResult {
         for (auto& v : in) {
-            fprintf(stderr, "[log] %s\n", v.to_display_string().c_str());
+            pho_console_write("[log] " + v.to_display_string() + "\n");
         }
         return PrimResult::success();
     });
 
     reg.register_prim("inspect", 1, 1, [](const std::vector<Value>& in) -> PrimResult {
-        fprintf(stderr, "[inspect] %s\n", in[0].to_display_string().c_str());
+        pho_console_write("[inspect] " + in[0].to_display_string() + "\n");
         return PrimResult::success(in[0]);
     });
 }

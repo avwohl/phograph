@@ -27,17 +27,33 @@ it from anywhere &mdash; including from inside itself (recursion).
 
 <p>Every method is a dataflow graph with two special nodes:</p>
 
-<pre class="diagram">
-  +-----------+
-  |  Inputs   |    &larr; parameters arrive here (output pins at bottom)
-  +--o----o---+
-     |    |
-    ... your graph ...
-     |    |
-  +--o----o---+
-  |  Outputs  |    &larr; return values collected here (input pins at top)
-  +-----------+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 440 260" width="100%" style="max-width:440px">
+  <defs><filter id="s04a" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- Inputs bar -->
+  <g filter="url(#s04a)">
+    <rect x="100" y="10" width="160" height="46" rx="4" fill="#d9f2dd"/>
+    <rect x="100" y="10" width="160" height="28" rx="4" fill="#338c4d" clip-path="url(#h04a1)"/>
+    <clipPath id="h04a1"><rect x="100" y="10" width="160" height="28"/></clipPath>
+    <text x="180" y="30" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Inputs</text>
+    <circle cx="153" cy="56" r="6" fill="#e64d33"/>
+    <circle cx="207" cy="56" r="6" fill="#e64d33"/>
+  </g>
+  <text x="280" y="32" fill="#718096" font-size="11" font-style="italic">parameters arrive here</text>
+  <!-- Dashed lines for graph body -->
+  <line x1="153" y1="56" x2="153" y2="200" stroke="#999" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="207" y1="56" x2="207" y2="200" stroke="#999" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="180" y="135" text-anchor="middle" fill="#999" font-size="12">... your graph ...</text>
+  <!-- Outputs bar -->
+  <g filter="url(#s04a)">
+    <rect x="100" y="200" width="160" height="46" rx="4" fill="#f8e1e1"/>
+    <rect x="100" y="200" width="160" height="28" rx="4" fill="#b33333" clip-path="url(#h04a2)"/>
+    <clipPath id="h04a2"><rect x="100" y="200" width="160" height="28"/></clipPath>
+    <text x="180" y="220" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Outputs</text>
+    <circle cx="153" cy="200" r="6" fill="#3380e6"/>
+    <circle cx="207" cy="200" r="6" fill="#3380e6"/>
+  </g>
+  <text x="280" y="222" fill="#718096" font-size="11" font-style="italic">return values collected here</text>
+</svg>
 
 <ul>
   <li>The <strong>input bar</strong> has output pins that provide the method&rsquo;s parameters.</li>
@@ -54,11 +70,20 @@ inputs map to the called method&rsquo;s input bar, and its outputs come from the
 called method&rsquo;s output bar.
 </p>
 
-<pre class="diagram">
-  +----------+
-  |   fib    |    &larr; calls the "fib" method
-  +--o---o---+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 380 70" width="100%" style="max-width:380px">
+  <defs><filter id="s04b" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <g filter="url(#s04b)">
+    <rect x="50" y="10" width="140" height="46" rx="4" fill="#f3ebfa"/>
+    <rect x="50" y="10" width="140" height="28" rx="4" fill="#66408c" clip-path="url(#h04b1)"/>
+    <clipPath id="h04b1"><rect x="50" y="10" width="140" height="28"/></clipPath>
+    <text x="120" y="30" text-anchor="middle" fill="white" font-weight="bold" font-size="13">fib</text>
+    <circle cx="97" cy="10" r="6" fill="#3380e6"/>
+    <circle cx="143" cy="10" r="6" fill="#3380e6"/>
+    <circle cx="97" cy="56" r="6" fill="#e64d33"/>
+    <circle cx="143" cy="56" r="6" fill="#e64d33"/>
+  </g>
+  <text x="210" y="32" fill="#718096" font-size="11" font-style="italic">method call</text>
+</svg>
 
 <h2>Walkthrough: Fibonacci</h2>
 
@@ -70,25 +95,47 @@ This project has two methods: <code>fib</code> and <code>main</code>.
 
 <p><strong><code>main</code></strong> calls <code>fib(10)</code>:</p>
 
-<pre class="diagram">
-  +---------+
-  | Inputs  |
-  +---------+
-
-  +------+
-  |  10  |
-  +--o---+
-     |
-     v
-  +------+
-  | fib  |     &larr; method call
-  +--o---+
-     |
-     v
-  +---------+
-  | Outputs |   (returns 55)
-  +---------+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 400 370" width="100%" style="max-width:400px">
+  <defs><filter id="s04c" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- Inputs -->
+  <g filter="url(#s04c)">
+    <rect x="130" y="10" width="120" height="34" rx="4" fill="#d9f2dd"/>
+    <rect x="130" y="10" width="120" height="28" rx="4" fill="#338c4d" clip-path="url(#h04c1)"/>
+    <clipPath id="h04c1"><rect x="130" y="10" width="120" height="28"/></clipPath>
+    <text x="190" y="30" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Inputs</text>
+  </g>
+  <!-- Constant 10 -->
+  <g filter="url(#s04c)">
+    <rect x="140" y="80" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="140" y="80" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h04c2)"/>
+    <clipPath id="h04c2"><rect x="140" y="80" width="100" height="28"/></clipPath>
+    <text x="190" y="99" text-anchor="middle" fill="white" font-weight="bold" font-size="13">10</text>
+    <circle cx="190" cy="120" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wire 10 -> fib -->
+  <path d="M 190 120 C 190 145 190 155 190 180" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- fib method call -->
+  <g filter="url(#s04c)">
+    <rect x="130" y="180" width="120" height="46" rx="4" fill="#f3ebfa"/>
+    <rect x="130" y="180" width="120" height="28" rx="4" fill="#66408c" clip-path="url(#h04c3)"/>
+    <clipPath id="h04c3"><rect x="130" y="180" width="120" height="28"/></clipPath>
+    <text x="190" y="199" text-anchor="middle" fill="white" font-weight="bold" font-size="13">fib</text>
+    <circle cx="190" cy="180" r="6" fill="#3380e6"/>
+    <circle cx="190" cy="226" r="6" fill="#e64d33"/>
+  </g>
+  <text x="270" y="202" fill="#718096" font-size="11" font-style="italic">method call</text>
+  <!-- Wire fib -> Outputs -->
+  <path d="M 190 226 C 190 256 190 270 190 290" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- Outputs -->
+  <g filter="url(#s04c)">
+    <rect x="130" y="290" width="120" height="40" rx="4" fill="#f8e1e1"/>
+    <rect x="130" y="290" width="120" height="28" rx="4" fill="#b33333" clip-path="url(#h04c4)"/>
+    <clipPath id="h04c4"><rect x="130" y="290" width="120" height="28"/></clipPath>
+    <text x="190" y="309" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Outputs</text>
+    <circle cx="190" cy="290" r="6" fill="#3380e6"/>
+  </g>
+  <text x="270" y="312" fill="#718096" font-size="11" font-style="italic">returns 55</text>
+</svg>
 
 <p><strong><code>fib</code></strong> has two cases (more on cases in Lesson 5).
 The key idea: <code>fib</code> calls itself twice (<code>fib(n-1)</code> and

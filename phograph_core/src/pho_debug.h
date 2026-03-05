@@ -6,6 +6,8 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <functional>
+#include <mutex>
+#include <condition_variable>
 
 namespace pho {
 
@@ -92,6 +94,12 @@ public:
     void set_breakpoint_hit_callback(BreakpointHitFn fn) { on_breakpoint_hit_ = std::move(fn); }
     void set_trace_record_callback(TraceRecordFn fn) { on_trace_record_ = std::move(fn); }
 
+    // Synchronization for blocking eval thread
+    void wait_for_resume();   // blocks eval thread until resumed or stopped
+    void signal_resume();     // wakes up blocked eval thread
+    void request_stop();      // sets stop flag + signals
+    bool stop_requested() const { return stop_requested_; }
+
     // State
     uint32_t current_step() const { return step_count_; }
     bool is_paused() const { return paused_; }
@@ -110,6 +118,11 @@ private:
     bool tracing_enabled_ = true;
     bool paused_ = false;
     bool step_mode_ = false; // true when stepping one node at a time
+    bool stop_requested_ = false;
+    int call_depth_ = 0;      // for StepOver vs StepInto
+    int step_over_depth_ = 0; // call depth when StepOver was issued
+    std::mutex mutex_;
+    std::condition_variable cv_;
 };
 
 } // namespace pho

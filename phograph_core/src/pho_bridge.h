@@ -43,6 +43,22 @@ void pho_engine_resize(PhoEngineRef engine, int32_t width, int32_t height);
 // Tick the engine (call per frame)
 void pho_engine_tick(PhoEngineRef engine, double dt);
 
+// ---- Console output ----
+const char* pho_engine_get_console(PhoEngineRef engine);
+void pho_engine_clear_console(PhoEngineRef engine);
+
+// ---- Debug API ----
+typedef void (*PhoDebugCallback)(void* ctx, const char* event_json);
+void pho_engine_debug_set_callback(PhoEngineRef engine, PhoDebugCallback cb, void* ctx);
+void pho_engine_debug_run(PhoEngineRef engine, const char* method_name);
+void pho_engine_debug_continue(PhoEngineRef engine);
+void pho_engine_debug_step_over(PhoEngineRef engine);
+void pho_engine_debug_step_into(PhoEngineRef engine);
+void pho_engine_debug_stop(PhoEngineRef engine);
+void pho_engine_debug_add_breakpoint(PhoEngineRef engine, uint32_t node_id,
+                                      const char* method, int case_idx);
+void pho_engine_debug_remove_breakpoint(PhoEngineRef engine, uint32_t node_id);
+
 // ---- Input events (Phase 6+) ----
 void pho_engine_send_pointer_down(PhoEngineRef engine, float x, float y, int32_t button);
 void pho_engine_send_pointer_up(PhoEngineRef engine, float x, float y, int32_t button);

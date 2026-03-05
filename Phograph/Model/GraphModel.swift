@@ -43,6 +43,47 @@ class GraphModel: ObservableObject {
         selectedNodeIds.removeAll()
     }
 
+    /// Find a wire connected to a specific input pin
+    func wireToInput(nodeId: UUID, pinIndex: Int) -> GraphWireModel? {
+        wires.first { $0.destNodeId == nodeId && $0.destPin == pinIndex }
+    }
+
+    /// Find the nearest input pin to a graph point within a threshold
+    func findNearestInputPin(at point: CGPoint, threshold: CGFloat = 20) -> (nodeId: UUID, pinIndex: Int, position: CGPoint)? {
+        var best: (nodeId: UUID, pinIndex: Int, position: CGPoint)?
+        var bestDist = threshold
+        for node in nodes {
+            for (i, _) in node.inputPins.enumerated() {
+                let px = CGFloat(i + 1) * node.width / CGFloat(node.inputPins.count + 1)
+                let pinPos = CGPoint(x: node.x + px, y: node.y)
+                let d = hypot(point.x - pinPos.x, point.y - pinPos.y)
+                if d < bestDist {
+                    bestDist = d
+                    best = (node.id, i, pinPos)
+                }
+            }
+        }
+        return best
+    }
+
+    /// Find the nearest output pin to a graph point within a threshold
+    func findNearestOutputPin(at point: CGPoint, threshold: CGFloat = 20) -> (nodeId: UUID, pinIndex: Int, position: CGPoint)? {
+        var best: (nodeId: UUID, pinIndex: Int, position: CGPoint)?
+        var bestDist = threshold
+        for node in nodes {
+            for (i, _) in node.outputPins.enumerated() {
+                let px = CGFloat(i + 1) * node.width / CGFloat(node.outputPins.count + 1)
+                let pinPos = CGPoint(x: node.x + px, y: node.y + node.height)
+                let d = hypot(point.x - pinPos.x, point.y - pinPos.y)
+                if d < bestDist {
+                    bestDist = d
+                    best = (node.id, i, pinPos)
+                }
+            }
+        }
+        return best
+    }
+
     func nodeAt(point: CGPoint) -> GraphNodeModel? {
         for node in nodes.reversed() {
             let rect = CGRect(x: node.x, y: node.y, width: node.width, height: node.height)
@@ -78,6 +119,7 @@ class GraphModel: ObservableObject {
             var numInputs: Int
             var numOutputs: Int
             var constantValue: String?
+            var libraryName: String?
         }
 
         var rawNodes: [RawNode] = []
@@ -95,9 +137,12 @@ class GraphModel: ObservableObject {
                 }
             }
 
+            let libName = nodeDict["library"] as? String
+
             rawNodes.append(RawNode(
                 nodeId: nodeId, name: name, nodeType: typeStr,
-                numInputs: numIn, numOutputs: numOut, constantValue: constVal
+                numInputs: numIn, numOutputs: numOut, constantValue: constVal,
+                libraryName: libName
             ))
         }
 
@@ -199,6 +244,7 @@ class GraphModel: ObservableObject {
                 }
 
                 let node = GraphNodeModel(x: x, y: y, label: displayName, nodeType: displayType)
+                node.engineNodeId = UInt32(rn.nodeId)
 
                 for i in 0..<rn.numInputs {
                     node.inputPins.append(PinModel(name: "in\(i)", index: i))
@@ -207,6 +253,11 @@ class GraphModel: ObservableObject {
                     node.outputPins.append(PinModel(name: "out\(i)", index: i))
                 }
                 node.constantValue = rn.constantValue
+                node.libraryName = rn.libraryName
+                if let annStr = nodesArray.first(where: { ($0["id"] as? Int) == rn.nodeId })?["annotation"] as? String,
+                   let ann = GraphNodeModel.NodeAnnotation(rawValue: annStr) {
+                    node.annotation = ann
+                }
                 node.height = node.computeHeight()
                 // Widen for long labels
                 let labelWidth = CGFloat(displayName.count) * 9.5 + 40
@@ -247,6 +298,23 @@ class GraphNodeModel: ObservableObject, Identifiable {
 
     /// Trace value (shown during debugging)
     @Published var traceValues: [String] = []
+
+    /// Engine node ID (from C++ engine, used for debugger breakpoints)
+    var engineNodeId: UInt32 = 0
+
+    /// Library that owns this primitive (nil for built-in)
+    @Published var libraryName: String?
+
+    /// Prograph annotation (loop, match, control flow)
+    @Published var annotation: NodeAnnotation = .none
+
+    enum NodeAnnotation: String {
+        case none
+        case loop, listMap, partition, inject
+        case nextCaseOnFailure, nextCaseOnSuccess
+        case continueOnFailure, terminateOnSuccess, terminateOnFailure
+        case finishOnSuccess, finishOnFailure, failOnSuccess, failOnFailure
+    }
 
     init(x: CGFloat, y: CGFloat, label: String, nodeType: String = "primitive") {
         self.x = x

@@ -54,13 +54,17 @@ label is the class name (prefixed with &ldquo;new&rdquo; in the canvas). It
 produces one output: the new object with default attribute values.
 </p>
 
-<pre class="diagram">
-  +-------------+
-  |  new Point  |    (instance generator)
-  +------o------+
-         |
-    (Point object with x=0, y=0)
-</pre>
+<svg class="diagram-svg" viewBox="0 0 400 100" width="100%" style="max-width:400px">
+  <defs><filter id="s07a" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <g filter="url(#s07a)">
+    <rect x="100" y="10" width="160" height="40" rx="4" fill="#f0f0f0"/>
+    <rect x="100" y="10" width="160" height="28" rx="4" fill="#666" clip-path="url(#h07a1)"/>
+    <clipPath id="h07a1"><rect x="100" y="10" width="160" height="28"/></clipPath>
+    <text x="180" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">new Point</text>
+    <circle cx="180" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <text x="180" y="78" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">Point object (x=0, y=0)</text>
+</svg>
 
 <h2>Get and Set nodes</h2>
 
@@ -69,21 +73,37 @@ To read or write an object&rsquo;s attributes, use <strong>Get</strong> and
 <strong>Set</strong> nodes.
 </p>
 
-<pre class="diagram">
-          [object]
-              |
-              v
-        +-----------+
-        |  get x    |     &rarr; outputs: (object, x-value)
-        +--o----o---+
-
-          [object]  [value]
-              |       |
-              v       v
-        +-----------+
-        |  set x    |     &rarr; outputs: (modified object)
-        +-----o-----+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 500 240" width="100%" style="max-width:500px">
+  <defs><filter id="s07b" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- get x -->
+  <text x="90" y="20" text-anchor="middle" fill="#555" font-size="11">[object]</text>
+  <path d="M 90 25 L 90 45" stroke="rgba(51,51,51,0.55)" stroke-width="1.5" marker-end="none"/>
+  <g filter="url(#s07b)">
+    <rect x="30" y="45" width="140" height="46" rx="4" fill="#f0f0f0"/>
+    <rect x="30" y="45" width="140" height="28" rx="4" fill="#666" clip-path="url(#h07b1)"/>
+    <clipPath id="h07b1"><rect x="30" y="45" width="140" height="28"/></clipPath>
+    <text x="100" y="64" text-anchor="middle" fill="white" font-weight="bold" font-size="13">get x</text>
+    <circle cx="100" cy="45" r="6" fill="#3380e6"/>
+    <circle cx="77" cy="91" r="6" fill="#e64d33"/>
+    <circle cx="123" cy="91" r="6" fill="#e64d33"/>
+  </g>
+  <text x="195" y="72" fill="#718096" font-size="11" font-style="italic">outputs: (object, x-value)</text>
+  <!-- set x -->
+  <text x="340" y="20" text-anchor="middle" fill="#555" font-size="11">[object]</text>
+  <text x="420" y="20" text-anchor="middle" fill="#555" font-size="11">[value]</text>
+  <path d="M 340 25 L 340 110" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 420 25 L 420 110" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <g filter="url(#s07b)">
+    <rect x="290" y="110" width="160" height="46" rx="4" fill="#f0f0f0"/>
+    <rect x="290" y="110" width="160" height="28" rx="4" fill="#666" clip-path="url(#h07b2)"/>
+    <clipPath id="h07b2"><rect x="290" y="110" width="160" height="28"/></clipPath>
+    <text x="370" y="129" text-anchor="middle" fill="white" font-weight="bold" font-size="13">set x</text>
+    <circle cx="337" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="403" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="370" cy="156" r="6" fill="#e64d33"/>
+  </g>
+  <text x="370" y="185" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">outputs: (modified object)</text>
+</svg>
 
 <p>
 <strong>Get</strong> has 1 input (the object) and 2 outputs: the object (pass-through)
@@ -103,16 +123,21 @@ call a class method via a <strong>method-call node</strong> named
 <code>ClassName/MethodName</code>, the engine passes the object as the first input.
 </p>
 
-<pre class="diagram">
-    [point object]
-          |
-          v
-  +------------------+
-  | Point/distance   |    (calls the "distance" method on Point)
-  +--------o---------+
-           |
-      (result value)
-</pre>
+<svg class="diagram-svg" viewBox="0 0 440 160" width="100%" style="max-width:440px">
+  <defs><filter id="s07c" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <text x="180" y="18" text-anchor="middle" fill="#555" font-size="11">[point object]</text>
+  <path d="M 180 23 L 180 50" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <g filter="url(#s07c)">
+    <rect x="80" y="50" width="200" height="46" rx="4" fill="#f3ebfa"/>
+    <rect x="80" y="50" width="200" height="28" rx="4" fill="#66408c" clip-path="url(#h07c1)"/>
+    <clipPath id="h07c1"><rect x="80" y="50" width="200" height="28"/></clipPath>
+    <text x="180" y="69" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Point/distance</text>
+    <circle cx="180" cy="50" r="6" fill="#3380e6"/>
+    <circle cx="180" cy="96" r="6" fill="#e64d33"/>
+  </g>
+  <text x="300" y="72" fill="#718096" font-size="11" font-style="italic">class method call</text>
+  <text x="180" y="125" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">(result value)</text>
+</svg>
 
 <h2>Walkthrough: Bank Account</h2>
 

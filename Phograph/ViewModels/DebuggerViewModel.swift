@@ -35,6 +35,11 @@ class DebuggerViewModel: ObservableObject {
         isPaused = false
     }
 
+    func stepInto() {
+        // Step into method calls
+        isPaused = false
+    }
+
     func rollback() {
         guard canRollback else { return }
         // Roll back to previous snapshot

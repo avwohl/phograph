@@ -75,7 +75,22 @@ void register_future_prims();
 void register_channel_prims();
 void register_effect_prims();
 
+// Library primitives
+void register_math_prims();
+void register_fileio_prims();
+void register_socket_prims();
+void register_sound_prims();
+void register_midi_prims();
+void register_locale_prims();
+void register_crypto_prims();
+void register_image_prims();
+void register_bitmap_prims();
+void register_net_prims();
+
 void register_all_phase1_prims();
 void register_all_prims();
+
+// Console output capture -- prims call this instead of fprintf(stderr,...)
+void pho_console_write(const std::string& text);
 
 } // namespace pho

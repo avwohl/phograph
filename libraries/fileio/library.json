@@ -1,0 +1,141 @@
+{
+  "name": "fileio",
+  "version": "1.0.0",
+  "description": "File I/O and string formatting primitives. Read/write text and binary files, format strings with interpolation.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "file-read-text",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Read an entire text file and return its contents as a string. Input: file path."
+    },
+    {
+      "name": "file-write-text",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Write a string to a text file (creates or overwrites). Inputs: file path, content. Output: file path on success."
+    },
+    {
+      "name": "file-append-text",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Append a string to a text file (creates if missing). Inputs: file path, content. Output: file path on success."
+    },
+    {
+      "name": "file-read-lines",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Read a text file and return a list of lines. Input: file path."
+    },
+    {
+      "name": "file-write-lines",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Write a list of lines to a text file with newline separators. Inputs: file path, list of strings. Output: file path on success."
+    },
+    {
+      "name": "file-read-bytes",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Read a file as raw binary data. Input: file path. Output: byte list."
+    },
+    {
+      "name": "file-write-bytes",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Write raw binary data to a file. Inputs: file path, byte list. Output: file path on success."
+    },
+    {
+      "name": "file-exists",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Check whether a file exists at the given path. Input: file path. Output: boolean."
+    },
+    {
+      "name": "file-delete",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Delete a file at the given path. Input: file path. Output: boolean success."
+    },
+    {
+      "name": "file-size",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Return the size of a file in bytes. Input: file path."
+    },
+    {
+      "name": "dir-list",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "List the contents of a directory. Input: directory path. Output: list of filenames."
+    },
+    {
+      "name": "dir-create",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Create a directory (and parents if needed). Input: directory path. Output: path on success."
+    },
+    {
+      "name": "path-join",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Join two path components with the platform path separator. Inputs: base path, child path."
+    },
+    {
+      "name": "path-extension",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Return the file extension from a path (e.g. \"txt\" from \"notes.txt\")."
+    },
+    {
+      "name": "path-basename",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Return the filename component of a path (e.g. \"notes.txt\" from \"/tmp/notes.txt\")."
+    },
+    {
+      "name": "path-dirname",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Return the directory component of a path (e.g. \"/tmp\" from \"/tmp/notes.txt\")."
+    },
+    {
+      "name": "fmt",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Format a template string with values from a dict. Placeholders use {key} syntax like Python f-strings. Input 1: template (e.g. \"Hello {name}, you are {age}\"). Input 2: dict of key-value pairs."
+    },
+    {
+      "name": "fmt-list",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Format a template string with positional values from a list. Placeholders use {0}, {1}, etc. Input 1: template (e.g. \"{0} + {1} = {2}\"). Input 2: list of values."
+    },
+    {
+      "name": "fmt-pad-left",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Pad a string on the left to a target width. Inputs: string, width, pad character."
+    },
+    {
+      "name": "fmt-pad-right",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Pad a string on the right to a target width. Inputs: string, width, pad character."
+    },
+    {
+      "name": "fmt-number",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Format a number with a specified number of decimal places. Inputs: number, decimal places."
+    },
+    {
+      "name": "fmt-join",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Join a list of strings with a separator. Inputs: list of strings, separator string."
+    }
+  ]
+}

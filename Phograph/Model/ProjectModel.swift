@@ -7,6 +7,7 @@ class ProjectModel: ObservableObject, Identifiable {
     @Published var sections: [SectionModel] = []
     @Published var filePath: URL?
     @Published var isDirty: Bool = false
+    @Published var libraryReferences: [LibraryReference] = []
 
     init(name: String = "Untitled") {
         self.name = name
@@ -50,6 +51,20 @@ class ProjectModel: ObservableObject, Identifiable {
                             $0["name"] as? String ?? ""
                         }
                     }
+                    if let classMethods = classDict["methods"] as? [[String: Any]] {
+                        for methodDict in classMethods {
+                            let method = MethodModel(
+                                name: methodDict["name"] as? String ?? "unnamed",
+                                numInputs: methodDict["num_inputs"] as? Int ?? 0,
+                                numOutputs: methodDict["num_outputs"] as? Int ?? 0
+                            )
+                            if let cases = methodDict["cases"] as? [[String: Any]] {
+                                method.caseCount = cases.count
+                                method.casesRaw = cases
+                            }
+                            classDef.methods.append(method)
+                        }
+                    }
                     section.classes.append(classDef)
                 }
             }
@@ -57,15 +72,32 @@ class ProjectModel: ObservableObject, Identifiable {
         }
 
         self.sections = newSections
+
+        // Parse library references
+        if let libsArray = root["libraries"] as? [[String: Any]] {
+            self.libraryReferences = libsArray.compactMap { dict in
+                guard let name = dict["name"] as? String,
+                      let version = dict["version"] as? String else { return nil }
+                return LibraryReference(name: name, version: version, source: dict["source"] as? String)
+            }
+        } else {
+            self.libraryReferences = []
+        }
+
         self.isDirty = false
         return true
     }
 
-    /// Find a method model by name
+    /// Find a method model by name (searches section methods and class methods)
     func findMethod(_ name: String) -> MethodModel? {
         for section in sections {
             if let m = section.methods.first(where: { $0.name == name }) {
                 return m
+            }
+            for classDef in section.classes {
+                if let m = classDef.methods.first(where: { $0.name == name }) {
+                    return m
+                }
             }
         }
         return nil
@@ -106,7 +138,8 @@ class ClassModel: ObservableObject, Identifiable {
     @Published var name: String
     @Published var parentName: String?
     @Published var attributes: [String] = []
-    @Published var isExpanded: Bool = false
+    @Published var methods: [MethodModel] = []
+    @Published var isExpanded: Bool = true
 
     init(name: String, parentName: String? = nil) {
         self.name = name

@@ -1,0 +1,87 @@
+{
+  "name": "socket",
+  "version": "1.0.0",
+  "description": "TCP and UDP socket primitives for low-level network programming. Based on iospharo SocketPlugin.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "tcp-connect",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Open a TCP connection. Inputs: host, port. Output: socket handle."
+    },
+    {
+      "name": "tcp-listen",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Listen for TCP connections on a port. Input: port. Output: server socket handle."
+    },
+    {
+      "name": "tcp-accept",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Accept an incoming TCP connection. Input: server socket. Output: client socket handle."
+    },
+    {
+      "name": "tcp-send",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Send data over a TCP socket. Inputs: socket, data string. Output: bytes sent."
+    },
+    {
+      "name": "tcp-recv",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Receive data from a TCP socket. Inputs: socket, max bytes. Output: data string."
+    },
+    {
+      "name": "tcp-close",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Close a TCP socket. Input: socket. Output: boolean success."
+    },
+    {
+      "name": "socket-status",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Get socket connection status. Input: socket. Output: status string (unconnected, waiting, connected, closed)."
+    },
+    {
+      "name": "udp-create",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Create a UDP socket bound to a port. Input: port (0 for any). Output: socket handle."
+    },
+    {
+      "name": "udp-send",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Send a UDP datagram. Inputs: socket, host, data string. Output: bytes sent."
+    },
+    {
+      "name": "udp-recv",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Receive a UDP datagram. Inputs: socket, max bytes. Output: data string."
+    },
+    {
+      "name": "dns-lookup",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Resolve a hostname to an IP address string. Input: hostname. Output: IP address."
+    },
+    {
+      "name": "dns-reverse",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Reverse DNS lookup. Input: IP address. Output: hostname."
+    },
+    {
+      "name": "local-address",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get the local machine's IP address. Output: IP address string."
+    }
+  ]
+}

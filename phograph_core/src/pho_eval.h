@@ -2,6 +2,7 @@
 #include "pho_value.h"
 #include "pho_graph.h"
 #include "pho_prim.h"
+#include "pho_debug.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -50,7 +51,11 @@ public:
     // Max evaluation steps (to prevent infinite loops)
     uint32_t max_steps = 100000;
 
+    // Debugger integration
+    void set_debugger(Debugger* d) { debugger_ = d; }
+
 private:
+    Debugger* debugger_ = nullptr;
     // Per-node slot storage during case evaluation
     struct NodeSlots {
         std::vector<Value> inputs;

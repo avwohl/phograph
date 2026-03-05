@@ -45,6 +45,19 @@ struct PhographApp: App {
                 }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
                 .disabled(viewModel.project == nil)
+
+                Divider()
+
+                Button("Export as PDF...") {
+                    viewModel.exportPDF()
+                }
+                .keyboardShortcut("p", modifiers: [.command, .shift])
+                .disabled(viewModel.currentGraph == nil)
+
+                Button("Export as SVG...") {
+                    viewModel.exportSVG()
+                }
+                .disabled(viewModel.currentGraph == nil)
             }
 
             // Edit menu additions

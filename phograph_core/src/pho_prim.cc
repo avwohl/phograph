@@ -43,6 +43,18 @@ void register_all_prims() {
     register_future_prims();
     register_channel_prims();
     register_effect_prims();
+
+    // Library primitives
+    register_math_prims();
+    register_fileio_prims();
+    register_socket_prims();
+    register_sound_prims();
+    register_midi_prims();
+    register_locale_prims();
+    register_crypto_prims();
+    register_image_prims();
+    register_bitmap_prims();
+    register_net_prims();
 }
 
 } // namespace pho

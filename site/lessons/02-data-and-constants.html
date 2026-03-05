@@ -47,13 +47,36 @@ A <strong>constant node</strong> has no input pins and one output pin. It produc
 fixed value every time it fires. The value is shown as the node&rsquo;s label.
 </p>
 
-<pre class="diagram">
-  +-------+        +--------+        +----------+
-  |   42  |        | "name" |        |   true   |
-  +---o---+        +---o----+        +----o-----+
-      |                |                  |
-  (integer)        (string)          (boolean)
-</pre>
+<svg class="diagram-svg" viewBox="0 0 480 90" width="100%" style="max-width:480px">
+  <defs><filter id="s02a" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- 42 -->
+  <g filter="url(#s02a)">
+    <rect x="20" y="10" width="110" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="20" y="10" width="110" height="28" rx="4" fill="#807333" clip-path="url(#h02a1)"/>
+    <clipPath id="h02a1"><rect x="20" y="10" width="110" height="28"/></clipPath>
+    <text x="75" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">42</text>
+    <circle cx="75" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <text x="75" y="78" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">(integer)</text>
+  <!-- "name" -->
+  <g filter="url(#s02a)">
+    <rect x="180" y="10" width="120" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="180" y="10" width="120" height="28" rx="4" fill="#807333" clip-path="url(#h02a2)"/>
+    <clipPath id="h02a2"><rect x="180" y="10" width="120" height="28"/></clipPath>
+    <text x="240" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&quot;name&quot;</text>
+    <circle cx="240" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <text x="240" y="78" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">(string)</text>
+  <!-- true -->
+  <g filter="url(#s02a)">
+    <rect x="350" y="10" width="110" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="350" y="10" width="110" height="28" rx="4" fill="#807333" clip-path="url(#h02a3)"/>
+    <clipPath id="h02a3"><rect x="350" y="10" width="110" height="28"/></clipPath>
+    <text x="405" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">true</text>
+    <circle cx="405" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <text x="405" y="78" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">(boolean)</text>
+</svg>
 
 <p>To add a constant: right-click the canvas and choose <strong>Constant</strong>.
 Then select the node and edit its value in the Inspector.</p>
@@ -72,15 +95,45 @@ An output pin can have multiple wires leaving it. The value is <em>copied</em> t
 each destination. This is called <strong>fan-out</strong>.
 </p>
 
-<pre class="diagram">
-  +-----+
-  |  5  |
-  +--o--+
-    /|\
-   / | \
-  v  v  v
- [+] [*] [log]
-</pre>
+<svg class="diagram-svg" viewBox="0 0 400 180" width="100%" style="max-width:400px">
+  <defs><filter id="s02b" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- Constant 5 -->
+  <g filter="url(#s02b)">
+    <rect x="150" y="10" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="150" y="10" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h02b1)"/>
+    <clipPath id="h02b1"><rect x="150" y="10" width="100" height="28"/></clipPath>
+    <text x="200" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">5</text>
+    <circle cx="200" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires from 5 -->
+  <path d="M 200 50 C 200 80 70 100 70 130" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 200 50 C 200 80 200 100 200 130" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 200 50 C 200 80 330 100 330 130" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- + -->
+  <g filter="url(#s02b)">
+    <rect x="20" y="130" width="100" height="40" rx="4" fill="#ebf0fa"/>
+    <rect x="20" y="130" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h02b2)"/>
+    <clipPath id="h02b2"><rect x="20" y="130" width="100" height="28"/></clipPath>
+    <text x="70" y="149" text-anchor="middle" fill="white" font-weight="bold" font-size="13">+</text>
+    <circle cx="70" cy="130" r="6" fill="#3380e6"/>
+  </g>
+  <!-- * -->
+  <g filter="url(#s02b)">
+    <rect x="150" y="130" width="100" height="40" rx="4" fill="#ebf0fa"/>
+    <rect x="150" y="130" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h02b3)"/>
+    <clipPath id="h02b3"><rect x="150" y="130" width="100" height="28"/></clipPath>
+    <text x="200" y="149" text-anchor="middle" fill="white" font-weight="bold" font-size="13">*</text>
+    <circle cx="200" cy="130" r="6" fill="#3380e6"/>
+  </g>
+  <!-- log -->
+  <g filter="url(#s02b)">
+    <rect x="280" y="130" width="100" height="40" rx="4" fill="#ebf0fa"/>
+    <rect x="280" y="130" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h02b4)"/>
+    <clipPath id="h02b4"><rect x="280" y="130" width="100" height="28"/></clipPath>
+    <text x="330" y="149" text-anchor="middle" fill="white" font-weight="bold" font-size="13">log</text>
+    <circle cx="330" cy="130" r="6" fill="#3380e6"/>
+  </g>
+</svg>
 
 <p>The constant <code>5</code> is delivered to three different nodes simultaneously.</p>
 
@@ -98,21 +151,40 @@ use a primitive like <code>+</code> or <code>concat</code> to merge them first.
 its input as output. This lets you see a value without breaking the data flow.
 </p>
 
-<pre class="diagram">
-  +-----+
-  |  7  |
-  +--o--+
-     |
-     v
-+---------+
-| inspect |   &rarr; prints "[inspect] 7" to console
-+----o----+
-     |
-     v            &larr; value 7 continues downstream
-  +-----+
-  |  +  |
-  +-----+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 420 280" width="100%" style="max-width:420px">
+  <defs><filter id="s02c" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- Constant 7 -->
+  <g filter="url(#s02c)">
+    <rect x="110" y="10" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="110" y="10" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h02c1)"/>
+    <clipPath id="h02c1"><rect x="110" y="10" width="100" height="28"/></clipPath>
+    <text x="160" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">7</text>
+    <circle cx="160" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wire 7 -> inspect -->
+  <path d="M 160 50 C 160 75 160 85 160 110" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- inspect -->
+  <g filter="url(#s02c)">
+    <rect x="100" y="110" width="120" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="100" y="110" width="120" height="28" rx="4" fill="#405999" clip-path="url(#h02c2)"/>
+    <clipPath id="h02c2"><rect x="100" y="110" width="120" height="28"/></clipPath>
+    <text x="160" y="129" text-anchor="middle" fill="white" font-weight="bold" font-size="13">inspect</text>
+    <circle cx="160" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="160" cy="156" r="6" fill="#e64d33"/>
+  </g>
+  <text x="240" y="132" fill="#718096" font-size="11" font-style="italic">prints &quot;[inspect] 7&quot;</text>
+  <!-- Wire inspect -> + -->
+  <path d="M 160 156 C 160 181 160 191 160 216" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- + -->
+  <g filter="url(#s02c)">
+    <rect x="110" y="216" width="100" height="40" rx="4" fill="#ebf0fa"/>
+    <rect x="110" y="216" width="100" height="28" rx="4" fill="#405999" clip-path="url(#h02c3)"/>
+    <clipPath id="h02c3"><rect x="110" y="216" width="100" height="28"/></clipPath>
+    <text x="160" y="235" text-anchor="middle" fill="white" font-weight="bold" font-size="13">+</text>
+    <circle cx="160" cy="216" r="6" fill="#3380e6"/>
+  </g>
+  <text x="240" y="240" fill="#718096" font-size="11" font-style="italic">value 7 continues</text>
+</svg>
 
 <div class="exercise">
   <h4>Exercise 2.1 &mdash; Multiple constants</h4>

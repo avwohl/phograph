@@ -98,6 +98,59 @@ static BOOL sPrimsInitialized = NO;
     return pho_engine_pixel_buffer(_engine, outWidth, outHeight);
 }
 
+// Console output
+
+- (nullable NSString *)consoleOutput {
+    const char *console = pho_engine_get_console(_engine);
+    if (!console || console[0] == '\0') return nil;
+    return [NSString stringWithUTF8String:console];
+}
+
+- (void)clearConsole {
+    pho_engine_clear_console(_engine);
+}
+
+// Debug support
+
+static void debugTrampoline(void* ctx, const char* json) {
+    PhographBridge* bridge = (__bridge PhographBridge*)ctx;
+    NSString* str = [NSString stringWithUTF8String:json];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (bridge.debugEventHandler) {
+            bridge.debugEventHandler(str);
+        }
+    });
+}
+
+- (void)debugRun:(NSString *)methodName {
+    pho_engine_debug_set_callback(_engine, debugTrampoline, (__bridge void*)self);
+    pho_engine_debug_run(_engine, [methodName UTF8String]);
+}
+
+- (void)debugContinue {
+    pho_engine_debug_continue(_engine);
+}
+
+- (void)debugStepOver {
+    pho_engine_debug_step_over(_engine);
+}
+
+- (void)debugStepInto {
+    pho_engine_debug_step_into(_engine);
+}
+
+- (void)debugStop {
+    pho_engine_debug_stop(_engine);
+}
+
+- (void)debugAddBreakpoint:(uint32_t)nodeId method:(NSString *)method caseIndex:(int)caseIndex {
+    pho_engine_debug_add_breakpoint(_engine, nodeId, [method UTF8String], caseIndex);
+}
+
+- (void)debugRemoveBreakpoint:(uint32_t)nodeId {
+    pho_engine_debug_remove_breakpoint(_engine, nodeId);
+}
+
 // Input event routing
 
 - (void)sendPointerDown:(float)x y:(float)y button:(int32_t)button {

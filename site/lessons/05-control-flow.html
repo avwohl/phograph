@@ -74,28 +74,52 @@ this case and try the next one.
 
 <p>Look at the <strong>Fibonacci</strong> example&rsquo;s <code>fib</code> method, case 1:</p>
 
-<pre class="diagram">
-  +---------+
-  | Inputs  |  (n)
-  +----o----+
-       |
-    +--+--------+
-    |            |
-    v            |
-+------+         |
-|  <=  | &lt;- nextCaseOnFailure
-+------+         |
-    ^            |
-    |            |
-+------+         |
-|   1  |         |
-+------+         |
-                 |
-                 v
-           +---------+
-           | Outputs |  (n)
-           +---------+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 440 380" width="100%" style="max-width:440px">
+  <defs><filter id="s05a" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- Inputs (n) -->
+  <g filter="url(#s05a)">
+    <rect x="130" y="10" width="140" height="40" rx="4" fill="#d9f2dd"/>
+    <rect x="130" y="10" width="140" height="28" rx="4" fill="#338c4d" clip-path="url(#h05a1)"/>
+    <clipPath id="h05a1"><rect x="130" y="10" width="140" height="28"/></clipPath>
+    <text x="200" y="30" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Inputs</text>
+    <circle cx="200" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <text x="285" y="32" fill="#718096" font-size="11" font-style="italic">(n)</text>
+  <!-- Fan-out wires from Inputs -->
+  <path d="M 200 50 C 200 80 120 90 120 120" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 200 50 C 200 100 300 200 300 290" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- Constant 1 -->
+  <g filter="url(#s05a)">
+    <rect x="60" y="180" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="60" y="180" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h05a2)"/>
+    <clipPath id="h05a2"><rect x="60" y="180" width="100" height="28"/></clipPath>
+    <text x="110" y="199" text-anchor="middle" fill="white" font-weight="bold" font-size="13">1</text>
+    <circle cx="110" cy="180" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wire: 1 goes up to <= (second input) -->
+  <path d="M 110 180 C 110 160 147 150 147 120" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- <= node with annotation -->
+  <g filter="url(#s05a)">
+    <rect x="70" y="80" width="120" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="70" y="80" width="120" height="28" rx="4" fill="#405999" clip-path="url(#h05a3)"/>
+    <clipPath id="h05a3"><rect x="70" y="80" width="120" height="28"/></clipPath>
+    <text x="130" y="99" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&lt;=</text>
+    <circle cx="113" cy="80" r="6" fill="#3380e6"/>
+    <circle cx="147" cy="80" r="6" fill="#3380e6"/>
+  </g>
+  <!-- Annotation badge -->
+  <rect x="200" y="88" width="140" height="20" rx="10" fill="#f59e0b" opacity="0.9"/>
+  <text x="270" y="102" text-anchor="middle" fill="white" font-weight="bold" font-size="10">nextCaseOnFailure</text>
+  <!-- Outputs (n) -->
+  <g filter="url(#s05a)">
+    <rect x="230" y="290" width="140" height="40" rx="4" fill="#f8e1e1"/>
+    <rect x="230" y="290" width="140" height="28" rx="4" fill="#b33333" clip-path="url(#h05a4)"/>
+    <clipPath id="h05a4"><rect x="230" y="290" width="140" height="28"/></clipPath>
+    <text x="300" y="309" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Outputs</text>
+    <circle cx="300" cy="290" r="6" fill="#3380e6"/>
+  </g>
+  <text x="385" y="312" fill="#718096" font-size="11" font-style="italic">(n)</text>
+</svg>
 
 <p>
 The <code>&lt;=</code> node compares <code>n</code> to <code>1</code>. It has the
@@ -141,16 +165,49 @@ primitive with 3 inputs: <code>condition</code>, <code>then-value</code>,
 <code>else-value</code>. It outputs whichever value corresponds to the condition.
 </p>
 
-<pre class="diagram">
-+------+  +-----+  +------+
-| true |  | "A" |  |  "B" |
-+--o---+  +--o--+  +--o---+
-    \        |        /
-     v       v       v
-    +----------------+
-    |       if       |     &rarr; outputs "A"
-    +-------o--------+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 440 200" width="100%" style="max-width:440px">
+  <defs><filter id="s05b" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- true -->
+  <g filter="url(#s05b)">
+    <rect x="30" y="10" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="30" y="10" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h05b1)"/>
+    <clipPath id="h05b1"><rect x="30" y="10" width="100" height="28"/></clipPath>
+    <text x="80" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">true</text>
+    <circle cx="80" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- "A" -->
+  <g filter="url(#s05b)">
+    <rect x="160" y="10" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="160" y="10" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h05b2)"/>
+    <clipPath id="h05b2"><rect x="160" y="10" width="100" height="28"/></clipPath>
+    <text x="210" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&quot;A&quot;</text>
+    <circle cx="210" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- "B" -->
+  <g filter="url(#s05b)">
+    <rect x="290" y="10" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="290" y="10" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h05b3)"/>
+    <clipPath id="h05b3"><rect x="290" y="10" width="100" height="28"/></clipPath>
+    <text x="340" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&quot;B&quot;</text>
+    <circle cx="340" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires to if -->
+  <path d="M 80 50 C 80 80 145 90 145 110" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 210 50 C 210 80 210 90 210 110" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 340 50 C 340 80 275 90 275 110" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- if node -->
+  <g filter="url(#s05b)">
+    <rect x="110" y="110" width="200" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="110" y="110" width="200" height="28" rx="4" fill="#405999" clip-path="url(#h05b4)"/>
+    <clipPath id="h05b4"><rect x="110" y="110" width="200" height="28"/></clipPath>
+    <text x="210" y="129" text-anchor="middle" fill="white" font-weight="bold" font-size="13">if</text>
+    <circle cx="145" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="210" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="275" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="210" cy="156" r="6" fill="#e64d33"/>
+  </g>
+  <text x="210" y="185" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">outputs &quot;A&quot;</text>
+</svg>
 
 <div class="exercise">
   <h4>Exercise 5.1 &mdash; Absolute value</h4>

@@ -1,0 +1,93 @@
+{
+  "name": "sound",
+  "version": "1.0.0",
+  "description": "Audio playback and synthesis primitives. Based on iospharo SoundPlugin (Audio Queue Services).",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "sound-init",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Initialize sound output. Inputs: sample rate (e.g. 44100), stereo boolean. Output: success boolean."
+    },
+    {
+      "name": "sound-play",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Play audio samples. Inputs: sample list, start index. Output: samples played count."
+    },
+    {
+      "name": "sound-stop",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Stop sound playback. Output: success boolean."
+    },
+    {
+      "name": "sound-is-running",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Check if sound output is active. Output: boolean."
+    },
+    {
+      "name": "sound-available",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get available buffer space in samples. Output: sample count."
+    },
+    {
+      "name": "sound-volume-get",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Get current volume level. Output: float 0.0-1.0."
+    },
+    {
+      "name": "sound-volume-set",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Set volume level. Input: float 0.0-1.0. Output: previous volume."
+    },
+    {
+      "name": "tone-sine",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Generate a sine wave tone. Inputs: frequency Hz, duration seconds, sample rate. Output: sample list."
+    },
+    {
+      "name": "tone-square",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Generate a square wave tone. Inputs: frequency Hz, duration seconds, sample rate. Output: sample list."
+    },
+    {
+      "name": "tone-sawtooth",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Generate a sawtooth wave. Inputs: frequency Hz, duration seconds, sample rate. Output: sample list."
+    },
+    {
+      "name": "tone-silence",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Generate silence. Inputs: duration seconds, sample rate. Output: sample list of zeros."
+    },
+    {
+      "name": "samples-mix",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Mix two sample lists by summing. Inputs: samples A, samples B. Output: mixed samples."
+    },
+    {
+      "name": "samples-concat",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Concatenate two sample lists sequentially. Inputs: samples A, samples B. Output: combined samples."
+    },
+    {
+      "name": "samples-gain",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Apply gain to samples. Inputs: samples, gain factor. Output: scaled samples."
+    }
+  ]
+}

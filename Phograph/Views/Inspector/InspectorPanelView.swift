@@ -56,6 +56,14 @@ struct InspectorPanelView: View {
                     .foregroundColor(.secondary)
             }
 
+            // Annotation
+            if node.annotation != .none {
+                LabeledContent("Annotation") {
+                    Text(node.annotation.rawValue)
+                        .foregroundColor(.secondary)
+                }
+            }
+
             // Position
             LabeledContent("Position") {
                 Text("(\(Int(node.x)), \(Int(node.y)))")
@@ -102,6 +110,12 @@ struct InspectorPanelView: View {
                 }
             }
 
+            // Library info
+            if let libName = node.libraryName {
+                Divider()
+                libraryInfoSection(libraryName: libName, primitiveName: node.label)
+            }
+
             // Constant value
             if let value = node.constantValue {
                 Divider()
@@ -120,6 +134,50 @@ struct InspectorPanelView: View {
                 ForEach(node.traceValues, id: \.self) { tv in
                     Text(tv)
                         .font(.system(.caption, design: .monospaced))
+                        .foregroundColor(.yellow)
+                }
+            }
+        }
+    }
+
+    private func libraryInfoSection(libraryName: String, primitiveName: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Library")
+                .font(.subheadline)
+                .fontWeight(.medium)
+
+            if let result = viewModel.libraryPrimitive(named: primitiveName),
+               result.library.manifest.name == libraryName {
+                let lib = result.library
+                let prim = result.primitive
+
+                LabeledContent("Library") {
+                    Text(lib.manifest.name)
+                        .foregroundColor(.purple)
+                }
+                LabeledContent("Version") {
+                    Text(lib.manifest.version)
+                        .foregroundColor(.secondary)
+                }
+                if let author = lib.manifest.author {
+                    LabeledContent("Author") {
+                        Text(author)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                if let desc = prim.description {
+                    Text(desc)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 2)
+                }
+            } else {
+                // Library not installed
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.yellow)
+                    Text("Library '\(libraryName)' not installed")
+                        .font(.caption)
                         .foregroundColor(.yellow)
                 }
             }

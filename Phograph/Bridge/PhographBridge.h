@@ -30,6 +30,20 @@ NS_ASSUME_NONNULL_BEGIN
 /// Get pixel buffer with dimensions
 - (nullable const uint8_t *)pixelBufferWidth:(int32_t *)outWidth height:(int32_t *)outHeight;
 
+/// Console output
+@property (nonatomic, readonly, nullable) NSString *consoleOutput;
+- (void)clearConsole;
+
+/// Debug support
+@property (nonatomic, copy, nullable) void (^debugEventHandler)(NSString *eventJSON);
+- (void)debugRun:(NSString *)methodName;
+- (void)debugContinue;
+- (void)debugStepOver;
+- (void)debugStepInto;
+- (void)debugStop;
+- (void)debugAddBreakpoint:(uint32_t)nodeId method:(NSString *)method caseIndex:(int)caseIndex;
+- (void)debugRemoveBreakpoint:(uint32_t)nodeId;
+
 /// Input event routing
 - (void)sendPointerDown:(float)x y:(float)y button:(int32_t)button;
 - (void)sendPointerUp:(float)x y:(float)y button:(int32_t)button;

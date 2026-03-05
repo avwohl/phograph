@@ -14,22 +14,38 @@ struct IDEWorkspaceView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear {
+            viewModel.libraryManager.discoverLibraries()
+        }
+        .sheet(isPresented: $viewModel.showLibraryManager) {
+            LibraryManagerView(viewModel: viewModel)
+        }
     }
 
     private var projectView: some View {
-        HStack(spacing: 0) {
-            ClassBrowserView(viewModel: viewModel)
-                .frame(width: 220)
+        VStack(spacing: 0) {
+            if viewModel.isDebugging {
+                DebuggerControlsView(viewModel: viewModel.debugger, ideViewModel: viewModel)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                Divider()
+            }
 
-            Divider()
+            HStack(spacing: 0) {
+                if viewModel.showSidebar {
+                    ClassBrowserView(viewModel: viewModel)
+                        .frame(width: 220)
+                    Divider()
+                }
 
-            GraphCanvasView(viewModel: viewModel)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                GraphCanvasView(viewModel: viewModel)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Divider()
-
-            InspectorPanelView(viewModel: viewModel)
-                .frame(width: 220)
+                if viewModel.showInspector {
+                    Divider()
+                    InspectorPanelView(viewModel: viewModel)
+                        .frame(width: 220)
+                }
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
@@ -67,6 +83,9 @@ struct IDEWorkspaceView: View {
                 welcomeButton("Open Project...", shortcut: "O") {
                     openProject()
                 }
+                welcomeButton("Browse Examples...", shortcut: "\u{21E7}E") {
+                    viewModel.showExampleBrowser = true
+                }
             }
             .padding(.top, 8)
 
@@ -79,6 +98,9 @@ struct IDEWorkspaceView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
+        .sheet(isPresented: $viewModel.showExampleBrowser) {
+            ExampleBrowserView(viewModel: viewModel)
+        }
     }
 
     private func welcomeButton(_ title: String, shortcut: String, action: @escaping () -> Void) -> some View {
@@ -115,9 +137,25 @@ struct IDEWorkspaceView: View {
     private func addNodeFromFuzzyFinder(name: String) {
         guard let graph = viewModel.currentGraph else { return }
         let node = GraphNodeModel(x: 200, y: 200, label: name, nodeType: "primitive")
-        node.inputPins = [PinModel(name: "in", index: 0)]
-        node.outputPins = [PinModel(name: "out", index: 0)]
+
+        // Look up correct pin counts from library primitives
+        if let result = viewModel.libraryPrimitive(named: name) {
+            let prim = result.primitive
+            for i in 0..<prim.num_inputs {
+                node.inputPins.append(PinModel(name: "in\(i)", index: i))
+            }
+            for i in 0..<prim.num_outputs {
+                node.outputPins.append(PinModel(name: "out\(i)", index: i))
+            }
+            node.libraryName = result.library.manifest.name
+        } else {
+            node.inputPins = [PinModel(name: "in", index: 0)]
+            node.outputPins = [PinModel(name: "out", index: 0)]
+        }
+
         node.height = node.computeHeight()
+        let labelWidth = CGFloat(name.count) * 9.5 + 40
+        node.width = max(node.width, labelWidth)
         graph.addNode(node)
         viewModel.showFuzzyFinder = false
     }

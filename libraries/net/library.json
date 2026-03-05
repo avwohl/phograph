@@ -1,0 +1,27 @@
+{
+  "name": "net",
+  "version": "1.0.0",
+  "description": "Network and JSON primitives for fetching data and parsing responses.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "http-get",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Fetch a URL via HTTP GET and return the response body"
+    },
+    {
+      "name": "http-post",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "POST data to a URL and return the response body"
+    },
+    {
+      "name": "json-parse",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Parse a JSON string into a dictionary or list"
+    }
+  ]
+}

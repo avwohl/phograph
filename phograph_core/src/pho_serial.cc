@@ -184,15 +184,15 @@ static ControlType parse_control(const std::string& s) {
 
 static NodeType parse_node_type(const std::string& s) {
     if (s == "primitive") return NodeType::Primitive;
-    if (s == "method-call") return NodeType::MethodCall;
+    if (s == "method-call" || s == "method_call") return NodeType::MethodCall;
     if (s == "constant") return NodeType::Constant;
-    if (s == "input-bar") return NodeType::InputBar;
-    if (s == "output-bar") return NodeType::OutputBar;
+    if (s == "input-bar" || s == "input_bar") return NodeType::InputBar;
+    if (s == "output-bar" || s == "output_bar") return NodeType::OutputBar;
     if (s == "get") return NodeType::Get;
     if (s == "set") return NodeType::Set;
-    if (s == "instance-generator") return NodeType::InstanceGenerator;
+    if (s == "instance-generator" || s == "instance_generator") return NodeType::InstanceGenerator;
     if (s == "persistent") return NodeType::Persistent;
-    if (s == "local-method") return NodeType::LocalMethod;
+    if (s == "local-method" || s == "local_method") return NodeType::LocalMethod;
     if (s == "evaluation") return NodeType::Evaluation;
     if (s == "inject") return NodeType::Inject;
     return NodeType::Primitive;
@@ -215,6 +215,14 @@ static Value parse_constant_value(const JsonValue& jv) {
             elems.push_back(parse_constant_value(e));
         }
         return Value::list(std::move(elems));
+    }
+    if (jv.type == JsonType::Object) {
+        auto type_str = jv.get_string("type");
+        auto* val = jv.get("value");
+        if (!type_str.empty() && val) {
+            return parse_constant_value(*val);
+        }
+        return Value::null_val();
     }
     return Value::null_val();
 }

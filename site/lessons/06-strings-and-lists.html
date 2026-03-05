@@ -36,16 +36,39 @@ and lists (ordered collections).
 
 <h3>Example: greeting</h3>
 
-<pre class="diagram">
-+----------+   +--------+
-| "Hello, " |   | "Ada"  |
-+-----o-----+   +---o----+
-       \            /
-        v          v
-      +--------+
-      | concat |         &rarr; "Hello, Ada"
-      +---o----+
-</pre>
+<svg class="diagram-svg" viewBox="0 0 420 180" width="100%" style="max-width:420px">
+  <defs><filter id="s06a" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- "Hello, " -->
+  <g filter="url(#s06a)">
+    <rect x="30" y="10" width="140" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="30" y="10" width="140" height="28" rx="4" fill="#807333" clip-path="url(#h06a1)"/>
+    <clipPath id="h06a1"><rect x="30" y="10" width="140" height="28"/></clipPath>
+    <text x="100" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&quot;Hello, &quot;</text>
+    <circle cx="100" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- "Ada" -->
+  <g filter="url(#s06a)">
+    <rect x="220" y="10" width="120" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="220" y="10" width="120" height="28" rx="4" fill="#807333" clip-path="url(#h06a2)"/>
+    <clipPath id="h06a2"><rect x="220" y="10" width="120" height="28"/></clipPath>
+    <text x="280" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&quot;Ada&quot;</text>
+    <circle cx="280" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires to concat -->
+  <path d="M 100 50 C 100 75 157 85 157 110" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 280 50 C 280 75 223 85 223 110" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- concat -->
+  <g filter="url(#s06a)">
+    <rect x="120" y="110" width="140" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="120" y="110" width="140" height="28" rx="4" fill="#405999" clip-path="url(#h06a3)"/>
+    <clipPath id="h06a3"><rect x="120" y="110" width="140" height="28"/></clipPath>
+    <text x="190" y="129" text-anchor="middle" fill="white" font-weight="bold" font-size="13">concat</text>
+    <circle cx="157" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="223" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="190" cy="156" r="6" fill="#e64d33"/>
+  </g>
+  <text x="190" y="178" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">&quot;Hello, Ada&quot;</text>
+</svg>
 
 <h2>List primitives</h2>
 
@@ -77,21 +100,61 @@ There is no list-literal node yet. To build a list, start with an empty list
 and <code>append</code> elements:
 </p>
 
-<pre class="diagram">
-   +------+
-   |  ()  |       (empty list constant)
-   +--o---+
-      |      +-----+
-      v      | "a" |
-  +--------+ +--o--+
-  | append |&lt;--+
-  +---o----+
-      |      +-----+
-      v      | "b" |
-  +--------+ +--o--+
-  | append |&lt;--+
-  +---o----+       &rarr; ("a", "b")
-</pre>
+<svg class="diagram-svg" viewBox="0 0 420 320" width="100%" style="max-width:420px">
+  <defs><filter id="s06b" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>
+  <!-- () empty list -->
+  <g filter="url(#s06b)">
+    <rect x="80" y="10" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="80" y="10" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h06b1)"/>
+    <clipPath id="h06b1"><rect x="80" y="10" width="100" height="28"/></clipPath>
+    <text x="130" y="29" text-anchor="middle" fill="white" font-weight="bold" font-size="13">()</text>
+    <circle cx="130" cy="50" r="6" fill="#e64d33"/>
+  </g>
+  <text x="200" y="32" fill="#718096" font-size="11" font-style="italic">empty list</text>
+  <!-- "a" -->
+  <g filter="url(#s06b)">
+    <rect x="240" y="60" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="240" y="60" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h06b2)"/>
+    <clipPath id="h06b2"><rect x="240" y="60" width="100" height="28"/></clipPath>
+    <text x="290" y="79" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&quot;a&quot;</text>
+    <circle cx="290" cy="100" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires to first append -->
+  <path d="M 130 50 C 130 75 113 90 113 110" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 290 100 C 290 105 167 105 167 110" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- first append -->
+  <g filter="url(#s06b)">
+    <rect x="70" y="110" width="140" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="70" y="110" width="140" height="28" rx="4" fill="#405999" clip-path="url(#h06b3)"/>
+    <clipPath id="h06b3"><rect x="70" y="110" width="140" height="28"/></clipPath>
+    <text x="140" y="129" text-anchor="middle" fill="white" font-weight="bold" font-size="13">append</text>
+    <circle cx="113" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="167" cy="110" r="6" fill="#3380e6"/>
+    <circle cx="140" cy="156" r="6" fill="#e64d33"/>
+  </g>
+  <!-- "b" -->
+  <g filter="url(#s06b)">
+    <rect x="240" y="170" width="100" height="40" rx="4" fill="#faf5e0"/>
+    <rect x="240" y="170" width="100" height="28" rx="4" fill="#807333" clip-path="url(#h06b4)"/>
+    <clipPath id="h06b4"><rect x="240" y="170" width="100" height="28"/></clipPath>
+    <text x="290" y="189" text-anchor="middle" fill="white" font-weight="bold" font-size="13">&quot;b&quot;</text>
+    <circle cx="290" cy="210" r="6" fill="#e64d33"/>
+  </g>
+  <!-- Wires to second append -->
+  <path d="M 140 156 C 140 180 113 195 113 220" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <path d="M 290 210 C 290 215 167 215 167 220" fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+  <!-- second append -->
+  <g filter="url(#s06b)">
+    <rect x="70" y="220" width="140" height="46" rx="4" fill="#ebf0fa"/>
+    <rect x="70" y="220" width="140" height="28" rx="4" fill="#405999" clip-path="url(#h06b5)"/>
+    <clipPath id="h06b5"><rect x="70" y="220" width="140" height="28"/></clipPath>
+    <text x="140" y="239" text-anchor="middle" fill="white" font-weight="bold" font-size="13">append</text>
+    <circle cx="113" cy="220" r="6" fill="#3380e6"/>
+    <circle cx="167" cy="220" r="6" fill="#3380e6"/>
+    <circle cx="140" cy="266" r="6" fill="#e64d33"/>
+  </g>
+  <text x="140" y="295" text-anchor="middle" fill="#718096" font-size="11" font-style="italic">(&quot;a&quot;, &quot;b&quot;)</text>
+</svg>
 
 <h2>Walkthrough: String Processing example</h2>
 

@@ -8,15 +8,27 @@ class GraphEditorViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var isDraggingNode: Bool = false
     @Published var isDraggingWire: Bool = false
+    @Published var selectionRect: CGRect? = nil
+
+    /// Wire drag endpoints in graph coordinates (rendered inside graphContent)
+    @Published var wireStartGraph: CGPoint = .zero
+    @Published var wireEndGraph: CGPoint = .zero
+
+    /// Legacy screen-space endpoints (kept for compatibility)
     @Published var wireStartPoint: CGPoint = .zero
     @Published var wireEndPoint: CGPoint = .zero
-    @Published var selectionRect: CGRect? = nil
+
+    /// Which direction we're dragging: from an output (looking for input) or from an input (looking for output)
+    enum WireDragDirection { case fromOutput, fromInput }
+    var wireDragDirection: WireDragDirection = .fromOutput
+
+    /// The source pin of the wire being dragged (always the output end)
+    var wireDragSourceNodeId: UUID?
+    var wireDragSourcePinIndex: Int = 0
 
     weak var graph: GraphModel?
     private var dragNodeId: UUID?
     private var dragStartOffset: CGPoint = .zero
-    private var wireSourceNodeId: UUID?
-    private var wireSourcePinIndex: Int = 0
 
     // Convert screen point to graph coordinates
     func screenToGraph(_ point: CGPoint) -> CGPoint {
@@ -97,9 +109,90 @@ class GraphEditorViewModel: ObservableObject {
 
     // MARK: - Wire Dragging
 
+    /// Start dragging a new wire from an output pin
+    func beginWireDragFromOutput(nodeId: UUID, pinIndex: Int, graphPos: CGPoint) {
+        wireDragDirection = .fromOutput
+        wireDragSourceNodeId = nodeId
+        wireDragSourcePinIndex = pinIndex
+        wireStartGraph = graphPos
+        wireEndGraph = graphPos
+        isDraggingWire = true
+    }
+
+    /// Detach an existing wire from an input pin and start dragging its loose end
+    /// Returns true if a wire was detached
+    @discardableResult
+    func detachAndDragFromInput(nodeId: UUID, pinIndex: Int, graphPos: CGPoint) -> Bool {
+        guard let graph = graph,
+              let wire = graph.wireToInput(nodeId: nodeId, pinIndex: pinIndex) else {
+            return false
+        }
+        // Remember the source (output) end of the detached wire
+        let srcNodeId = wire.sourceNodeId
+        let srcPin = wire.sourcePin
+
+        // Remove the wire
+        graph.removeWire(id: wire.id)
+
+        // Find the output pin's graph position
+        if let srcNode = graph.nodes.first(where: { $0.id == srcNodeId }) {
+            let px = CGFloat(srcPin + 1) * srcNode.width / CGFloat(srcNode.outputPins.count + 1)
+            let srcGraphPos = CGPoint(x: srcNode.x + px, y: srcNode.y + srcNode.height)
+
+            // Start dragging from the source output, looking for a new input to connect to
+            wireDragDirection = .fromOutput
+            wireDragSourceNodeId = srcNodeId
+            wireDragSourcePinIndex = srcPin
+            wireStartGraph = srcGraphPos
+            wireEndGraph = graphPos
+            isDraggingWire = true
+            return true
+        }
+        return false
+    }
+
+    func updateWireDragGraph(to graphPoint: CGPoint) {
+        wireEndGraph = graphPoint
+    }
+
+    /// End wire drag and try to connect. Returns true if a connection was made.
+    @discardableResult
+    func endWireDragAndConnect() -> Bool {
+        isDraggingWire = false
+        guard let graph = graph, let sourceNodeId = wireDragSourceNodeId else {
+            return false
+        }
+
+        let dropPoint = wireEndGraph
+        var connected = false
+
+        // We're dragging from an output, looking for an input pin to connect to
+        if let target = graph.findNearestInputPin(at: dropPoint, threshold: 25 / zoomScale) {
+            // Don't connect to the same node
+            if target.nodeId != sourceNodeId {
+                // Remove any existing wire to this input (one wire per input)
+                if let existing = graph.wireToInput(nodeId: target.nodeId, pinIndex: target.pinIndex) {
+                    graph.removeWire(id: existing.id)
+                }
+                let wire = GraphWireModel(
+                    sourceNodeId: sourceNodeId,
+                    sourcePin: wireDragSourcePinIndex,
+                    destNodeId: target.nodeId,
+                    destPin: target.pinIndex
+                )
+                graph.addWire(wire)
+                connected = true
+            }
+        }
+
+        wireDragSourceNodeId = nil
+        return connected
+    }
+
+    // Legacy wire drag methods (kept for compatibility)
     func beginWireDrag(nodeId: UUID, pinIndex: Int, screenPoint: CGPoint) {
-        wireSourceNodeId = nodeId
-        wireSourcePinIndex = pinIndex
+        wireDragSourceNodeId = nodeId
+        wireDragSourcePinIndex = pinIndex
         wireStartPoint = screenPoint
         wireEndPoint = screenPoint
         isDraggingWire = true
@@ -111,24 +204,22 @@ class GraphEditorViewModel: ObservableObject {
 
     func endWireDrag(at screenPoint: CGPoint) -> (UUID, Int)? {
         isDraggingWire = false
-        guard let sourceId = wireSourceNodeId else { return nil }
+        guard let sourceId = wireDragSourceNodeId else { return nil }
 
         let graphPoint = screenToGraph(screenPoint)
-        // Find target node/pin at this position
         if let targetNode = graph?.nodeAt(point: graphPoint),
            targetNode.id != sourceId {
-            // Create wire
             let wire = GraphWireModel(
                 sourceNodeId: sourceId,
-                sourcePin: wireSourcePinIndex,
+                sourcePin: wireDragSourcePinIndex,
                 destNodeId: targetNode.id,
-                destPin: 0 // Simplified: connect to first input
+                destPin: 0
             )
             graph?.addWire(wire)
             return (targetNode.id, 0)
         }
 
-        wireSourceNodeId = nil
+        wireDragSourceNodeId = nil
         return nil
     }
 

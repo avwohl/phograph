@@ -1,0 +1,111 @@
+{
+  "name": "crypto",
+  "version": "1.0.0",
+  "description": "Cryptographic hashing, encoding, and digital signature primitives. Based on iospharo DSAPrims and SqueakSSL.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "sha256",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Compute SHA-256 hash. Input: data string. Output: hex digest string."
+    },
+    {
+      "name": "sha1",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Compute SHA-1 hash. Input: data string. Output: hex digest string."
+    },
+    {
+      "name": "md5",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Compute MD5 hash. Input: data string. Output: hex digest string."
+    },
+    {
+      "name": "hmac-sha256",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Compute HMAC-SHA256. Inputs: key, message. Output: hex digest string."
+    },
+    {
+      "name": "hmac-sha1",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Compute HMAC-SHA1. Inputs: key, message. Output: hex digest string."
+    },
+    {
+      "name": "random-bytes",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Generate cryptographically secure random bytes. Input: count. Output: byte list."
+    },
+    {
+      "name": "random-int",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Generate a cryptographically secure random integer in range. Inputs: min, max. Output: integer."
+    },
+    {
+      "name": "uuid",
+      "num_inputs": 0,
+      "num_outputs": 1,
+      "description": "Generate a version-4 UUID string. Output: UUID string (e.g. \"550e8400-e29b-41d4-a716-446655440000\")."
+    },
+    {
+      "name": "base64-encode",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Encode data as Base64. Input: data string. Output: Base64 string."
+    },
+    {
+      "name": "base64-decode",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Decode a Base64 string. Input: Base64 string. Output: data string."
+    },
+    {
+      "name": "hex-encode",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Encode data as hexadecimal. Input: data string. Output: hex string."
+    },
+    {
+      "name": "hex-decode",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Decode a hexadecimal string. Input: hex string. Output: data string."
+    },
+    {
+      "name": "dsa-verify",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Verify a DSA signature. Inputs: public key, data, signature. Output: boolean valid."
+    },
+    {
+      "name": "ssl-connect",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Establish an SSL/TLS connection. Inputs: host, port. Output: ssl handle."
+    },
+    {
+      "name": "ssl-send",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Send data over SSL. Inputs: ssl handle, data. Output: bytes sent."
+    },
+    {
+      "name": "ssl-recv",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Receive data over SSL. Inputs: ssl handle, max bytes. Output: data string."
+    },
+    {
+      "name": "ssl-close",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Close an SSL connection. Input: ssl handle. Output: success boolean."
+    }
+  ]
+}

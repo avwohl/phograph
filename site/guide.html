@@ -49,6 +49,8 @@ covers the IDE&rsquo;s windows, menus, and workflows.
   <tr><td>Browse Examples&hellip;</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td><td>Open the Example Browser</td></tr>
   <tr><td>Save Project</td><td><kbd>Cmd</kbd>+<kbd>S</kbd></td><td>Save to the current file</td></tr>
   <tr><td>Save Project As&hellip;</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Save to a new file</td></tr>
+  <tr><td>Export as PDF&hellip;</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Export current graph as vector PDF</td></tr>
+  <tr><td>Export as SVG&hellip;</td><td>&mdash;</td><td>Export current graph as SVG</td></tr>
 </table>
 
 <h2>Edit Menu</h2>
@@ -177,6 +179,25 @@ Click one to load it into the workspace.
   <li>Wire values are shown as labels during debugging (trace overlay).</li>
   <li>Press <kbd>Cmd</kbd>+<kbd>.</kbd> to stop at any time.</li>
 </ol>
+
+<h2>Exporting Graphs</h2>
+
+<p>
+You can export the current graph as a vector graphic for use outside the IDE.
+</p>
+
+<ul>
+  <li><strong>Export as PDF</strong> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>)
+      &mdash; saves a vector PDF of the current graph. Nodes, wires, and labels
+      are fully scalable and look sharp at any zoom level.</li>
+  <li><strong>Export as SVG</strong> &mdash; saves a scalable vector graphic
+      suitable for embedding in web pages, documentation, or presentations.</li>
+</ul>
+
+<p>
+Both formats preserve the exact visual layout of the canvas: node colors,
+pin positions, and Bezier wire curves.
+</p>
 
 <h2>Saving and Loading</h2>
 

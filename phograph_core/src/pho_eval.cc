@@ -148,6 +148,18 @@ EvalResult Evaluator::eval_case(Project& project, const Case& c,
                 target_ns.inputs[w->target.index] = ns.outputs[w->source.index];
                 target_ns.inputs_filled++;
 
+                // Record trace entry for debugger
+                if (debugger_ && debugger_->is_tracing()) {
+                    TraceEntry entry;
+                    entry.source_node = nid;
+                    entry.source_pin = w->source.index;
+                    entry.dest_node = w->target.node_id;
+                    entry.dest_pin = w->target.index;
+                    entry.value = ns.outputs[w->source.index];
+                    entry.step_number = steps;
+                    debugger_->record_trace(entry);
+                }
+
                 // Check if target node is now ready
                 const Node* target_node = c.find_node(w->target.node_id);
                 if (target_node && !target_ns.executed) {
@@ -157,6 +169,14 @@ EvalResult Evaluator::eval_case(Project& project, const Case& c,
                         ready.push(w->target.node_id);
                     }
                 }
+            }
+        }
+
+        // Debugger: step completed check
+        if (debugger_) {
+            debugger_->step_completed(nid);
+            if (debugger_->stop_requested()) {
+                return EvalResult::make_error("execution stopped by debugger");
             }
         }
 

@@ -19,17 +19,33 @@ targets:
       - path: phograph_core/src
         excludes:
           - "pho_platform_stub.cc"
+    postCompileScripts:
+      - script: |
+          mkdir -p "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries"
+          cp -R "$SRCROOT/libraries/" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries/"
+        name: Copy Bundled Libraries
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.phograph.app
         PRODUCT_NAME: Phograph
         GENERATE_INFOPLIST_FILE: YES
         MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: 1
+        CURRENT_PROJECT_VERSION: 2
         SWIFT_OBJC_BRIDGING_HEADER: Phograph/Bridge/Phograph-Bridging-Header.h
         HEADER_SEARCH_PATHS:
           - $(SRCROOT)/phograph_core/src
+          - $(SRCROOT)/phograph_core/src/plugins
         CLANG_CXX_LANGUAGE_STANDARD: c++17
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - sdk: AudioToolbox.framework
+      - sdk: CoreMIDI.framework
+      - sdk: CoreGraphics.framework
+      - sdk: ImageIO.framework
+      - sdk: CoreServices.framework
+      - sdk: CoreFoundation.framework
+      - sdk: Security.framework
     entitlements:
       path: Phograph/Phograph.entitlements
       properties:

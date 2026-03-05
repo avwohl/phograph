@@ -112,6 +112,14 @@ pre.diagram {
   line-height: 1.6;
 }
 
+/* SVG dataflow diagrams */
+.diagram-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1rem auto 1.25rem;
+}
+
 /* Concept callouts */
 .callout {
   border-left: 4px solid var(--info);

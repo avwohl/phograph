@@ -1,0 +1,39 @@
+{
+  "name": "math",
+  "version": "1.0.0",
+  "description": "Mathematical utility primitives including factorial, fibonacci, GCD, and primality testing.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "factorial",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Compute the factorial of a non-negative integer"
+    },
+    {
+      "name": "fibonacci",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Compute the nth Fibonacci number"
+    },
+    {
+      "name": "gcd",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Compute the greatest common divisor of two integers"
+    },
+    {
+      "name": "lcm",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Compute the least common multiple of two integers"
+    },
+    {
+      "name": "is-prime",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Test whether an integer is prime"
+    }
+  ]
+}

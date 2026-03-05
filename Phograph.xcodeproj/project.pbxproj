@@ -8,52 +8,78 @@
 
 /* Begin PBXBuildFile section */
 		0505653916DCACC25F7D386E /* pho_codegen.cc in Sources */ = {isa = PBXBuildFile; fileRef = B0ADC1AEF3B99C3F7F960566 /* pho_codegen.cc */; };
+		05B9D376F4589B7BD9664D39 /* SoundPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9A52A51EBEE24DF267422749 /* SoundPlugin.cpp */; };
 		151132FA4A5896B849B0D88A /* DebuggerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DA829A4E71950465B879EDC /* DebuggerViewModel.swift */; };
 		15A0D0B6493BA08B72330A8B /* pho_serial.cc in Sources */ = {isa = PBXBuildFile; fileRef = 78CA6A5A88D3DE1FC331CE9A /* pho_serial.cc */; };
 		17D1075A7FA2846B696D3D82 /* GraphEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86EAFD6622CDFA143D60A9 /* GraphEditorViewModel.swift */; };
 		1865DE5B93671B6C42ABFE4F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BDBF2378B37816E503D425B /* ContentView.swift */; };
+		1B5D8F12E55EE75348143571 /* pho_prim_sound.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3FEB401FDE0890377BE8DD24 /* pho_prim_sound.cc */; };
+		1C3D96601C66DFB9609CC8B2 /* pho_prim_bitmap.cc in Sources */ = {isa = PBXBuildFile; fileRef = F68E80E63511A5668B5DC4E9 /* pho_prim_bitmap.cc */; };
+		1FD72047ED276A5348CA1695 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D253EF63213D4F5C854260F8 /* AudioToolbox.framework */; };
+		23242A65648CBEB6C9B17D8B /* pho_prim_midi.cc in Sources */ = {isa = PBXBuildFile; fileRef = D8F2271554AE17BE475B8EC3 /* pho_prim_midi.cc */; };
 		26F715E7232CCFD3D72740FB /* pho_prim_input.cc in Sources */ = {isa = PBXBuildFile; fileRef = 701E4E7FB3952BA220D6C779 /* pho_prim_input.cc */; };
 		2F623A674A568C0CF732996C /* pho_prim_scene.cc in Sources */ = {isa = PBXBuildFile; fileRef = F26A83D0E05BCC3AD9239013 /* pho_prim_scene.cc */; };
 		351A22555E8C618443365EF8 /* pho_platform_apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = AF7E8476E014DCEE1A6D9A33 /* pho_platform_apple.mm */; };
 		35B8CCE7C5F68EF4B88C7C83 /* GraphModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC17F36E5FB9BD95BF139FF5 /* GraphModel.swift */; };
 		3B56E28510E8B5CFFA90E112 /* pho_prim_compare.cc in Sources */ = {isa = PBXBuildFile; fileRef = A707EBA1B043462C0643B175 /* pho_prim_compare.cc */; };
 		3E100E667DBCF6A1090E5451 /* InspectorPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C76D19446080D8DEFBC98C1C /* InspectorPanelView.swift */; };
+		3E59EF66663A47240536AA98 /* pho_prim_fileio.cc in Sources */ = {isa = PBXBuildFile; fileRef = 60942FAFE50962C53EE610C0 /* pho_prim_fileio.cc */; };
 		43467022BAD99308602C1188 /* PhographRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1806A1B8FDABADAFFD28B33A /* PhographRuntime.swift */; };
 		43D820B485A5F9643B9F32F3 /* pho_prim_logic.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5555ECC8C3D2E9ADAC123FEE /* pho_prim_logic.cc */; };
+		58129B41909D7B112881CE8E /* LibraryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F99B5E14CDBDEBFCC32554 /* LibraryModel.swift */; };
 		605ED3388A746AEA67259477 /* pho_prim_arith.cc in Sources */ = {isa = PBXBuildFile; fileRef = 0A5371F2514E62AEE3876281 /* pho_prim_arith.cc */; };
 		6B0DE6CF6F0F031C6F19B906 /* pho_draw.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69F29F6DE5E2975C0543CA37 /* pho_draw.cc */; };
 		6B45FADC48978EF74FC6B57F /* pho_prim_anim.cc in Sources */ = {isa = PBXBuildFile; fileRef = 65E90C9FF9B2927DFDB227C6 /* pho_prim_anim.cc */; };
+		7174C7231DF0920D6B9FB4EF /* pho_prim_image.cc in Sources */ = {isa = PBXBuildFile; fileRef = 515C80815BD5134617ADE267 /* pho_prim_image.cc */; };
 		75FEF62F9E43330D3FB9CB97 /* pho_prim_canvas.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57403738A3318DFF2E519EE2 /* pho_prim_canvas.cc */; };
 		79CA4BCD203B6F225D176F83 /* pho_prim_type.cc in Sources */ = {isa = PBXBuildFile; fileRef = DEDD4B17208383C872AAC9DE /* pho_prim_type.cc */; };
 		79F1515968476DB80D8B9FD7 /* ClassBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77830459694BCAF37123AD6 /* ClassBrowserView.swift */; };
 		7B6DB96CC330101150F9E872 /* DebuggerControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931E94D5F9E4680786AFF2B9 /* DebuggerControlsView.swift */; };
+		7CCE963803033F967DB1B8CD /* pho_prim_socket.cc in Sources */ = {isa = PBXBuildFile; fileRef = 38689107DA4C8E8C21E96A31 /* pho_prim_socket.cc */; };
 		7DE5F5D03831F9464FF4F77F /* pho_prim_future.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2211ECBF8C2AA9B14EE8A001 /* pho_prim_future.cc */; };
+		7F25D26A0743B1CC78049FE3 /* pho_prim_locale.cc in Sources */ = {isa = PBXBuildFile; fileRef = 394DC90DDB00A442787CE8DE /* pho_prim_locale.cc */; };
+		847883AAD5F88522EA25F32C /* ExampleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C79A4E3C515257FEC6E3259 /* ExampleCatalog.swift */; };
 		8997F80ED8481072503798A7 /* pho_prim.cc in Sources */ = {isa = PBXBuildFile; fileRef = 840BBDA39067CF34271709FD /* pho_prim.cc */; };
 		8A53CC300B9AC4D27207FDB8 /* pho_thread.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2398B5E8422D003EA71D484B /* pho_thread.cc */; };
 		8CA5E909A8F812CA974F6EC8 /* pho_value.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5921BAFF4D0EA32A19423869 /* pho_value.cc */; };
 		8EDB75C4C140710EC2FCC356 /* PhographApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C174D3AEE64848299E5BCDE /* PhographApp.swift */; };
+		8F5DD0B584C941CF3C789E87 /* GraphExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4747E319E463688FE7172612 /* GraphExporter.swift */; };
 		8FFD877CD52ABCD300EDF943 /* pho_debug.cc in Sources */ = {isa = PBXBuildFile; fileRef = 65C85F08CA77176A5FA9AB45 /* pho_debug.cc */; };
+		96C3121E38602EBD2BA7C520 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A8E107BE4E0AF4D74157D73 /* CoreMIDI.framework */; };
 		9C2129DEC8DD31919315C4E7 /* TraceOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7769B3A96B086FFDDC51271D /* TraceOverlayView.swift */; };
+		9EB40F5E3CA5A133F8AC3E52 /* pho_prim_math.cc in Sources */ = {isa = PBXBuildFile; fileRef = 716E791274C7816A1B2C7BE8 /* pho_prim_math.cc */; };
+		A58747C4225163D5BB3DBFFE /* MIDIPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 21A6BB6F29F91492D4907EAD /* MIDIPlugin.cpp */; };
 		A6A757EB417F0B4DB8420E28 /* pho_prim_error.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2E0EA23C0877169E918EE279 /* pho_prim_error.cc */; };
 		A7499F8834953332FEE25F3A /* pho_prim_dict.cc in Sources */ = {isa = PBXBuildFile; fileRef = 010F3E4AB40711C80DDDA9BE /* pho_prim_dict.cc */; };
+		ABC8AE82D2CE25711C566A91 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1556B05FDF6DB2CFD4687859 /* Security.framework */; };
+		B68A433629F30E014B40EF93 /* LibraryManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC6A0FD9EA961784FDB66CE /* LibraryManagerView.swift */; };
 		B9FBE913140A37BFC927EB37 /* pho_prim_draw.cc in Sources */ = {isa = PBXBuildFile; fileRef = CB645910513AB2F99294E549 /* pho_prim_draw.cc */; };
 		BB4E874294E68A477EDAC328 /* pho_bridge.cc in Sources */ = {isa = PBXBuildFile; fileRef = C3B75A4DDD4EA0D245D25219 /* pho_bridge.cc */; };
 		BC2B57A39525F24D6ED9AE12 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F7CF26D14A56E3C8367C05 /* ToolbarView.swift */; };
+		BE2C32124041335C3B20E394 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7131313DA0EF9F85705CC070 /* ImageIO.framework */; };
 		BE7B7F3403B0E0BB435128B2 /* pho_prim_effect.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3051005097E7F9AB1FEED61A /* pho_prim_effect.cc */; };
+		BEAC3FA064B3A82104B7BBB9 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3ED112F1C37D46758A9AD22 /* CoreFoundation.framework */; };
+		C10FA3A39B3EE69681909800 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72FDD89D54B48B58C831E3EC /* CoreServices.framework */; };
 		C1F0829D1768C6EF3D0BB4C0 /* pho_prim_data.cc in Sources */ = {isa = PBXBuildFile; fileRef = D52BCD2F370FC7ED1914D579 /* pho_prim_data.cc */; };
 		CB34D75DD1D4766F99BF7636 /* IDEViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF280DEB21A6BF89B4056E /* IDEViewModel.swift */; };
 		CC0A5EE7C79CC847FC819CA9 /* pho_prim_io.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4DC9C35BA36329123C3F8D6A /* pho_prim_io.cc */; };
 		CF098C0B25A8D5DA02C16441 /* ProjectModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC069BB3AF8DDE44DBD7DB3A /* ProjectModel.swift */; };
+		D5792B53B26C3ECDF055ADCC /* ExampleBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329F70B25D61746AAA201CB7 /* ExampleBrowserView.swift */; };
 		D7B95B05D00068367359DBF0 /* pho_eval.cc in Sources */ = {isa = PBXBuildFile; fileRef = EC0D3842E5869AB8E7B3372D /* pho_eval.cc */; };
 		DABD06000B1CED9AE7106227 /* pho_prim_string.cc in Sources */ = {isa = PBXBuildFile; fileRef = 92E0D1790F391A3CBBAB8030 /* pho_prim_string.cc */; };
+		DD41637F7CBD27BFC22D5F45 /* pho_prim_net.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6FF8F9022B82B5216D2BE773 /* pho_prim_net.cc */; };
 		E07473846353ED4647262C8D /* GraphCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D3C7145D803517BA3C5A4A /* GraphCanvasView.swift */; };
 		E1607F7741FBA7D47E25D640 /* pho_prim_channel.cc in Sources */ = {isa = PBXBuildFile; fileRef = 664CA750F27D61771D2A6898 /* pho_prim_channel.cc */; };
 		E2F87DBDCE52205FFBE323A0 /* pho_prim_list.cc in Sources */ = {isa = PBXBuildFile; fileRef = 327C11ABE73A1F44955D56BC /* pho_prim_list.cc */; };
 		E386C090CC9A7CE741DB5CE5 /* PhographCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB72D30CAE7D718FBE676D61 /* PhographCanvasView.swift */; };
+		E6A02B605F7E4154BB257E05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9DFEA6AD89EDA84947FF916E /* Assets.xcassets */; };
+		E90C9315CEFF5C979F5F9E0E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 391BD8263B270B9C34E5B16C /* CoreGraphics.framework */; };
+		ECDC400FD2940663FC6738AE /* LibraryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985C19BF8D2068D21B7B6055 /* LibraryManager.swift */; };
 		EEE22245A088E0B53D83C86D /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7D5729CBF8321E9A7ABFE7B /* MetalRenderer.swift */; };
 		EF332E3897056343D48F01C9 /* IDEWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E4C90A198AB065ECDD57A7 /* IDEWorkspaceView.swift */; };
 		EFB3FBE382B87EF74345CFCB /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 89E66D548939DECE7EB77F9A /* Shaders.metal */; };
 		F1FF5056A892916CA57832CD /* CallStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18338E0F3CD7081F92830742 /* CallStackView.swift */; };
+		F283F1524EAC80BE30E7D6E6 /* pho_prim_crypto.cc in Sources */ = {isa = PBXBuildFile; fileRef = 797ED897EE088C4CD685FA7D /* pho_prim_crypto.cc */; };
 		F87749AFE52AE28C12D28158 /* FuzzyFinderPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447F92C566566BA1E5104661 /* FuzzyFinderPopup.swift */; };
 		FA0F01EB3113CC4332FE1C85 /* PhographBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 520B767AF95577087AE754B9 /* PhographBridge.mm */; };
 /* End PBXBuildFile section */
@@ -65,44 +91,68 @@
 		05BDFDD2D5731A06B8341A46 /* pho_codegen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_codegen.h; sourceTree = "<group>"; };
 		0A5371F2514E62AEE3876281 /* pho_prim_arith.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_arith.cc; sourceTree = "<group>"; };
 		0E204BA10ADEED03DFA06404 /* pho_fuzzy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_fuzzy.h; sourceTree = "<group>"; };
+		0FF44E8BEA3C4AEC9E450BF6 /* MIDIPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MIDIPlugin.h; sourceTree = "<group>"; };
 		150E930BA55604621D711B3E /* pho_prim.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_prim.h; sourceTree = "<group>"; };
+		1556B05FDF6DB2CFD4687859 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		1806A1B8FDABADAFFD28B33A /* PhographRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhographRuntime.swift; sourceTree = "<group>"; };
 		18338E0F3CD7081F92830742 /* CallStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStackView.swift; sourceTree = "<group>"; };
+		21A6BB6F29F91492D4907EAD /* MIDIPlugin.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MIDIPlugin.cpp; sourceTree = "<group>"; };
 		2211ECBF8C2AA9B14EE8A001 /* pho_prim_future.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_future.cc; sourceTree = "<group>"; };
 		2398B5E8422D003EA71D484B /* pho_thread.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_thread.cc; sourceTree = "<group>"; };
+		2A8E107BE4E0AF4D74157D73 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		2ACD60E7D173063C294E80EA /* pho_bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_bridge.h; sourceTree = "<group>"; };
 		2D236A351C7DDB5FF644FF67 /* PhographBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PhographBridge.h; sourceTree = "<group>"; };
 		2E0EA23C0877169E918EE279 /* pho_prim_error.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_error.cc; sourceTree = "<group>"; };
 		2E6CBDE2256FB052F7E5138D /* pho_draw.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_draw.h; sourceTree = "<group>"; };
 		3051005097E7F9AB1FEED61A /* pho_prim_effect.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_effect.cc; sourceTree = "<group>"; };
 		327C11ABE73A1F44955D56BC /* pho_prim_list.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_list.cc; sourceTree = "<group>"; };
+		329F70B25D61746AAA201CB7 /* ExampleBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleBrowserView.swift; sourceTree = "<group>"; };
 		33B08E02D892678B73CAEE51 /* pho_serial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_serial.h; sourceTree = "<group>"; };
+		38689107DA4C8E8C21E96A31 /* pho_prim_socket.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_socket.cc; sourceTree = "<group>"; };
+		391BD8263B270B9C34E5B16C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		394DC90DDB00A442787CE8DE /* pho_prim_locale.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_locale.cc; sourceTree = "<group>"; };
+		3C79A4E3C515257FEC6E3259 /* ExampleCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleCatalog.swift; sourceTree = "<group>"; };
 		3DA829A4E71950465B879EDC /* DebuggerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebuggerViewModel.swift; sourceTree = "<group>"; };
+		3FEB401FDE0890377BE8DD24 /* pho_prim_sound.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_sound.cc; sourceTree = "<group>"; };
 		40434D604DF25247BFEA1AE8 /* pho_ide_render.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_ide_render.h; sourceTree = "<group>"; };
 		41DF280DEB21A6BF89B4056E /* IDEViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDEViewModel.swift; sourceTree = "<group>"; };
 		447F92C566566BA1E5104661 /* FuzzyFinderPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyFinderPopup.swift; sourceTree = "<group>"; };
+		4747E319E463688FE7172612 /* GraphExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphExporter.swift; sourceTree = "<group>"; };
 		491A8CD0B0065175D6BD72C6 /* Phograph-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Phograph-Bridging-Header.h"; sourceTree = "<group>"; };
 		4DC9C35BA36329123C3F8D6A /* pho_prim_io.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_io.cc; sourceTree = "<group>"; };
+		4FEA53A47D278CC6922002D5 /* SoundPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SoundPlugin.h; sourceTree = "<group>"; };
+		515C80815BD5134617ADE267 /* pho_prim_image.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_image.cc; sourceTree = "<group>"; };
 		520B767AF95577087AE754B9 /* PhographBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PhographBridge.mm; sourceTree = "<group>"; };
 		5555ECC8C3D2E9ADAC123FEE /* pho_prim_logic.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_logic.cc; sourceTree = "<group>"; };
 		57403738A3318DFF2E519EE2 /* pho_prim_canvas.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_canvas.cc; sourceTree = "<group>"; };
 		5921BAFF4D0EA32A19423869 /* pho_value.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_value.cc; sourceTree = "<group>"; };
+		60942FAFE50962C53EE610C0 /* pho_prim_fileio.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_fileio.cc; sourceTree = "<group>"; };
 		65C85F08CA77176A5FA9AB45 /* pho_debug.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_debug.cc; sourceTree = "<group>"; };
 		65E90C9FF9B2927DFDB227C6 /* pho_prim_anim.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_anim.cc; sourceTree = "<group>"; };
 		664CA750F27D61771D2A6898 /* pho_prim_channel.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_channel.cc; sourceTree = "<group>"; };
 		672DA49A15183C60B167175C /* pho_scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_scene.h; sourceTree = "<group>"; };
 		69F29F6DE5E2975C0543CA37 /* pho_draw.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_draw.cc; sourceTree = "<group>"; };
+		6BC6A0FD9EA961784FDB66CE /* LibraryManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryManagerView.swift; sourceTree = "<group>"; };
 		6C174D3AEE64848299E5BCDE /* PhographApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhographApp.swift; sourceTree = "<group>"; };
+		6FF8F9022B82B5216D2BE773 /* pho_prim_net.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_net.cc; sourceTree = "<group>"; };
 		701E4E7FB3952BA220D6C779 /* pho_prim_input.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_input.cc; sourceTree = "<group>"; };
+		7131313DA0EF9F85705CC070 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
+		716E791274C7816A1B2C7BE8 /* pho_prim_math.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_math.cc; sourceTree = "<group>"; };
+		72FDD89D54B48B58C831E3EC /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		7769B3A96B086FFDDC51271D /* TraceOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraceOverlayView.swift; sourceTree = "<group>"; };
 		78CA6A5A88D3DE1FC331CE9A /* pho_serial.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_serial.cc; sourceTree = "<group>"; };
+		797ED897EE088C4CD685FA7D /* pho_prim_crypto.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_crypto.cc; sourceTree = "<group>"; };
 		7ABADF28BC5216E8033B051F /* pho_mem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_mem.h; sourceTree = "<group>"; };
 		840BBDA39067CF34271709FD /* pho_prim.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim.cc; sourceTree = "<group>"; };
 		89E66D548939DECE7EB77F9A /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		90E4C90A198AB065ECDD57A7 /* IDEWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDEWorkspaceView.swift; sourceTree = "<group>"; };
 		92E0D1790F391A3CBBAB8030 /* pho_prim_string.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_string.cc; sourceTree = "<group>"; };
 		931E94D5F9E4680786AFF2B9 /* DebuggerControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebuggerControlsView.swift; sourceTree = "<group>"; };
+		985C19BF8D2068D21B7B6055 /* LibraryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryManager.swift; sourceTree = "<group>"; };
+		9A52A51EBEE24DF267422749 /* SoundPlugin.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SoundPlugin.cpp; sourceTree = "<group>"; };
 		9BDBF2378B37816E503D425B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		9DFEA6AD89EDA84947FF916E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A3ED112F1C37D46758A9AD22 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		A707EBA1B043462C0643B175 /* pho_prim_compare.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_compare.cc; sourceTree = "<group>"; };
 		A77830459694BCAF37123AD6 /* ClassBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassBrowserView.swift; sourceTree = "<group>"; };
 		A7D5729CBF8321E9A7ABFE7B /* MetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRenderer.swift; sourceTree = "<group>"; };
@@ -115,20 +165,41 @@
 		C3B75A4DDD4EA0D245D25219 /* pho_bridge.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_bridge.cc; sourceTree = "<group>"; };
 		C3CB72DC89CA50B9DC9999FE /* pho_graph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_graph.h; sourceTree = "<group>"; };
 		C76D19446080D8DEFBC98C1C /* InspectorPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorPanelView.swift; sourceTree = "<group>"; };
+		C7F99B5E14CDBDEBFCC32554 /* LibraryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryModel.swift; sourceTree = "<group>"; };
 		CB645910513AB2F99294E549 /* pho_prim_draw.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_draw.cc; sourceTree = "<group>"; };
 		CFA5FC5AF26DCF89764DB7E9 /* Phograph.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Phograph.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D14854E440D4ADDABCBD30FB /* pho_eval.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_eval.h; sourceTree = "<group>"; };
+		D253EF63213D4F5C854260F8 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		D52BCD2F370FC7ED1914D579 /* pho_prim_data.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_data.cc; sourceTree = "<group>"; };
+		D8F2271554AE17BE475B8EC3 /* pho_prim_midi.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_midi.cc; sourceTree = "<group>"; };
 		DB72D30CAE7D718FBE676D61 /* PhographCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhographCanvasView.swift; sourceTree = "<group>"; };
 		DEDD4B17208383C872AAC9DE /* pho_prim_type.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_type.cc; sourceTree = "<group>"; };
 		EA86EAFD6622CDFA143D60A9 /* GraphEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphEditorViewModel.swift; sourceTree = "<group>"; };
 		EC0D3842E5869AB8E7B3372D /* pho_eval.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_eval.cc; sourceTree = "<group>"; };
 		F26A83D0E05BCC3AD9239013 /* pho_prim_scene.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_scene.cc; sourceTree = "<group>"; };
 		F38CE4B598B83BDCF78DCD90 /* Phograph.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Phograph.entitlements; sourceTree = "<group>"; };
+		F68E80E63511A5668B5DC4E9 /* pho_prim_bitmap.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_bitmap.cc; sourceTree = "<group>"; };
 		F7E3D83FCB995B46677F21EA /* pho_prim_wrappers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_prim_wrappers.h; sourceTree = "<group>"; };
 		FC17F36E5FB9BD95BF139FF5 /* GraphModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphModel.swift; sourceTree = "<group>"; };
 		FFF3A1AFE39C50A7FB637B93 /* pho_thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_thread.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B712F0725CE912C6B01FC371 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1FD72047ED276A5348CA1695 /* AudioToolbox.framework in Frameworks */,
+				96C3121E38602EBD2BA7C520 /* CoreMIDI.framework in Frameworks */,
+				E90C9315CEFF5C979F5F9E0E /* CoreGraphics.framework in Frameworks */,
+				BE2C32124041335C3B20E394 /* ImageIO.framework in Frameworks */,
+				C10FA3A39B3EE69681909800 /* CoreServices.framework in Frameworks */,
+				BEAC3FA064B3A82104B7BBB9 /* CoreFoundation.framework in Frameworks */,
+				ABC8AE82D2CE25711C566A91 /* Security.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		06A4C76BC886B277A456503A = {
@@ -136,8 +207,34 @@
 			children = (
 				A9F49F604B9078472F5FE3B7 /* Phograph */,
 				51A7C2185450FC0D90E87CDD /* phograph_core */,
+				149DE0195D5261226DC44E5C /* Frameworks */,
 				CA901840D163F98F365575AE /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		1240E65519885675C8E34B7D /* plugins */ = {
+			isa = PBXGroup;
+			children = (
+				21A6BB6F29F91492D4907EAD /* MIDIPlugin.cpp */,
+				0FF44E8BEA3C4AEC9E450BF6 /* MIDIPlugin.h */,
+				9A52A51EBEE24DF267422749 /* SoundPlugin.cpp */,
+				4FEA53A47D278CC6922002D5 /* SoundPlugin.h */,
+			);
+			path = plugins;
+			sourceTree = "<group>";
+		};
+		149DE0195D5261226DC44E5C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D253EF63213D4F5C854260F8 /* AudioToolbox.framework */,
+				A3ED112F1C37D46758A9AD22 /* CoreFoundation.framework */,
+				391BD8263B270B9C34E5B16C /* CoreGraphics.framework */,
+				2A8E107BE4E0AF4D74157D73 /* CoreMIDI.framework */,
+				72FDD89D54B48B58C831E3EC /* CoreServices.framework */,
+				7131313DA0EF9F85705CC070 /* ImageIO.framework */,
+				1556B05FDF6DB2CFD4687859 /* Security.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		33D0DA8A02DE402587F9C1F2 /* Canvas */ = {
@@ -152,8 +249,10 @@
 		3A6329C880C8CCD1DF6506DB /* IDE */ = {
 			isa = PBXGroup;
 			children = (
+				329F70B25D61746AAA201CB7 /* ExampleBrowserView.swift */,
 				447F92C566566BA1E5104661 /* FuzzyFinderPopup.swift */,
 				90E4C90A198AB065ECDD57A7 /* IDEWorkspaceView.swift */,
+				6BC6A0FD9EA961784FDB66CE /* LibraryManagerView.swift */,
 				04F7CF26D14A56E3C8367C05 /* ToolbarView.swift */,
 			);
 			path = IDE;
@@ -212,7 +311,10 @@
 		65BC897A2D44DE0DDAC80ACD /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				3C79A4E3C515257FEC6E3259 /* ExampleCatalog.swift */,
+				4747E319E463688FE7172612 /* GraphExporter.swift */,
 				FC17F36E5FB9BD95BF139FF5 /* GraphModel.swift */,
+				C7F99B5E14CDBDEBFCC32554 /* LibraryModel.swift */,
 				AC069BB3AF8DDE44DBD7DB3A /* ProjectModel.swift */,
 			);
 			path = Model;
@@ -255,20 +357,30 @@
 				AAF840BAD8645F8B9DC3E83C /* pho_platform.h */,
 				65E90C9FF9B2927DFDB227C6 /* pho_prim_anim.cc */,
 				0A5371F2514E62AEE3876281 /* pho_prim_arith.cc */,
+				F68E80E63511A5668B5DC4E9 /* pho_prim_bitmap.cc */,
 				57403738A3318DFF2E519EE2 /* pho_prim_canvas.cc */,
 				664CA750F27D61771D2A6898 /* pho_prim_channel.cc */,
 				A707EBA1B043462C0643B175 /* pho_prim_compare.cc */,
+				797ED897EE088C4CD685FA7D /* pho_prim_crypto.cc */,
 				D52BCD2F370FC7ED1914D579 /* pho_prim_data.cc */,
 				010F3E4AB40711C80DDDA9BE /* pho_prim_dict.cc */,
 				CB645910513AB2F99294E549 /* pho_prim_draw.cc */,
 				3051005097E7F9AB1FEED61A /* pho_prim_effect.cc */,
 				2E0EA23C0877169E918EE279 /* pho_prim_error.cc */,
+				60942FAFE50962C53EE610C0 /* pho_prim_fileio.cc */,
 				2211ECBF8C2AA9B14EE8A001 /* pho_prim_future.cc */,
+				515C80815BD5134617ADE267 /* pho_prim_image.cc */,
 				701E4E7FB3952BA220D6C779 /* pho_prim_input.cc */,
 				4DC9C35BA36329123C3F8D6A /* pho_prim_io.cc */,
 				327C11ABE73A1F44955D56BC /* pho_prim_list.cc */,
+				394DC90DDB00A442787CE8DE /* pho_prim_locale.cc */,
 				5555ECC8C3D2E9ADAC123FEE /* pho_prim_logic.cc */,
+				716E791274C7816A1B2C7BE8 /* pho_prim_math.cc */,
+				D8F2271554AE17BE475B8EC3 /* pho_prim_midi.cc */,
+				6FF8F9022B82B5216D2BE773 /* pho_prim_net.cc */,
 				F26A83D0E05BCC3AD9239013 /* pho_prim_scene.cc */,
+				38689107DA4C8E8C21E96A31 /* pho_prim_socket.cc */,
+				3FEB401FDE0890377BE8DD24 /* pho_prim_sound.cc */,
 				92E0D1790F391A3CBBAB8030 /* pho_prim_string.cc */,
 				DEDD4B17208383C872AAC9DE /* pho_prim_type.cc */,
 				F7E3D83FCB995B46677F21EA /* pho_prim_wrappers.h */,
@@ -281,6 +393,7 @@
 				FFF3A1AFE39C50A7FB637B93 /* pho_thread.h */,
 				5921BAFF4D0EA32A19423869 /* pho_value.cc */,
 				B58FF33C2DC6E3940249B7AA /* pho_value.h */,
+				1240E65519885675C8E34B7D /* plugins */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -296,6 +409,7 @@
 		A9F49F604B9078472F5FE3B7 /* Phograph */ = {
 			isa = PBXGroup;
 			children = (
+				9DFEA6AD89EDA84947FF916E /* Assets.xcassets */,
 				F38CE4B598B83BDCF78DCD90 /* Phograph.entitlements */,
 				8A04BD7EE8E5A7CF2FFF2E44 /* App */,
 				5673611C1CB464BEE1D95EF5 /* Bridge */,
@@ -314,6 +428,7 @@
 				3DA829A4E71950465B879EDC /* DebuggerViewModel.swift */,
 				EA86EAFD6622CDFA143D60A9 /* GraphEditorViewModel.swift */,
 				41DF280DEB21A6BF89B4056E /* IDEViewModel.swift */,
+				985C19BF8D2068D21B7B6055 /* LibraryManager.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -342,6 +457,9 @@
 			buildConfigurationList = 4A4821AB0EA4A7CC88180F00 /* Build configuration list for PBXNativeTarget "Phograph" */;
 			buildPhases = (
 				8F20EAF00783A1C749E25F01 /* Sources */,
+				82BEFCA2E6A84F2E54EBB036 /* Copy Bundled Libraries */,
+				818DA1ADA5D61ED57ABF9E62 /* Resources */,
+				B712F0725CE912C6B01FC371 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -382,6 +500,38 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		818DA1ADA5D61ED57ABF9E62 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E6A02B605F7E4154BB257E05 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		82BEFCA2E6A84F2E54EBB036 /* Copy Bundled Libraries */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Bundled Libraries";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries\"\ncp -R \"$SRCROOT/libraries/\" \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries/\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		8F20EAF00783A1C749E25F01 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -392,13 +542,20 @@
 				1865DE5B93671B6C42ABFE4F /* ContentView.swift in Sources */,
 				7B6DB96CC330101150F9E872 /* DebuggerControlsView.swift in Sources */,
 				151132FA4A5896B849B0D88A /* DebuggerViewModel.swift in Sources */,
+				D5792B53B26C3ECDF055ADCC /* ExampleBrowserView.swift in Sources */,
+				847883AAD5F88522EA25F32C /* ExampleCatalog.swift in Sources */,
 				F87749AFE52AE28C12D28158 /* FuzzyFinderPopup.swift in Sources */,
 				E07473846353ED4647262C8D /* GraphCanvasView.swift in Sources */,
 				17D1075A7FA2846B696D3D82 /* GraphEditorViewModel.swift in Sources */,
+				8F5DD0B584C941CF3C789E87 /* GraphExporter.swift in Sources */,
 				35B8CCE7C5F68EF4B88C7C83 /* GraphModel.swift in Sources */,
 				CB34D75DD1D4766F99BF7636 /* IDEViewModel.swift in Sources */,
 				EF332E3897056343D48F01C9 /* IDEWorkspaceView.swift in Sources */,
 				3E100E667DBCF6A1090E5451 /* InspectorPanelView.swift in Sources */,
+				ECDC400FD2940663FC6738AE /* LibraryManager.swift in Sources */,
+				B68A433629F30E014B40EF93 /* LibraryManagerView.swift in Sources */,
+				58129B41909D7B112881CE8E /* LibraryModel.swift in Sources */,
+				A58747C4225163D5BB3DBFFE /* MIDIPlugin.cpp in Sources */,
 				EEE22245A088E0B53D83C86D /* MetalRenderer.swift in Sources */,
 				8EDB75C4C140710EC2FCC356 /* PhographApp.swift in Sources */,
 				FA0F01EB3113CC4332FE1C85 /* PhographBridge.mm in Sources */,
@@ -406,6 +563,7 @@
 				43467022BAD99308602C1188 /* PhographRuntime.swift in Sources */,
 				CF098C0B25A8D5DA02C16441 /* ProjectModel.swift in Sources */,
 				EFB3FBE382B87EF74345CFCB /* Shaders.metal in Sources */,
+				05B9D376F4589B7BD9664D39 /* SoundPlugin.cpp in Sources */,
 				BC2B57A39525F24D6ED9AE12 /* ToolbarView.swift in Sources */,
 				9C2129DEC8DD31919315C4E7 /* TraceOverlayView.swift in Sources */,
 				BB4E874294E68A477EDAC328 /* pho_bridge.cc in Sources */,
@@ -417,20 +575,30 @@
 				8997F80ED8481072503798A7 /* pho_prim.cc in Sources */,
 				6B45FADC48978EF74FC6B57F /* pho_prim_anim.cc in Sources */,
 				605ED3388A746AEA67259477 /* pho_prim_arith.cc in Sources */,
+				1C3D96601C66DFB9609CC8B2 /* pho_prim_bitmap.cc in Sources */,
 				75FEF62F9E43330D3FB9CB97 /* pho_prim_canvas.cc in Sources */,
 				E1607F7741FBA7D47E25D640 /* pho_prim_channel.cc in Sources */,
 				3B56E28510E8B5CFFA90E112 /* pho_prim_compare.cc in Sources */,
+				F283F1524EAC80BE30E7D6E6 /* pho_prim_crypto.cc in Sources */,
 				C1F0829D1768C6EF3D0BB4C0 /* pho_prim_data.cc in Sources */,
 				A7499F8834953332FEE25F3A /* pho_prim_dict.cc in Sources */,
 				B9FBE913140A37BFC927EB37 /* pho_prim_draw.cc in Sources */,
 				BE7B7F3403B0E0BB435128B2 /* pho_prim_effect.cc in Sources */,
 				A6A757EB417F0B4DB8420E28 /* pho_prim_error.cc in Sources */,
+				3E59EF66663A47240536AA98 /* pho_prim_fileio.cc in Sources */,
 				7DE5F5D03831F9464FF4F77F /* pho_prim_future.cc in Sources */,
+				7174C7231DF0920D6B9FB4EF /* pho_prim_image.cc in Sources */,
 				26F715E7232CCFD3D72740FB /* pho_prim_input.cc in Sources */,
 				CC0A5EE7C79CC847FC819CA9 /* pho_prim_io.cc in Sources */,
 				E2F87DBDCE52205FFBE323A0 /* pho_prim_list.cc in Sources */,
+				7F25D26A0743B1CC78049FE3 /* pho_prim_locale.cc in Sources */,
 				43D820B485A5F9643B9F32F3 /* pho_prim_logic.cc in Sources */,
+				9EB40F5E3CA5A133F8AC3E52 /* pho_prim_math.cc in Sources */,
+				23242A65648CBEB6C9B17D8B /* pho_prim_midi.cc in Sources */,
+				DD41637F7CBD27BFC22D5F45 /* pho_prim_net.cc in Sources */,
 				2F623A674A568C0CF732996C /* pho_prim_scene.cc in Sources */,
+				7CCE963803033F967DB1B8CD /* pho_prim_socket.cc in Sources */,
+				1B5D8F12E55EE75348143571 /* pho_prim_sound.cc in Sources */,
 				DABD06000B1CED9AE7106227 /* pho_prim_string.cc in Sources */,
 				79CA4BCD203B6F225D176F83 /* pho_prim_type.cc in Sources */,
 				15A0D0B6493BA08B72330A8B /* pho_serial.cc in Sources */,
@@ -568,11 +736,13 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = Phograph/Phograph.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/phograph_core/src",
+					"$(SRCROOT)/phograph_core/src/plugins",
 				);
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -592,11 +762,13 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = Phograph/Phograph.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/phograph_core/src",
+					"$(SRCROOT)/phograph_core/src/plugins",
 				);
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

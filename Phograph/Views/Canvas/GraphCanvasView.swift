@@ -1,66 +1,88 @@
 import SwiftUI
+import AppKit
 
 /// Graph editor canvas with zoom/pan/selection and node+wire rendering.
 struct GraphCanvasView: View {
     @ObservedObject var viewModel: IDEViewModel
     @StateObject private var editor = GraphEditorViewModel()
+    @State private var canvasSize: CGSize = .zero
+
+    /// Tracks the NSView backing this canvas for coordinate conversion
+    @State private var canvasNSView: NSView?
+
+    /// Resizable console height
+    @State private var consoleHeight: CGFloat = 80
 
     var body: some View {
         GeometryReader { geo in
-            ZStack {
-                // White background like classic Prograph
-                Color.white
-                    .ignoresSafeArea()
+            VStack(spacing: 0) {
+                ZStack {
+                    // White background
+                    Color.white
+                        .ignoresSafeArea()
 
-                // Graph content (scrollable via pan + zoom)
-                graphContent
-                    .scaleEffect(editor.zoomScale, anchor: .topLeading)
-                    .offset(x: editor.panOffset.x, y: editor.panOffset.y)
+                    // Graph content (scrollable via pan + zoom)
+                    graphContent
+                        .scaleEffect(editor.zoomScale, anchor: .topLeading)
+                        .offset(x: editor.panOffset.x, y: editor.panOffset.y)
 
-                // Wire being dragged
-                if editor.isDraggingWire {
-                    Path { path in
-                        path.move(to: editor.wireStartPoint)
-                        let cp1 = CGPoint(x: editor.wireStartPoint.x + 50, y: editor.wireStartPoint.y)
-                        let cp2 = CGPoint(x: editor.wireEndPoint.x - 50, y: editor.wireEndPoint.y)
-                        path.addCurve(to: editor.wireEndPoint, control1: cp1, control2: cp2)
+                    // Selection rect
+                    if let rect = editor.selectionRect {
+                        Rectangle()
+                            .fill(Color.blue.opacity(0.1))
+                            .border(Color.blue.opacity(0.5), width: 1)
+                            .frame(width: rect.width, height: rect.height)
+                            .position(x: rect.midX, y: rect.midY)
                     }
-                    .stroke(Color.blue.opacity(0.8), lineWidth: 2)
-                }
 
-                // Selection rect
-                if let rect = editor.selectionRect {
-                    Rectangle()
-                        .fill(Color.blue.opacity(0.1))
-                        .border(Color.blue.opacity(0.5), width: 1)
-                        .frame(width: rect.width, height: rect.height)
-                        .position(x: rect.midX, y: rect.midY)
+                    // Case navigation bar (top overlay)
+                    if let method = viewModel.currentMethod, method.caseCount > 1 {
+                        VStack {
+                            caseNavigationBar(method: method)
+                            Spacer()
+                        }
+                    }
+
+                    // Missing library banner (bottom overlay)
+                    if !viewModel.missingLibraries.isEmpty {
+                        VStack {
+                            Spacer()
+                            missingLibraryBanner
+                        }
+                    }
+
+                    // Trace overlay during debugging
+                    if viewModel.isDebugging && !viewModel.debugger.wireTraceValues.isEmpty {
+                        TraceOverlayView(
+                            traceValues: viewModel.debugger.wireTraceValues,
+                            zoomScale: editor.zoomScale,
+                            panOffset: editor.panOffset
+                        )
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 // Console overlay at bottom
-                VStack {
-                    Spacer()
-                    if !viewModel.consoleOutput.isEmpty {
-                        ScrollView {
-                            Text(viewModel.consoleOutput)
-                                .font(.system(.caption, design: .monospaced))
-                                .foregroundColor(.white)
-                                .padding(8)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .frame(height: 80)
-                        .background(Color.black.opacity(0.8))
-                    }
+                if viewModel.showConsole && !viewModel.consoleOutput.isEmpty {
+                    consolePanel
                 }
             }
+            .background(CanvasNSViewFinder(nsView: $canvasNSView))
             .gesture(panGesture)
             .onAppear {
+                canvasSize = geo.size
                 editor.graph = viewModel.currentGraph
-                // Delay centering so GeometryReader has final size
+                installRightClickMonitor()
+                installKeyMonitor()
                 DispatchQueue.main.async {
+                    canvasSize = geo.size
                     centerGraph(in: geo.size)
                     syncPanStart()
                 }
+            }
+            .onDisappear {
+                removeRightClickMonitor()
+                removeKeyMonitor()
             }
             .onChange(of: viewModel.currentGraph?.methodName) { _ in
                 editor.graph = viewModel.currentGraph
@@ -70,16 +92,139 @@ struct GraphCanvasView: View {
                 }
             }
             .onChange(of: geo.size) { newSize in
+                canvasSize = newSize
                 centerGraph(in: newSize)
                 syncPanStart()
             }
+            .onChange(of: viewModel.zoomRequest) { request in
+                guard let request = request else { return }
+                let center = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
+                switch request {
+                case .zoomIn:
+                    editor.zoom(by: 1.25, anchor: center)
+                case .zoomOut:
+                    editor.zoom(by: 0.8, anchor: center)
+                case .fitToWindow:
+                    editor.zoomToFit(canvasSize: canvasSize)
+                }
+                syncPanStart()
+                viewModel.zoomRequest = nil
+            }
+        }
+    }
+
+    // MARK: - Case Navigation Bar
+
+    private func caseNavigationBar(method: MethodModel) -> some View {
+        HStack {
+            Button(action: { viewModel.prevCase() }) {
+                Image(systemName: "chevron.left")
+            }
+            .disabled(viewModel.selectedCaseIndex <= 0)
+
+            Text("Case \(viewModel.selectedCaseIndex + 1) of \(method.caseCount)")
+                .font(.caption)
+                .fontWeight(.medium)
+
+            Button(action: { viewModel.nextCase() }) {
+                Image(systemName: "chevron.right")
+            }
+            .disabled(viewModel.selectedCaseIndex >= method.caseCount - 1)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .padding(.top, 8)
+    }
+
+    // MARK: - Missing Library Banner
+
+    private var missingLibraryBanner: some View {
+        HStack {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(.yellow)
+            Text("Missing libraries: \(viewModel.missingLibraries.map(\.name).joined(separator: ", "))")
+                .font(.caption)
+            Spacer()
+            Button("Manage...") {
+                viewModel.showLibraryManager = true
+            }
+            .font(.caption)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .padding(8)
+    }
+
+    // MARK: - Console Panel
+
+    private var consolePanel: some View {
+        VStack(spacing: 0) {
+            // Drag handle
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 4)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            consoleHeight = max(40, min(300, consoleHeight - value.translation.height))
+                        }
+                )
+                .onHover { hovering in
+                    if hovering {
+                        NSCursor.resizeUpDown.push()
+                    } else {
+                        NSCursor.pop()
+                    }
+                }
+
+            // Console header
+            HStack {
+                Text("Console")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                Spacer()
+                Button(action: { viewModel.clearConsole() }) {
+                    Image(systemName: "trash")
+                        .font(.caption)
+                }
+                .buttonStyle(.plain)
+                Button(action: { viewModel.showConsole = false }) {
+                    Image(systemName: "xmark")
+                        .font(.caption)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.black.opacity(0.9))
+            .foregroundColor(.white)
+
+            // Console content
+            ScrollViewReader { proxy in
+                ScrollView {
+                    Text(viewModel.consoleOutput)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundColor(.white)
+                        .padding(8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .id("consoleBottom")
+                }
+                .onChange(of: viewModel.consoleOutput) { _ in
+                    proxy.scrollTo("consoleBottom", anchor: .bottom)
+                }
+            }
+            .frame(height: consoleHeight)
+            .background(Color.black.opacity(0.8))
         }
     }
 
     private func centerGraph(in size: CGSize) {
         guard let graph = viewModel.currentGraph, !graph.nodes.isEmpty else { return }
 
-        // Find bounding box of all nodes
         var minX = CGFloat.infinity, minY = CGFloat.infinity
         var maxX = -CGFloat.infinity, maxY = -CGFloat.infinity
         for node in graph.nodes {
@@ -93,12 +238,10 @@ struct GraphCanvasView: View {
         let graphH = maxY - minY
         let margin: CGFloat = 40
 
-        // Scale to fit but keep nodes readable (min 0.6, max 1.0)
         let scaleX = (size.width - margin * 2) / max(graphW, 1)
         let scaleY = (size.height - margin * 2) / max(graphH, 1)
         let scale = max(min(min(scaleX, scaleY), 1.0), 0.6)
 
-        // Center the graph in the canvas
         let offsetX = (size.width - graphW * scale) / 2 - minX * scale + margin / 2
         let offsetY = (size.height - graphH * scale) / 2 - minY * scale + margin / 2
 
@@ -108,39 +251,57 @@ struct GraphCanvasView: View {
 
     @ViewBuilder
     private var graphContent: some View {
+        let _ = viewModel.graphRevision
         if let graph = viewModel.currentGraph {
             ZStack {
-                // Wires (draw first, behind nodes)
+                // Wires
                 ForEach(graph.wires) { wire in
                     wireView(wire: wire, graph: graph)
                 }
-
                 // Nodes
                 ForEach(graph.nodes) { node in
                     nodeView(node: node, isSelected: graph.selectedNodeIds.contains(node.id))
+                }
+                // Wire being dragged (rendered in graph space)
+                if editor.isDraggingWire {
+                    wireDragPreview
                 }
             }
         }
     }
 
+    /// Preview wire while dragging — rendered in graph coordinates
+    private var wireDragPreview: some View {
+        let startPt = editor.wireStartGraph
+        let endPt = editor.wireEndGraph
+        return Path { path in
+            path.move(to: startPt)
+            let dy = max(abs(endPt.y - startPt.y) * 0.4, 30)
+            path.addCurve(
+                to: endPt,
+                control1: CGPoint(x: startPt.x, y: startPt.y + dy),
+                control2: CGPoint(x: endPt.x, y: endPt.y - dy)
+            )
+        }
+        .stroke(Color.blue.opacity(0.8), style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+    }
+
     // MARK: - Node rendering
 
-    /// Pin spacing constant: pins are evenly distributed across node width.
-    /// Pin X for pin index i of count n: node.x + (i+1) * node.width / (n+1)
     private static let pinRadius: CGFloat = 6
+    /// Hit target radius for pins (larger than visual for easier clicking)
+    private static let pinHitRadius: CGFloat = 14
 
     private func nodeView(node: GraphNodeModel, isSelected: Bool) -> some View {
         let colors = nodeColors(for: node.nodeType)
+        let hasBreakpoint = viewModel.debugger.breakpointNodeIds.contains(String(node.engineNodeId))
+        let isPausedHere = viewModel.pausedNodeId == node.engineNodeId && node.engineNodeId != 0
 
         return ZStack {
-            // Node body
             VStack(spacing: 0) {
-                // Input pin row (top) - circles drawn as overlay
                 if node.inputPins.count > 0 {
                     Spacer().frame(height: Self.pinRadius)
                 }
-
-                // Header with label
                 Text(node.label)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(colors.headerText)
@@ -149,56 +310,167 @@ struct GraphCanvasView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
                     .background(colors.header)
-
-                // Output pin row (bottom) - circles drawn as overlay
                 if node.outputPins.count > 0 {
                     Spacer().frame(height: Self.pinRadius)
                 }
             }
             .frame(width: node.width, height: node.height)
-            .background(colors.body)
+            .background(isPausedHere ? Color.yellow.opacity(0.3) : colors.body)
             .clipShape(RoundedRectangle(cornerRadius: 4))
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .stroke(isSelected ? Color.blue : colors.border, lineWidth: isSelected ? 2.5 : 1)
+                    .stroke(isPausedHere ? Color.yellow : (isSelected ? Color.blue : colors.border),
+                            lineWidth: isPausedHere ? 3 : (isSelected ? 2.5 : 1))
             )
+
+            // Breakpoint indicator (red dot, top-left)
+            if hasBreakpoint {
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 10, height: 10)
+                    .position(x: 8, y: 8)
+            }
 
             // Input pins along top edge
             ForEach(Array(node.inputPins.enumerated()), id: \.element.id) { i, pin in
                 let px = pinX(index: i, count: node.inputPins.count, nodeWidth: node.width)
-                Circle()
-                    .fill(Color(red: 0.2, green: 0.5, blue: 0.9))
-                    .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
-                    .position(x: px, y: 0)
+                pinCircle(
+                    fill: Color(red: 0.2, green: 0.5, blue: 0.9),
+                    hasWire: viewModel.currentGraph?.wireToInput(nodeId: node.id, pinIndex: i) != nil
+                )
+                .position(x: px, y: 0)
             }
 
             // Output pins along bottom edge
             ForEach(Array(node.outputPins.enumerated()), id: \.element.id) { i, pin in
                 let px = pinX(index: i, count: node.outputPins.count, nodeWidth: node.width)
-                Circle()
-                    .fill(Color(red: 0.9, green: 0.3, blue: 0.2))
-                    .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
-                    .position(x: px, y: node.height)
+                pinCircle(
+                    fill: Color(red: 0.9, green: 0.3, blue: 0.2),
+                    hasWire: true // output pins always look active
+                )
+                .position(x: px, y: node.height)
+            }
+
+            // Annotation badge (top-right corner)
+            if node.annotation != .none {
+                annotationBadge(node.annotation)
+                    .position(x: node.width - 10, y: 10)
             }
         }
         .frame(width: node.width, height: node.height)
         .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
         .position(x: node.x + node.width / 2, y: node.y + node.height / 2)
         .gesture(
-            DragGesture()
+            DragGesture(minimumDistance: 3)
                 .onChanged { value in
-                    let graphPt = editor.screenToGraph(value.location)
-                    if !editor.isDraggingNode {
+                    if !editor.isDraggingNode && !editor.isDraggingWire {
+                        // First drag movement — decide: pin drag or node drag?
+                        let start = value.startLocation // in node-local coords (0,0 = top-left)
+
+                        // Check output pins (bottom edge)
+                        for (i, _) in node.outputPins.enumerated() {
+                            let pinLocalPos = CGPoint(
+                                x: pinX(index: i, count: node.outputPins.count, nodeWidth: node.width),
+                                y: node.height
+                            )
+                            if hypot(start.x - pinLocalPos.x, start.y - pinLocalPos.y) < Self.pinHitRadius {
+                                let graphPos = CGPoint(x: node.x + pinLocalPos.x, y: node.y + pinLocalPos.y)
+                                editor.beginWireDragFromOutput(nodeId: node.id, pinIndex: i, graphPos: graphPos)
+                                return
+                            }
+                        }
+
+                        // Check input pins (top edge) — detach existing wire if any
+                        for (i, _) in node.inputPins.enumerated() {
+                            let pinLocalPos = CGPoint(
+                                x: pinX(index: i, count: node.inputPins.count, nodeWidth: node.width),
+                                y: 0
+                            )
+                            if hypot(start.x - pinLocalPos.x, start.y - pinLocalPos.y) < Self.pinHitRadius {
+                                let graphPos = CGPoint(x: node.x + pinLocalPos.x, y: node.y + pinLocalPos.y)
+                                if editor.detachAndDragFromInput(nodeId: node.id, pinIndex: i, graphPos: graphPos) {
+                                    return
+                                }
+                                // No wire to detach — could start a new wire from input (drag upward)
+                                // For now, fall through to node drag
+                            }
+                        }
+
+                        // Not near a pin → node drag
+                        let graphPt = editor.screenToGraph(value.location)
                         editor.beginNodeDrag(nodeId: node.id, at: graphPt)
                     }
-                    editor.updateNodeDrag(to: graphPt)
+
+                    if editor.isDraggingWire {
+                        // Convert drag location from node-local to graph coords
+                        let graphPt = CGPoint(x: node.x + value.location.x, y: node.y + value.location.y)
+                        editor.updateWireDragGraph(to: graphPt)
+                    } else if editor.isDraggingNode {
+                        let graphPt = editor.screenToGraph(value.location)
+                        editor.updateNodeDrag(to: graphPt)
+                    }
                 }
                 .onEnded { _ in
-                    editor.endNodeDrag()
+                    if editor.isDraggingWire {
+                        editor.endWireDragAndConnect()
+                    } else {
+                        editor.endNodeDrag()
+                    }
                 }
         )
         .onTapGesture {
             viewModel.currentGraph?.selectNode(id: node.id)
+        }
+    }
+
+    /// Pin circle with larger invisible hit area
+    private func pinCircle(fill: Color, hasWire: Bool) -> some View {
+        ZStack {
+            // Visual circle
+            Circle()
+                .fill(fill)
+                .frame(width: Self.pinRadius * 2, height: Self.pinRadius * 2)
+            // Connected indicator ring
+            if hasWire {
+                Circle()
+                    .stroke(fill.opacity(0.4), lineWidth: 1.5)
+                    .frame(width: Self.pinRadius * 2 + 4, height: Self.pinRadius * 2 + 4)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func annotationBadge(_ annotation: GraphNodeModel.NodeAnnotation) -> some View {
+        let (icon, color) = annotationStyle(annotation)
+        Image(systemName: icon)
+            .font(.system(size: 10, weight: .bold))
+            .foregroundColor(.white)
+            .frame(width: 18, height: 18)
+            .background(color, in: Circle())
+    }
+
+    private func annotationStyle(_ annotation: GraphNodeModel.NodeAnnotation) -> (String, Color) {
+        switch annotation {
+        case .none:
+            return ("questionmark", .gray)
+        case .loop:
+            return ("arrow.triangle.2.circlepath", .blue)
+        case .listMap:
+            return ("ellipsis", .purple)
+        case .partition:
+            return ("arrow.triangle.branch", .orange)
+        case .inject:
+            return ("arrow.right.circle", .teal)
+        case .nextCaseOnFailure, .nextCaseOnSuccess:
+            return ("arrow.right", .yellow)
+        case .continueOnFailure:
+            return ("arrow.forward", .green)
+        case .terminateOnSuccess, .terminateOnFailure:
+            return ("stop.fill", .red)
+        case .finishOnSuccess, .finishOnFailure:
+            return ("checkmark.circle", .green)
+        case .failOnSuccess, .failOnFailure:
+            return ("xmark.circle", .red)
         }
     }
 
@@ -258,12 +530,11 @@ struct GraphCanvasView: View {
 
     // MARK: - Pin positioning
 
-    /// X position for pin at index i out of count pins, distributed across nodeWidth
     private func pinX(index: Int, count: Int, nodeWidth: CGFloat) -> CGFloat {
         CGFloat(index + 1) * nodeWidth / CGFloat(count + 1)
     }
 
-    // MARK: - Wire rendering (vertical: output bottom -> input top)
+    // MARK: - Wire rendering
 
     private func wireView(wire: GraphWireModel, graph: GraphModel) -> some View {
         let sourceNode = graph.nodes.first { $0.id == wire.sourceNodeId }
@@ -271,10 +542,8 @@ struct GraphCanvasView: View {
 
         return Group {
             if let src = sourceNode, let dst = destNode {
-                // Source: output pin on bottom edge
                 let startX = src.x + pinX(index: wire.sourcePin, count: src.outputPins.count, nodeWidth: src.width)
                 let startY = src.y + src.height
-                // Dest: input pin on top edge
                 let endX = dst.x + pinX(index: wire.destPin, count: dst.inputPins.count, nodeWidth: dst.width)
                 let endY = dst.y
 
@@ -313,5 +582,221 @@ struct GraphCanvasView: View {
 
     private func syncPanStart() {
         panStart = editor.panOffset
+    }
+
+    // MARK: - Key event monitor
+
+    @State private var keyMonitor: Any?
+
+    private func installKeyMonitor() {
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            // Delete / Backspace
+            if event.keyCode == 51 || event.keyCode == 117 {
+                if event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty {
+                    viewModel.deleteSelected()
+                    return nil
+                }
+            }
+            // Cmd+A — Select All
+            if event.charactersIgnoringModifiers == "a" && event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.shift) {
+                viewModel.selectAll()
+                return nil
+            }
+            // Cmd+D — Duplicate
+            if event.charactersIgnoringModifiers == "d" && event.modifierFlags.contains(.command) {
+                viewModel.duplicateSelected()
+                return nil
+            }
+            return event
+        }
+    }
+
+    private func removeKeyMonitor() {
+        if let monitor = keyMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyMonitor = nil
+        }
+    }
+
+    // MARK: - Right-click event monitor
+
+    @State private var rightClickMonitor: Any?
+
+    private func installRightClickMonitor() {
+        rightClickMonitor = NSEvent.addLocalMonitorForEvents(matching: .rightMouseDown) { [self] event in
+            guard let nsView = canvasNSView else { return event }
+            let locationInView = nsView.convert(event.locationInWindow, from: nil)
+            guard nsView.bounds.contains(locationInView) else { return event }
+            showContextMenu(at: locationInView, in: nsView)
+            return nil
+        }
+    }
+
+    private func removeRightClickMonitor() {
+        if let monitor = rightClickMonitor {
+            NSEvent.removeMonitor(monitor)
+            rightClickMonitor = nil
+        }
+    }
+
+    // MARK: - Right-click context menu (native NSMenu)
+
+    private func showContextMenu(at location: NSPoint, in view: NSView) {
+        let menu = NSMenu(title: "Insert Node")
+
+        func addPrim(_ name: String, inputs: Int, outputs: Int, to parent: NSMenu, libraryName: String? = nil) {
+            let item = NSMenuItem(title: name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+            item.representedObject = { [weak viewModel] in
+                self.insertPrimitive(name: name, inputs: inputs, outputs: outputs, libraryName: libraryName)
+            } as () -> Void
+            item.target = CanvasMenuTarget.shared
+            parent.addItem(item)
+        }
+
+        let arith = NSMenuItem(title: "Arithmetic", action: nil, keyEquivalent: "")
+        let arithSub = NSMenu()
+        for name in ["+", "-", "*", "/", "mod", "abs", "round"] { addPrim(name, inputs: 2, outputs: 1, to: arithSub) }
+        arith.submenu = arithSub
+        menu.addItem(arith)
+
+        let cmp = NSMenuItem(title: "Compare", action: nil, keyEquivalent: "")
+        let cmpSub = NSMenu()
+        for name in ["=", "<", ">", "<=", ">=", "!="] { addPrim(name, inputs: 2, outputs: 1, to: cmpSub) }
+        cmp.submenu = cmpSub
+        menu.addItem(cmp)
+
+        let logic = NSMenuItem(title: "Logic", action: nil, keyEquivalent: "")
+        let logicSub = NSMenu()
+        addPrim("and", inputs: 2, outputs: 1, to: logicSub)
+        addPrim("or", inputs: 2, outputs: 1, to: logicSub)
+        addPrim("not", inputs: 1, outputs: 1, to: logicSub)
+        addPrim("if", inputs: 3, outputs: 1, to: logicSub)
+        logic.submenu = logicSub
+        menu.addItem(logic)
+
+        let str = NSMenuItem(title: "String", action: nil, keyEquivalent: "")
+        let strSub = NSMenu()
+        for name in ["concat", "length", "to-string", "split", "trim", "replace"] { addPrim(name, inputs: 2, outputs: 1, to: strSub) }
+        str.submenu = strSub
+        menu.addItem(str)
+
+        let list = NSMenuItem(title: "List", action: nil, keyEquivalent: "")
+        let listSub = NSMenu()
+        for name in ["get-nth", "append", "sort", "empty?", "length", "map", "filter"] { addPrim(name, inputs: 2, outputs: 1, to: listSub) }
+        list.submenu = listSub
+        menu.addItem(list)
+
+        let dict = NSMenuItem(title: "Dict", action: nil, keyEquivalent: "")
+        let dictSub = NSMenu()
+        addPrim("dict-create", inputs: 0, outputs: 1, to: dictSub)
+        addPrim("dict-get", inputs: 2, outputs: 1, to: dictSub)
+        addPrim("dict-set", inputs: 3, outputs: 1, to: dictSub)
+        dict.submenu = dictSub
+        menu.addItem(dict)
+
+        menu.addItem(NSMenuItem.separator())
+
+        let constItem = NSMenuItem(title: "Constant", action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+        constItem.representedObject = { [weak viewModel] in
+            self.insertConstant()
+        } as () -> Void
+        constItem.target = CanvasMenuTarget.shared
+        menu.addItem(constItem)
+
+        let io = NSMenuItem(title: "I/O", action: nil, keyEquivalent: "")
+        let ioSub = NSMenu()
+        addPrim("log", inputs: 1, outputs: 1, to: ioSub)
+        addPrim("inspect", inputs: 1, outputs: 1, to: ioSub)
+        io.submenu = ioSub
+        menu.addItem(io)
+
+        // Library submenus
+        let libs = viewModel.libraryManager.libraries
+        if !libs.isEmpty {
+            menu.addItem(NSMenuItem.separator())
+            for lib in libs {
+                let libItem = NSMenuItem(title: lib.manifest.name, action: nil, keyEquivalent: "")
+                let libSub = NSMenu()
+                for prim in lib.manifest.primitives {
+                    addPrim(prim.name, inputs: prim.num_inputs, outputs: prim.num_outputs, to: libSub, libraryName: lib.manifest.name)
+                }
+                libItem.submenu = libSub
+                menu.addItem(libItem)
+            }
+        }
+
+        // Breakpoint toggle (if clicking on a node)
+        let graphPt = editor.screenToGraph(CGPoint(x: location.x, y: view.bounds.height - location.y))
+        if let node = viewModel.currentGraph?.nodeAt(point: graphPt), node.engineNodeId != 0 {
+            menu.addItem(NSMenuItem.separator())
+            let bpTitle = viewModel.debugger.breakpointNodeIds.contains(String(node.engineNodeId))
+                ? "Remove Breakpoint" : "Toggle Breakpoint"
+            let bpItem = NSMenuItem(title: bpTitle, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+            let engineId = node.engineNodeId
+            bpItem.representedObject = { [weak viewModel] in
+                viewModel?.toggleBreakpoint(nodeId: engineId)
+            } as () -> Void
+            bpItem.target = CanvasMenuTarget.shared
+            menu.addItem(bpItem)
+        }
+
+        menu.popUp(positioning: nil, at: location, in: view)
+    }
+
+    private var insertionPoint: CGPoint {
+        editor.screenToGraph(CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2))
+    }
+
+    private func insertPrimitive(name: String, inputs: Int, outputs: Int, libraryName: String? = nil) {
+        guard let graph = viewModel.currentGraph else { return }
+        let pt = insertionPoint
+        let node = GraphNodeModel(x: pt.x - 80, y: pt.y - 20, label: name, nodeType: "primitive")
+        for i in 0..<inputs {
+            node.inputPins.append(PinModel(name: "in\(i)", index: i))
+        }
+        for i in 0..<outputs {
+            node.outputPins.append(PinModel(name: "out\(i)", index: i))
+        }
+        node.libraryName = libraryName
+        node.height = node.computeHeight()
+        let labelWidth = CGFloat(name.count) * 9.5 + 40
+        node.width = max(node.width, labelWidth)
+        graph.addNode(node)
+    }
+
+    private func insertConstant() {
+        guard let graph = viewModel.currentGraph else { return }
+        let pt = insertionPoint
+        let node = GraphNodeModel(x: pt.x - 80, y: pt.y - 20, label: "0", nodeType: "constant")
+        node.outputPins.append(PinModel(name: "out0", index: 0))
+        node.constantValue = "0"
+        node.height = node.computeHeight()
+        graph.addNode(node)
+    }
+}
+
+// MARK: - Native NSMenu support for right-click
+
+class CanvasMenuTarget: NSObject {
+    static let shared = CanvasMenuTarget()
+
+    @objc func menuAction(_ sender: NSMenuItem) {
+        if let action = sender.representedObject as? () -> Void {
+            action()
+        }
+    }
+}
+
+struct CanvasNSViewFinder: NSViewRepresentable {
+    @Binding var nsView: NSView?
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async { self.nsView = view }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async { self.nsView = nsView }
     }
 }

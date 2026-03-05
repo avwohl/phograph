@@ -1,0 +1,135 @@
+{
+  "name": "bitmap",
+  "version": "1.0.0",
+  "description": "Low-level bitmap and pixel manipulation primitives. Based on iospharo BitBltPlugin, B2DPlugin (Balloon 2D), FloatArrayPlugin, and SurfacePlugin.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "bitmap-create",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Create a blank bitmap. Inputs: width, height. Output: bitmap handle."
+    },
+    {
+      "name": "bitmap-fill",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Fill entire bitmap with a color. Inputs: bitmap, color integer (ARGB). Output: bitmap."
+    },
+    {
+      "name": "bitmap-get-pixel",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Read a pixel value. Inputs: bitmap, x, y. Output: color integer (ARGB)."
+    },
+    {
+      "name": "bitmap-set-pixel",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Write a pixel value. Inputs: bitmap, (x,y list), color integer (ARGB). Output: bitmap."
+    },
+    {
+      "name": "bitmap-width",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Get bitmap width. Input: bitmap. Output: integer."
+    },
+    {
+      "name": "bitmap-height",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Get bitmap height. Input: bitmap. Output: integer."
+    },
+    {
+      "name": "bitblt-copy",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "BitBlt copy operation: copy a rectangular region from source to destination. Inputs: dest bitmap, source bitmap, rect (x,y,w,h list). Output: dest bitmap."
+    },
+    {
+      "name": "bitblt-blend",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "BitBlt alpha blend: composite source onto dest with alpha. Inputs: dest bitmap, source bitmap, position (x,y list). Output: dest bitmap."
+    },
+    {
+      "name": "b2d-draw-line",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Draw a line on a bitmap (Balloon 2D). Inputs: bitmap, start (x,y list), end (x,y list). Output: bitmap."
+    },
+    {
+      "name": "b2d-draw-rect",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Draw a rectangle outline. Inputs: bitmap, origin (x,y list), size (w,h list). Output: bitmap."
+    },
+    {
+      "name": "b2d-fill-rect",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Fill a rectangle with color. Inputs: bitmap, rect (x,y,w,h list), color integer. Output: bitmap."
+    },
+    {
+      "name": "b2d-draw-oval",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Draw an oval outline in a bounding rect. Inputs: bitmap, rect (x,y,w,h list), color integer. Output: bitmap."
+    },
+    {
+      "name": "b2d-fill-oval",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Fill an oval in a bounding rect. Inputs: bitmap, rect (x,y,w,h list), color integer. Output: bitmap."
+    },
+    {
+      "name": "b2d-draw-polygon",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Draw a polygon from a list of points. Inputs: bitmap, points list (list of x,y lists). Output: bitmap."
+    },
+    {
+      "name": "b2d-draw-bezier",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Draw a cubic Bezier curve. Inputs: bitmap, control points (4-element list of x,y lists), color integer. Output: bitmap."
+    },
+    {
+      "name": "color-rgb",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Create ARGB color from R, G, B components (0-255). Inputs: red, green, blue. Output: color integer."
+    },
+    {
+      "name": "color-rgba",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Create ARGB color from R, G, B, A. Inputs: red, green, blue (0-255 each in a list), alpha (0-255). Output: color integer."
+    },
+    {
+      "name": "float-array-add",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Element-wise addition of two float arrays (SIMD accelerated). Inputs: array A, array B. Output: result array."
+    },
+    {
+      "name": "float-array-mul",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Element-wise multiplication of two float arrays (SIMD accelerated). Inputs: array A, array B. Output: result array."
+    },
+    {
+      "name": "float-array-scale",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Scale a float array by a scalar value. Inputs: array, scalar. Output: result array."
+    },
+    {
+      "name": "float-array-sum",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Sum all elements of a float array. Input: array. Output: sum."
+    }
+  ]
+}

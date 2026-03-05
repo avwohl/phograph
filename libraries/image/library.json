@@ -1,0 +1,99 @@
+{
+  "name": "image",
+  "version": "1.0.0",
+  "description": "Image loading, saving, and manipulation primitives. Based on iospharo JPEGReaderPlugin and JPEGReadWriter2Plugin.",
+  "author": "Phograph Team",
+  "min_engine_version": "0.1.0",
+  "primitives": [
+    {
+      "name": "image-load",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Load an image from a file path (JPEG, PNG). Input: file path. Output: image handle."
+    },
+    {
+      "name": "image-save-jpeg",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Save an image as JPEG. Inputs: image, file path, quality (1-100). Output: success boolean."
+    },
+    {
+      "name": "image-save-png",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Save an image as PNG. Inputs: image, file path. Output: success boolean."
+    },
+    {
+      "name": "image-decode-jpeg",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Decode JPEG data bytes into an image. Input: byte data. Output: image handle."
+    },
+    {
+      "name": "image-encode-jpeg",
+      "num_inputs": 2,
+      "num_outputs": 1,
+      "description": "Encode an image as JPEG data bytes. Inputs: image, quality (1-100). Output: byte data."
+    },
+    {
+      "name": "image-width",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Get image width in pixels. Input: image. Output: integer width."
+    },
+    {
+      "name": "image-height",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Get image height in pixels. Input: image. Output: integer height."
+    },
+    {
+      "name": "image-resize",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Resize an image. Inputs: image, new width, new height. Output: resized image."
+    },
+    {
+      "name": "image-crop",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Crop an image to a rectangle. Inputs: image, origin (x,y list), size (w,h list). Output: cropped image."
+    },
+    {
+      "name": "image-get-pixel",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Get pixel color at coordinates. Inputs: image, x, y. Output: color (RGBA list)."
+    },
+    {
+      "name": "image-set-pixel",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Set pixel color at coordinates. Inputs: image, (x,y list), color (RGBA list). Output: modified image."
+    },
+    {
+      "name": "image-create",
+      "num_inputs": 3,
+      "num_outputs": 1,
+      "description": "Create a blank image. Inputs: width, height, fill color (RGBA list). Output: image handle."
+    },
+    {
+      "name": "image-flip-h",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Flip an image horizontally. Input: image. Output: flipped image."
+    },
+    {
+      "name": "image-flip-v",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Flip an image vertically. Input: image. Output: flipped image."
+    },
+    {
+      "name": "image-grayscale",
+      "num_inputs": 1,
+      "num_outputs": 1,
+      "description": "Convert an image to grayscale. Input: image. Output: grayscale image."
+    }
+  ]
+}

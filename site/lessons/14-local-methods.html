@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 14: Local Methods and Eval Nodes - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 14: Local Methods and Eval Nodes</h1>
+<p><span class="badge advanced">Advanced</span></p>
+
+<p>
+Sometimes you need a small piece of logic that doesn&rsquo;t deserve its own
+named method. Phograph offers two mechanisms for inline computation:
+<strong>local methods</strong> and <strong>evaluation nodes</strong>.
+</p>
+
+<h2>Local methods</h2>
+
+<p>
+A <strong>local method</strong> embeds a method body directly inside a node.
+Instead of calling a named method defined elsewhere, the node contains its
+own mini-graph. This is useful for one-off transformations that are only
+needed in one place.
+</p>
+
+<pre><code>  constant 5 --&gt; [local method] --&gt; log
+                   body:
+                     input --&gt; * 2 --&gt; + 1 --&gt; output
+                   outputs: 11
+</code></pre>
+
+<p>
+The local method has its own input and output bars, just like a regular method,
+but it lives inside the parent method&rsquo;s canvas.
+</p>
+
+<h2>Evaluation nodes</h2>
+
+<p>
+An <strong>eval node</strong> lets you write a single inline expression instead
+of building a subgraph. The expression uses a simple syntax with named inputs.
+</p>
+
+<pre><code>  constant 3 --&gt; [eval: a + b * 2] &lt;-- constant 4
+                  outputs: 11       (b * 2 = 8, a + 8 = 11)
+</code></pre>
+
+<h2>Expression syntax</h2>
+
+<p>
+Eval nodes support the following operators and constructs:
+</p>
+
+<ul>
+  <li><strong>Arithmetic</strong>: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code> (modulo)</li>
+  <li><strong>Comparison</strong>: <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></li>
+  <li><strong>Boolean</strong>: <code>&amp;&amp;</code>, <code>||</code>, <code>!</code></li>
+  <li><strong>Ternary</strong>: <code>condition ? value_if_true : value_if_false</code></li>
+</ul>
+
+<pre><code>  eval: score >= 60 ? "pass" : "fail"
+  eval: (a + b) / 2
+  eval: !is_empty &amp;&amp; count > 0
+</code></pre>
+
+<h2>Inject nodes</h2>
+
+<p>
+An <strong>inject node</strong> performs dynamic dispatch &mdash; it calls a
+method whose name is provided at runtime as a string input. This is useful
+when the operation to perform is determined by data rather than wired
+statically.
+</p>
+
+<pre><code>  constant "add" --&gt; [inject] &lt;-- constant 3
+                                  &lt;-- constant 4
+                      outputs: 7
+
+  constant "multiply" --&gt; [inject] &lt;-- constant 3
+                                       &lt;-- constant 4
+                           outputs: 12
+</code></pre>
+
+<p>
+The first input is the method name; the remaining inputs are passed as
+arguments. The runtime looks up the method and calls it.
+</p>
+
+<h2>What you learned</h2>
+
+<ul>
+  <li><strong>Local methods</strong> embed a method body inside a node for one-off logic.</li>
+  <li><strong>Eval nodes</strong> let you write inline expressions (arithmetic, comparison, boolean, ternary).</li>
+  <li><strong>Inject nodes</strong> perform dynamic dispatch by calling a method whose name is a runtime value.</li>
+  <li>These tools reduce clutter by keeping small operations close to where they are used.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="13-networking.html">&larr; Prev: HTTP Networking</a>
+  <a href="15-front-panel.html">Next: Front Panel &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

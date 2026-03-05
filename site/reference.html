@@ -30,10 +30,31 @@ types, primitives, and control flow.
   <li><a href="#structure">Program Structure</a></li>
   <li><a href="#types">Data Types</a></li>
   <li><a href="#nodes">Node Types</a></li>
-  <li><a href="#primitives">Primitives Reference</a></li>
+  <li><a href="#primitives">Primitives Reference</a>
+    <ul>
+      <li><a href="#prim-arith">Arithmetic</a></li>
+      <li><a href="#prim-compare">Comparison</a></li>
+      <li><a href="#prim-logic">Logic</a></li>
+      <li><a href="#prim-string">String</a></li>
+      <li><a href="#prim-list">List</a></li>
+      <li><a href="#prim-higher-order">Higher-Order List</a></li>
+      <li><a href="#prim-dict">Dict</a></li>
+      <li><a href="#prim-console">Console / Debug</a></li>
+      <li><a href="#prim-typecheck">Type Checking</a></li>
+      <li><a href="#prim-enum">Enum</a></li>
+      <li><a href="#prim-methodref">Method References</a></li>
+      <li><a href="#prim-net">Networking</a></li>
+      <li><a href="#prim-json">JSON</a></li>
+      <li><a href="#prim-date">Date/Time</a></li>
+      <li><a href="#prim-observable">Observables</a></li>
+    </ul>
+  </li>
   <li><a href="#control">Control Flow</a></li>
   <li><a href="#loops">Loops and List Annotations</a></li>
   <li><a href="#classes">Classes and Objects</a></li>
+  <li><a href="#protocols">Protocols</a></li>
+  <li><a href="#actors">Actor Classes</a></li>
+  <li><a href="#frontpanel">Front Panel</a></li>
   <li><a href="#errors">Error Handling</a></li>
   <li><a href="#async">Concurrency and Async</a></li>
 </ul>
@@ -135,15 +156,18 @@ following the original Prograph convention.
   <tr><th>Type</th><th>Appearance</th><th>Description</th></tr>
   <tr><td>Primitive</td><td>Rectangle with bottom line</td><td>Built-in operation</td></tr>
   <tr><td>Universal method</td><td>Rectangle with name</td><td>Call to a standalone method</td></tr>
-  <tr><td>Local method</td><td>Rectangle with side lines</td><td>Grouped operations within a parent method</td></tr>
+  <tr><td>Local method</td><td>Rectangle with side lines</td><td>Embedded method body evaluated inline within the parent case</td></tr>
   <tr><td>Instance generator</td><td>Octagon</td><td>Creates a new object</td></tr>
   <tr><td>Constant</td><td>Horizontal line with value</td><td>Supplies a fixed value</td></tr>
   <tr><td>Get</td><td>Special icon</td><td>Reads an attribute from an object</td></tr>
   <tr><td>Set</td><td>Special icon</td><td>Writes an attribute on an object</td></tr>
-  <tr><td>Persistent</td><td>Oval</td><td>Accesses a global variable</td></tr>
-  <tr><td>Evaluation</td><td>Rectangle with expression</td><td>Inline formula</td></tr>
-  <tr><td>Inject</td><td>Rectangle with inject pin</td><td>Dynamic dispatch by name</td></tr>
+  <tr><td>Persistent</td><td>Oval</td><td>Stores/retrieves values that persist across method invocations</td></tr>
+  <tr><td>Evaluation</td><td>Rectangle with expression</td><td>Inline expression evaluation (arithmetic, boolean, ternary)</td></tr>
+  <tr><td>Inject</td><td>Rectangle with inject pin</td><td>Dynamic dispatch by name string or method-ref</td></tr>
+  <tr><td>Loop</td><td>Rectangle with loop icon</td><td>Iteratively calls a method, feeding outputs back as inputs</td></tr>
 </table>
+
+<h3>Pin Types</h3>
 
 <p>
 Nodes have <strong>input pins</strong> at the top and <strong>output
@@ -152,11 +176,62 @@ for scalars, hexagons for booleans, squares for collections, diamonds for
 optionals, pentagons for objects, triangles for execution flow.
 </p>
 
+<p>Pins have additional properties:</p>
+
+<ul>
+  <li><strong>Hot pins</strong> &mdash; trigger node evaluation when data arrives.
+      By default all data inputs are hot.</li>
+  <li><strong>Cold pins</strong> &mdash; supply data but do not trigger evaluation.
+      The node fires only when a hot pin receives data.</li>
+  <li><strong>Optional pins</strong> &mdash; have a default value and do not need
+      a wire connected. If unwired, the default is used.</li>
+</ul>
+
+<h3>Wire Types</h3>
+
+<ul>
+  <li><strong>Data wires</strong> (solid lines) &mdash; carry values between nodes.</li>
+  <li><strong>Execution wires</strong> (dashed gray lines, <code>is_execution</code>)
+      &mdash; enforce ordering for side-effecting operations without carrying data.
+      A node with an execution-in pin fires only after the upstream execution wire
+      has triggered.</li>
+</ul>
+
+<h3>Node Annotations</h3>
+
+<p>
+In addition to control-flow annotations (see <a href="#control">Control Flow</a>),
+nodes support structural annotations that change how they process data:
+</p>
+
+<table>
+  <tr><th>Annotation</th><th>Description</th></tr>
+  <tr><td><code>ListMap</code></td><td>Applies the node operation to each element of a list input, producing a list of results</td></tr>
+  <tr><td><code>Partition</code></td><td>Splits a list into two lists (pass/fail) based on a boolean result from the node</td></tr>
+  <tr><td><code>Try</code></td><td>Catches errors on a designated output pin instead of propagating failure</td></tr>
+</table>
+
+<h3>Pattern Matching Guards</h3>
+
+<p>
+Cases in a method support <strong>pattern matching guards</strong> that control
+which case fires based on the input values. Guard types:
+</p>
+
+<ul>
+  <li><strong>Type guard</strong> &mdash; matches when the input is a specific type
+      (e.g., <code>Integer</code>, <code>String</code>, a class name).</li>
+  <li><strong>Value guard</strong> &mdash; matches when the input equals a specific
+      literal value.</li>
+  <li><strong>Wildcard guard</strong> &mdash; matches any value (used as a default /
+      catch-all case).</li>
+</ul>
+
 <!-- ===== PRIMITIVES ===== -->
 
 <h2 id="primitives">Primitives Reference</h2>
 
-<h3>Arithmetic</h3>
+<h3 id="prim-arith">Arithmetic</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
@@ -183,7 +258,7 @@ optionals, pentagons for objects, triangles for execution flow.
   <tr><td><code>rand</code></td><td>&mdash;</td><td>real</td><td>Random number [0, 1)</td></tr>
 </table>
 
-<h3>Comparison</h3>
+<h3 id="prim-compare">Comparison</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
@@ -195,7 +270,7 @@ optionals, pentagons for objects, triangles for execution flow.
   <tr><td><code>&gt;=</code></td><td>a, b</td><td>boolean</td><td>Greater than or equal</td></tr>
 </table>
 
-<h3>Logic</h3>
+<h3 id="prim-logic">Logic</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
@@ -204,7 +279,7 @@ optionals, pentagons for objects, triangles for execution flow.
   <tr><td><code>not</code></td><td>a</td><td>boolean</td><td>Logical NOT</td></tr>
 </table>
 
-<h3>String</h3>
+<h3 id="prim-string">String</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
@@ -220,9 +295,10 @@ optionals, pentagons for objects, triangles for execution flow.
   <tr><td><code>string-starts-with?</code></td><td>str, prefix</td><td>boolean</td><td>Test prefix</td></tr>
   <tr><td><code>string-ends-with?</code></td><td>str, suffix</td><td>boolean</td><td>Test suffix</td></tr>
   <tr><td><code>char-at</code></td><td>str, index</td><td>string</td><td>Character at position (1-indexed)</td></tr>
+  <tr><td><code>string-repeat</code></td><td>string, count</td><td>string</td><td>Repeat string N times</td></tr>
 </table>
 
-<h3>List</h3>
+<h3 id="prim-list">List</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
@@ -236,14 +312,33 @@ optionals, pentagons for objects, triangles for execution flow.
   <tr><td><code>reverse</code></td><td>list</td><td>list</td><td>Reverse order</td></tr>
   <tr><td><code>empty?</code></td><td>list</td><td>boolean</td><td>True if empty</td></tr>
   <tr><td><code>contains?</code></td><td>list, elem</td><td>boolean</td><td>Test membership</td></tr>
-  <tr><td><code>map</code></td><td>list, method-ref</td><td>list</td><td>Apply to each element</td></tr>
-  <tr><td><code>filter</code></td><td>list, method-ref</td><td>list</td><td>Keep matching elements</td></tr>
-  <tr><td><code>reduce</code></td><td>list, init, method-ref</td><td>value</td><td>Fold/reduce</td></tr>
-  <tr><td><code>zip</code></td><td>list1, list2</td><td>pairs</td><td>Combine element-wise</td></tr>
+  <tr><td><code>concat</code></td><td>list1, list2</td><td>list</td><td>Concatenate two lists</td></tr>
+  <tr><td><code>zip</code></td><td>list1, list2</td><td>list</td><td>Combine element-wise into list of pairs</td></tr>
   <tr><td><code>unique</code></td><td>list</td><td>list</td><td>Remove duplicates</td></tr>
+  <tr><td><code>enumerate</code></td><td>list</td><td>list</td><td>List of [index, value] pairs (1-indexed)</td></tr>
 </table>
 
-<h3>Dict</h3>
+<h3 id="prim-higher-order">Higher-Order List</h3>
+
+<p>
+These primitives take a <code>method-ref</code> as a callback argument
+(see <a href="#prim-methodref">Method References</a>).
+</p>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>map</code></td><td>list, method-ref</td><td>list</td><td>Apply function to each element</td></tr>
+  <tr><td><code>filter</code></td><td>list, method-ref</td><td>list</td><td>Keep elements where callback returns true</td></tr>
+  <tr><td><code>reduce</code></td><td>list, method-ref, initial</td><td>value</td><td>Fold list with accumulator</td></tr>
+  <tr><td><code>flat-map</code></td><td>list, method-ref</td><td>list</td><td>Map then flatten one level</td></tr>
+  <tr><td><code>any?</code></td><td>list, method-ref</td><td>boolean</td><td>True if callback returns true for any element</td></tr>
+  <tr><td><code>all?</code></td><td>list, method-ref</td><td>boolean</td><td>True if callback returns true for all elements</td></tr>
+  <tr><td><code>find</code></td><td>list, method-ref</td><td>value</td><td>First element where callback returns true (null if none)</td></tr>
+  <tr><td><code>sort-by</code></td><td>list, method-ref</td><td>list</td><td>Sort by key extracted by callback</td></tr>
+  <tr><td><code>group-by</code></td><td>list, method-ref</td><td>dict</td><td>Group elements by key extracted by callback</td></tr>
+</table>
+
+<h3 id="prim-dict">Dict</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
@@ -256,9 +351,10 @@ optionals, pentagons for objects, triangles for execution flow.
   <tr><td><code>dict-values</code></td><td>dict</td><td>list</td><td>All values</td></tr>
   <tr><td><code>dict-size</code></td><td>dict</td><td>integer</td><td>Number of entries</td></tr>
   <tr><td><code>dict-merge</code></td><td>d1, d2</td><td>dict</td><td>Merge (d2 wins on conflict)</td></tr>
+  <tr><td><code>dict-set!</code></td><td>dict, key, val</td><td>dict</td><td>Set key in-place (mutating)</td></tr>
 </table>
 
-<h3>Console / Debug</h3>
+<h3 id="prim-console">Console / Debug</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
@@ -267,7 +363,7 @@ optionals, pentagons for objects, triangles for execution flow.
   <tr><td><code>breakpoint</code></td><td>&mdash;</td><td>&mdash;</td><td>Pause if debugger attached</td></tr>
 </table>
 
-<h3>Type Checking</h3>
+<h3 id="prim-typecheck">Type Checking</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
@@ -278,29 +374,103 @@ optionals, pentagons for objects, triangles for execution flow.
   <tr><td><code>list?</code></td><td>value</td><td>boolean</td><td>Is list?</td></tr>
   <tr><td><code>null?</code></td><td>value</td><td>boolean</td><td>Is null?</td></tr>
   <tr><td><code>error?</code></td><td>value</td><td>boolean</td><td>Is error?</td></tr>
-  <tr><td><code>class-of</code></td><td>object</td><td>string</td><td>Class name</td></tr>
-  <tr><td><code>instance-of?</code></td><td>obj, class</td><td>boolean</td><td>Is instance of class?</td></tr>
+  <tr><td><code>class-of</code></td><td>object</td><td>string</td><td>Class name of an object</td></tr>
+  <tr><td><code>instance-of?</code></td><td>obj, class_name</td><td>boolean</td><td>Is instance of named class?</td></tr>
+  <tr><td><code>responds-to?</code></td><td>obj, method_name</td><td>boolean</td><td>Does object have named method?</td></tr>
+  <tr><td><code>conforms-to?</code></td><td>obj, protocol_name</td><td>boolean</td><td>Does object conform to named protocol?</td></tr>
 </table>
 
-<h3>Networking</h3>
+<h3 id="prim-enum">Enum</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
-  <tr><td><code>http-get</code></td><td>url</td><td>response</td><td>Async HTTP GET</td></tr>
-  <tr><td><code>http-post</code></td><td>url, body, type</td><td>response</td><td>Async HTTP POST</td></tr>
-  <tr><td><code>json-parse</code></td><td>string</td><td>value</td><td>Parse JSON</td></tr>
-  <tr><td><code>json-encode</code></td><td>value</td><td>string</td><td>Encode as JSON</td></tr>
+  <tr><td><code>enum-create</code></td><td>type, variant, data_list</td><td>enum</td><td>Create an enum value with type name, variant name, and associated data</td></tr>
+  <tr><td><code>enum-type</code></td><td>enum</td><td>string</td><td>Get the enum type name</td></tr>
+  <tr><td><code>enum-variant</code></td><td>enum</td><td>string</td><td>Get the variant name</td></tr>
+  <tr><td><code>enum-data</code></td><td>enum</td><td>list</td><td>Extract associated data as a list</td></tr>
 </table>
 
-<h3>Date/Time</h3>
+<h3 id="prim-methodref">Method References</h3>
+
+<p>
+Method references are first-class values that point to a method. They can be
+passed to higher-order primitives like <code>map</code>, <code>filter</code>,
+and <code>reduce</code>, or called dynamically with <code>call</code>.
+</p>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>method-ref</code></td><td>name_string</td><td>ref</td><td>Create a reference to a universal method by name</td></tr>
+  <tr><td><code>method-ref-class</code></td><td>class, method</td><td>ref</td><td>Reference to a specific class method</td></tr>
+  <tr><td><code>method-ref-bound</code></td><td>object, method</td><td>ref</td><td>Reference bound to a specific object instance</td></tr>
+  <tr><td><code>call</code></td><td>ref, arg</td><td>result</td><td>Invoke a method-ref with an argument</td></tr>
+  <tr><td><code>is-method-ref?</code></td><td>value</td><td>boolean</td><td>Test if value is a method reference</td></tr>
+  <tr><td><code>method-ref-name</code></td><td>ref</td><td>string</td><td>Get the method name from a reference</td></tr>
+</table>
+
+<h3 id="prim-net">Networking</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>http-get</code></td><td>url</td><td>body_string</td><td>HTTP GET request, returns response body as string</td></tr>
+  <tr><td><code>http-post</code></td><td>url, body, content_type</td><td>response_string</td><td>HTTP POST request with body and content type</td></tr>
+</table>
+
+<h3 id="prim-json">JSON</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>json-parse</code></td><td>string</td><td>value</td><td>Parse JSON string into a Phograph value (dict, list, etc.)</td></tr>
+  <tr><td><code>json-encode</code></td><td>value</td><td>string</td><td>Encode a Phograph value as a JSON string</td></tr>
+</table>
+
+<h3 id="prim-date">Date/Time</h3>
 
 <table>
   <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
   <tr><td><code>date-now</code></td><td>&mdash;</td><td>date</td><td>Current date/time</td></tr>
-  <tr><td><code>date-create</code></td><td>y, m, d, h, m, s</td><td>date</td><td>Create from components</td></tr>
-  <tr><td><code>date-format</code></td><td>date, fmt</td><td>string</td><td>Format as string</td></tr>
-  <tr><td><code>date-diff</code></td><td>d1, d2</td><td>real</td><td>Difference in seconds</td></tr>
-  <tr><td><code>date-add</code></td><td>date, secs</td><td>date</td><td>Add duration</td></tr>
+  <tr><td><code>date-create</code></td><td>Y, M, D, h, m, s</td><td>date</td><td>Create from year, month, day, hour, minute, second</td></tr>
+  <tr><td><code>date-components</code></td><td>date</td><td>list</td><td>Extract [year, month, day, hour, minute, second]</td></tr>
+  <tr><td><code>date-add</code></td><td>date, seconds</td><td>date</td><td>Add seconds to a date</td></tr>
+  <tr><td><code>date-diff</code></td><td>date1, date2</td><td>seconds</td><td>Difference between two dates in seconds</td></tr>
+  <tr><td><code>date-format</code></td><td>date, format_string</td><td>string</td><td>Format date as string (e.g., "yyyy-MM-dd")</td></tr>
+  <tr><td><code>date-parse</code></td><td>string, format_string</td><td>date</td><td>Parse string into date using format</td></tr>
+  <tr><td><code>date-weekday</code></td><td>date</td><td>integer</td><td>Day of week (0=Sunday through 6=Saturday)</td></tr>
+  <tr><td><code>date-compare</code></td><td>date1, date2</td><td>integer</td><td>Compare dates: &lt;0 if before, 0 if equal, &gt;0 if after</td></tr>
+  <tr><td><code>date-from-timestamp</code></td><td>number</td><td>date</td><td>Create date from Unix timestamp (seconds since epoch)</td></tr>
+  <tr><td><code>date-to-timestamp</code></td><td>date</td><td>number</td><td>Convert date to Unix timestamp</td></tr>
+</table>
+
+<h4>Duration Helpers</h4>
+
+<p>
+Convenience primitives for creating durations in seconds, suitable for use
+with <code>date-add</code>:
+</p>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>seconds</code></td><td>n</td><td>n</td><td>Identity (n seconds)</td></tr>
+  <tr><td><code>minutes</code></td><td>n</td><td>n * 60</td><td>Convert minutes to seconds</td></tr>
+  <tr><td><code>hours</code></td><td>n</td><td>n * 3600</td><td>Convert hours to seconds</td></tr>
+  <tr><td><code>days</code></td><td>n</td><td>n * 86400</td><td>Convert days to seconds</td></tr>
+</table>
+
+<h3 id="prim-observable">Observables</h3>
+
+<p>
+Observables let you watch for changes to object attributes and react
+automatically. They are the foundation for reactive data binding in
+front panels and between objects.
+</p>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>observe</code></td><td>object, attr_name</td><td>observer_id</td><td>Watch a specific attribute for changes</td></tr>
+  <tr><td><code>unobserve</code></td><td>object, observer_id</td><td>null</td><td>Stop watching a specific observer</td></tr>
+  <tr><td><code>observe-any</code></td><td>object</td><td>observer_id</td><td>Watch all attributes on an object for any change</td></tr>
+  <tr><td><code>bind</code></td><td>src_obj, src_attr, tgt_obj, tgt_attr</td><td>observer_id</td><td>Bind source attribute to target &mdash; changes propagate automatically</td></tr>
+  <tr><td><code>unbind</code></td><td>object, observer_id</td><td>null</td><td>Remove a binding</td></tr>
 </table>
 
 <!-- ===== CONTROL FLOW ===== -->
@@ -412,6 +582,57 @@ dynamic dispatch based on the object&rsquo;s class.
   <tr><td><code>//MethodName</code></td><td>Context dispatch &mdash; within the same class</td></tr>
   <tr><td><code>ClassName/MethodName</code></td><td>Explicit &mdash; call a specific class&rsquo;s method</td></tr>
 </table>
+
+<!-- ===== PROTOCOLS ===== -->
+
+<h2 id="protocols">Protocols</h2>
+
+<p>
+A <strong>protocol</strong> defines a set of method signatures that a class
+must implement to conform. Protocols enable polymorphism without inheritance
+&mdash; any class can conform to any protocol by providing the required methods.
+</p>
+
+<p>
+Use <code>conforms-to?</code> to test at runtime whether an object&rsquo;s
+class conforms to a given protocol. Protocol conformance is declared on the
+class definition and checked by the runtime.
+</p>
+
+<!-- ===== ACTORS ===== -->
+
+<h2 id="actors">Actor Classes</h2>
+
+<p>
+An <strong>actor</strong> class is declared with the <code>actor</code> keyword
+in its class definition. Actors provide concurrency safety: all method calls on
+an actor are serialized, ensuring that only one method executes at a time on a
+given actor instance. This eliminates data races without manual locking.
+</p>
+
+<p>
+Actor methods are implicitly asynchronous &mdash; calls from outside the actor
+return a Future that resolves when the method completes. Calls within the same
+actor execute synchronously.
+</p>
+
+<!-- ===== FRONT PANEL ===== -->
+
+<h2 id="frontpanel">Front Panel</h2>
+
+<p>
+A <strong>front panel</strong> is a SwiftUI interface automatically generated
+from a class&rsquo;s attributes. Each attribute with a front-panel annotation
+becomes an interactive control (slider, text field, toggle, color picker, etc.)
+bound to the attribute&rsquo;s value via the <a href="#prim-observable">observable</a>
+system.
+</p>
+
+<p>
+When the user changes a control, the bound attribute updates. When code changes
+the attribute, the control updates. This two-way binding is established
+automatically using <code>bind</code>.
+</p>
 
 <!-- ===== ERRORS ===== -->
 

@@ -8,12 +8,14 @@ Programs are built by connecting nodes with wires on a visual canvas rather than
 
 - **Visual graph editor** - drag nodes, connect wires, zoom/pan canvas
 - **Dataflow evaluation** - token-based firing with automatic scheduling
-- **13 data types** - integer, float, boolean, string, list, dict, object, enum, data, date, error, future, nothing
-- **~400 primitives** - arithmetic, string, list, dict, type, I/O, scene graph, animation
+- **14 data types** - integer, float, boolean, string, list, dict, object, enum, data, date, error, future, method-ref, nothing
+- **~400 built-in primitives** - arithmetic, string, list, dict, type, date, JSON, I/O, scene graph, animation, method refs, observables
 - **Classes and OOP** - inheritance, protocols, enums, data-determined dispatch
-- **Multiple cases** - pattern matching with type/value/list/dict destructuring
-- **Control flow** - loops, spreads, broadcasts, shift registers, error clusters
+- **Multiple cases** - pattern matching with type/value/list/dict destructuring, case guards with type/value/wildcard
+- **Control flow** - execution wires, evaluation nodes, loops, spreads, broadcasts, shift registers, error clusters
 - **Async** - futures, channels, managed effects
+- **Observable attributes** - reactive attribute system with actor classes
+- **Front panel** - runtime UI for interactive programs
 - **Scene graph** - shape hierarchy with CPU rasterizer, displayed via Metal
 - **Compiler** - graph-to-Swift source code generation for standalone binaries
 - **Debugger** - breakpoints, step/rollback, trace values on wires
@@ -71,11 +73,11 @@ Once running:
     cmake --build build
     ctest --test-dir build --output-on-failure
 
-This builds the portable C++ engine as a static library and runs the full test suite (12 test executables, ~200 assertions). No Xcode app or GUI required.
+This builds the portable C++ engine as a static library and runs the full test suite (13 test executables, ~200 assertions). No Xcode app or GUI required.
 
 Expected output:
 
-    100% tests passed, 0 tests failed out of 12
+    100% tests passed, 0 tests failed out of 13
 
 ## Architecture
 
@@ -85,7 +87,8 @@ The project follows a portable C++ core with thin platform bridge pattern:
       Phograph/
         App/                     SwiftUI entry point
         Bridge/                  ObjC++ bridge to C++ engine
-        Views/                   SwiftUI IDE views (canvas, browser, inspector)
+        Views/                   SwiftUI IDE views (canvas, browser, inspector, front panel)
+          IDE/FrontPanelView.swift  Runtime front panel UI
         ViewModels/              IDE state management
         Model/                   Swift ObservableObject models
         Metal/                   MetalRenderer + shaders
@@ -99,6 +102,8 @@ The project follows a portable C++ core with thin platform bridge pattern:
         pho_serial.{h,cc}        JSON serialization/deserialization
         pho_bridge.{h,cc}        C API for Swift/ObjC interop
         pho_prim*.cc             Primitive implementations (~25 files)
+        pho_prim_date.cc         Date/time primitives
+        pho_prim_methodref.cc    Method reference primitives
         pho_scene.{h,cc}         Scene graph
         pho_draw.{h,cc}          CPU rasterizer
         pho_codegen.{h,cc}       Graph-to-Swift compiler
@@ -106,7 +111,7 @@ The project follows a portable C++ core with thin platform bridge pattern:
         pho_thread.{h,cc}        Run loop, timers, event queue
         pho_platform.h           Platform abstraction (no implementation)
         plugins/                 Native audio/MIDI plugin implementations
-      tests/                     C++ test suite (12 executables)
+      tests/                     C++ test suite (13 executables)
 
     libraries/                   Plugin libraries (10 libraries, 135 primitives)
       math/                      factorial, fibonacci, gcd, lcm, is-prime
@@ -134,7 +139,7 @@ The C++ core has zero platform `#include`s. All I/O goes through `pho_platform.h
     cmake --build build
     ctest --test-dir build --output-on-failure
 
-The test suite contains 12 executables:
+The test suite contains 13 executables:
 
     Test                What it covers
     ----                --------------
@@ -149,6 +154,7 @@ The test suite contains 12 executables:
     test_phase9         Async: futures, channels, effects
     test_phase10        Compiler: Swift code generation, name mangling, topo sort
     test_e2e_compile    End-to-end: compile graph to Swift, run swiftc, verify output
+    test_phase11_28     Phases 11-28: execution wires, loops, listMap, try/error, pattern matching, observables
     test_comprehensive  Full-language bridge test: all primitives, types, control flow, OOP, canvas
 
 ### Library Validation

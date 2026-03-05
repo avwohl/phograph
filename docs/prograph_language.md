@@ -97,7 +97,7 @@ Phograph is **not a pure dataflow language** -- data flowing through diagrams ca
 Phograph has two kinds of wires, inspired by Unreal Blueprints and Cables.gl:
 
 - **Data wires** (solid lines): carry values between operations. This is the classic Prograph wire. Data flows top-to-bottom. An operation fires when all data inputs are available.
-- **Execution wires** (dashed lines with arrow): enforce sequencing between operations that have side effects. An operation with an execution-in pin fires only after the upstream operation on the execution wire has completed, even if all data inputs are already available.
+- **Execution wires** (dashed gray lines with arrow): enforce sequencing between operations that have side effects. Marked `is_execution=true` in the graph model. An execution wire carries no data -- it only signals completion. An operation with an execution-in pin fires only after the upstream operation on the execution wire has completed **and** all data inputs are available.
 
 **Why both?** Pure dataflow can express any computation, but when operations have side effects (file I/O, network calls, UI mutations), the programmer must control the order. Original Prograph used **synchro links** for this, but they were awkward and disconnected from the data model. Execution wires make sequencing first-class and visible.
 
@@ -157,7 +157,7 @@ Inspired by Scratch/Snap!'s shape-based type system, Phograph pins have shapes t
 | **Triangle** | Execution | Execution-in / execution-out flow |
 | **Star** | Error | Error output from try annotations |
 
-**Colors** further distinguish types within a shape category: Integer (blue circle), Real (green circle), String (pink circle), Data (dark cyan circle), Date (amber circle), Boolean (red hexagon), List (orange square), Dict (purple square), Object (teal pentagon), External (gray pentagon), Enum (indigo pentagon), Null (white diamond), Error (bright red star).
+**Colors** further distinguish types within a shape category: Integer (blue circle), Real (green circle), String (pink circle), Data (dark cyan circle), Date (amber circle), Boolean (red hexagon), List (orange square), Dict (purple square), Object (teal pentagon), External (gray pentagon), Enum (indigo pentagon), MethodRef (olive pentagon), Null (white diamond), Error (bright red star).
 
 ### Visible Coercion Dots
 
@@ -221,7 +221,7 @@ When a method is called:
 
 Every method has a defined **arity** -- a specific number of inputs and outputs. The visual editor displays and enforces this.
 
-**Phograph extension -- optional inputs:** An input node can be marked as **optional** (visually: a dashed circle instead of solid). Optional inputs have a **default value** specified in the node's properties. If no wire is connected to an optional input, the default value is used. This reduces method proliferation -- instead of writing three methods for different argument counts, write one with optional parameters.
+**Phograph extension -- optional inputs:** An input node can be marked as **optional** (visually: a dashed circle instead of solid). Optional inputs have a **default value** specified in the node's properties (`PinDef.is_optional = true`, `PinDef.default_value`). If no wire is connected to an optional input, the default value is used. A node fires when all **required** (non-optional) inputs are filled; optional inputs use their defaults if unconnected. This reduces method proliferation -- instead of writing three methods for different argument counts, write one with optional parameters.
 
 ```
 Method "draw-circle" (3 required, 2 optional):
@@ -237,6 +237,8 @@ Method "draw-circle" (3 required, 2 optional):
 - When calling, wires to optional inputs can be omitted
 - The editor shows optional inputs with dashed circles and default values annotated
 - Output nodes cannot be optional
+
+**Hot and cold pins** (see also §5): Each input pin has an `is_hot` flag (default true). Hot pins trigger evaluation when new data arrives; cold pins store data passively. The hot/cold distinction determines firing behavior in reactive and streaming graphs.
 
 **Phograph extension -- variadic inputs:** An input node can be marked as **variadic** (visually: ellipsis inside the circle). A variadic input accepts any number of wires; the values are collected into a list. Only one variadic input is allowed per method, and it must be the last input.
 
@@ -260,7 +262,7 @@ During interpretation, if a called method doesn't exist, an alert offers to crea
 
 ## 4. Data Types
 
-Phograph has **thirteen data types**:
+Phograph has **fourteen data types**:
 
 | Type | Description |
 |------|-------------|
@@ -276,6 +278,7 @@ Phograph has **thirteen data types**:
 | **External** | Opaque reference to a platform/FFI resource (Swift object, C pointer, OS handle) |
 | **Error** | Error value with message, code, and optional details (see §7.1) |
 | **Enum** | Value of an enum type with optional associated data (see §9, Enum Types) |
+| **MethodRef** | First-class reference to a method (see §5, Method References) |
 | **Null** | The single "nothing" value. Represents absence of data. |
 
 **Design change from original Prograph:** The original had three confusing "nothing" values -- NULL, NONE, and Undefined -- with unclear, overlapping semantics. Phograph collapses these into a single `null`. An uninitialized attribute is `null`. An absent return value is `null`. There is one nothing, not three.
@@ -341,7 +344,7 @@ Dicts work with **list annotations**: applying an ellipsis-annotated operation t
 
 Small formula-like constructs embedded in an operation icon. Hold a single expression with inputs named by the wires connected to them. No function-call overhead. Example: `b*b - 4*a*c` with inputs `a`, `b`, `c`.
 
-**Design change from original Prograph:** The original limited evaluations to 26 inputs named `a` through `z` and supported only arithmetic. Phograph **inline expression nodes** (see §5) extend evaluations with a richer expression language: arithmetic, comparison, boolean logic, string interpolation, ternary (`condition ? then : else`), and method calls. Wire labels name the inputs, with no fixed limit. Evaluations and inline expressions are the same feature -- "evaluation" is the original Prograph term; "inline expression" is the modern name.
+**Design change from original Prograph:** The original limited evaluations to 26 inputs named `a` through `z` and supported only arithmetic. Phograph **inline expression nodes** (see §5) extend evaluations with a richer expression language: arithmetic, comparison, boolean logic, string concatenation, ternary (`condition ? then : else`), and method calls. Inputs are bound to variables `a`, `b`, `c`... (positional) as well as `input0`, `input1`... (indexed), so expressions like `a * b + c` or `input0 > input1 ? input0 : input1` work naturally. Wire labels name the inputs, with no fixed limit. Evaluations and inline expressions are the same feature -- "evaluation" is the original Prograph term; "inline expression" is the modern name.
 
 ### Memory Management
 
@@ -383,7 +386,7 @@ A **Date** represents an absolute point in time with nanosecond precision. Inter
 | `date-create-utc` | year, month, day, hour, minute, second | date | Create a date from components (in UTC) |
 | `date-components` | date | year, month, day, hour, minute, second | Decompose a date (in local timezone) |
 | `date-components-utc` | date | year, month, day, hour, minute, second | Decompose a date (in UTC) |
-| `date-timestamp` | date | real | Seconds since Unix epoch |
+| `date-to-timestamp` | date | real | Seconds since Unix epoch |
 | `date-from-timestamp` | real | date | Create from Unix timestamp |
 | `date-add` | date, seconds | date | Add a duration (in seconds) to a date |
 | `date-diff` | date1, date2 | real | Difference in seconds between two dates |
@@ -490,9 +493,29 @@ Inspired by Unity Visual Scripting and Enso, the **primary way to add nodes** to
 - Shows type signatures and brief descriptions in the popup
 - Recent/frequent operations appear at the top
 
-### Inject Construct
+### Evaluation Nodes (NodeType::Evaluation)
 
-An **inject** determines at runtime which method to call. Instead of a fixed method name, a blank operation icon receives the method name as data input via a special inject node. This enables:
+An **evaluation node** (`NodeType::Evaluation`) holds an expression string that is evaluated inline. Inputs are bound to named variables: the first input is `a` (alias `input0`), the second is `b` (alias `input1`), and so on. The expression supports:
+
+- **Arithmetic**: `+`, `-`, `*`, `/`, `%`
+- **Comparison**: `==`, `!=`, `<`, `>`, `<=`, `>=`
+- **Boolean**: `&&`, `||`, `!`
+- **String concatenation**: `+` on strings
+- **Ternary**: `condition ? then_value : else_value`
+
+Examples: `a * b + c`, `a > 0 ? a : -a`, `a + " world"`.
+
+Evaluation nodes are semantically equivalent to a subgraph of primitive operations but take far less screen space. They compile to a single Swift expression with zero function-call overhead.
+
+### Local Method Nodes (NodeType::LocalMethod)
+
+A **local method node** (`NodeType::LocalMethod`) embeds a complete method body (`Node.local_method`) inside a parent method. The embedded method is evaluated inline when the node fires. Local methods are not callable from outside their containing method -- they exist purely for organizational clarity.
+
+Local methods are created by selecting operations and choosing "Opers To Local." They can be promoted to universal methods later.
+
+### Inject Construct (NodeType::Inject)
+
+An **inject** determines at runtime which method to call. The first input is the method name as a string or a method reference; remaining inputs are passed as arguments to the resolved method. This enables:
 
 - Runtime dispatch based on user selection
 - Function-pointer-like behavior
@@ -512,6 +535,8 @@ A **method reference** is created with the `method-ref` icon (rectangle with an 
 | `method-ref-bound` | object, method-name | reference | Create a reference bound to a specific object (captures `self`) |
 | `call` | reference, args-list | result | Invoke a method reference with arguments |
 | `call-async` | reference, args-list | future | Invoke a method reference asynchronously, returns a Future |
+| `is-method-ref?` | value | boolean | Test if a value is a method reference |
+| `method-ref-name` | reference | string | Get the method name from a reference |
 
 Method references replace stringly-typed inject for most uses. The editor validates that the referenced method exists at edit time (though the check is advisory, not enforced until runtime).
 
@@ -694,6 +719,8 @@ All comparison primitives automatically carry a **control annotation** for use i
 | `instance-of?` | object, class-name | boolean | Test if object is an instance of the named class (including superclasses) |
 | `responds-to?` | object, method-name | boolean | Test if object has a method with the given name |
 | `conforms-to?` | object, protocol-name | boolean | Test if object conforms to a protocol (see §9) |
+| `enum-create` | type-name, variant-name, data | enum | Create an enum value programmatically |
+| `enum-data` | enum-value | value | Extract associated data from an enum value |
 
 ### File Primitives
 
@@ -822,11 +849,11 @@ An **Error** is a value (not an exception) with:
 
 #### Try Annotation
 
-The **try annotation** is a control annotation that catches failures from an operation and converts them to error values flowing out of a dedicated error output node.
+The **try annotation** (`has_try=true` on a node) catches failures from an operation and converts them to error values flowing out of a dedicated error output pin (`error_out_pin` specifies which output pin receives the error).
 
 When an operation has a try annotation:
 - On **success**: data flows through the normal output nodes. The error output produces `null`.
-- On **failure**: normal output nodes produce `null`. The error output produces an `Error` value describing what went wrong.
+- On **failure**: normal output nodes produce `null`. The error output (identified by `error_out_pin`) produces an `Error` value describing what went wrong.
 
 This replaces the pattern of using `continue-on-failure` + downstream testing with a direct, visible error flow path. The error wire is visually distinct (dashed red) so error paths are immediately obvious in the dataflow graph.
 
@@ -990,13 +1017,14 @@ Managed effects are **optional**. The programmer can call `http-get` directly (i
 
 ### Loop Construct (Counted Loop)
 
-Equivalent to a `for` loop. Created by highlighting the input and output nodes of a method icon and selecting Loop. The icon displays stacked arrows showing the feedback path.
+Equivalent to a `for` loop. A MethodCall node with `is_loop=true` calls its target method iteratively. The icon displays stacked arrows showing the feedback path.
 
 Behavior:
 1. The output of each iteration feeds back as the input for the next iteration
-2. A match test inside the loop method checks the termination condition
+2. A match test inside the loop method checks the termination condition; alternatively, the method can **fail** to terminate the loop
 3. A **Terminate** or **Finish** control on the match ends the loop
-4. The final value exits the loop to downstream operations
+4. When the called method fails, the loop terminates and returns the **last successful input values** (not the failed outputs)
+5. The final value exits the loop to downstream operations
 
 ### Repeat Construct (Indefinite Loop)
 
@@ -1007,19 +1035,20 @@ Behavior:
 2. No feedback value required (though data can be threaded through)
 3. Continues until a **Terminate** or **Finish** control fires inside the repeated method
 
-### List Annotation (Ellipsis / Autoindexing)
+### List Annotation (Ellipsis / ListMap)
 
-Any input or output node can be marked with an **ellipsis annotation**:
+Any input or output node can be marked with an **ellipsis annotation**, or equivalently a node can set `list_map=true`:
 
-- **Ellipsis on input**: The operation expects a list; it automatically executes once for each element (map/for-each)
-- **Ellipsis on output** (with ellipsis input): Results are gathered into a list (map with collect)
-- This converts "any elementary operation" into a loop
+- **ListMap node**: a node with `list_map=true` iterates over the elements of its list input, executing once per element. Results are gathered into a list.
+- **Scalar inputs broadcast**: if a ListMap node has both a list input and scalar inputs, the scalar values are broadcast (reused) for each iteration.
+- **Ellipsis on input**: equivalent visual representation -- the operation expects a list; it automatically executes once for each element (map/for-each).
+- **Ellipsis on output** (with ellipsis input): Results are gathered into a list (map with collect).
 
 This is one of Prograph's most powerful features. A single annotated `+` operation with a list input will add a value to every element, producing a new list -- no explicit loop needed.
 
 ### Partition Annotation
 
-Applied via `Controls Menu > Partition` on a logical test. The operation processes every element of an input list and produces **two output lists**: one where the test succeeded and one where it failed. Equivalent to a `partition` or `filter` in functional languages.
+A node with `partition=true` splits a list based on a boolean output. The operation processes every element of an input list and produces **two output lists**: one where the test returned true (pass) and one where it returned false (fail). Equivalent to a `partition` or `filter` in functional languages.
 
 ### Inject/Accumulate Annotation (Fold/Reduce)
 
@@ -1031,11 +1060,11 @@ Attached to an operation to make it iterate. The loop continues until a control 
 
 ### Shift Registers (Phograph Extension)
 
-Inspired by LabVIEW, a **shift register** is a visual mechanism for carrying an accumulator value from one loop iteration to the next. It replaces the inject/accumulate annotation with a clearer visual metaphor:
+Inspired by LabVIEW, a **shift register** is named state carried across loop iterations. Each shift register has an `input_pin`, an `output_pin`, and an `initial` value. Shift registers are stored on the Case that contains the loop.
 
 - A shift register appears as a pair of connected terminals on opposite sides of a loop boundary: one on the **right edge** (end of iteration) and one on the **left edge** (start of next iteration).
-- The programmer sets an **initial value** on the left terminal.
-- At the end of each iteration, the value on the right terminal feeds back to the left terminal for the next iteration.
+- The programmer sets an **initial value** on the left terminal (the `initial` field).
+- At the end of each iteration, the value on the right terminal (`output_pin`) feeds back to the left terminal (`input_pin`) for the next iteration.
 - When the loop completes, the final value on the right terminal exits the loop.
 
 ```
@@ -1112,7 +1141,7 @@ In original Prograph CPX, all attributes were effectively public. Phograph adds 
 | **protected** | Half-filled circle | Accessible from the same class and its subclasses. |
 | **read-only** | Circle with line | Publicly readable (get), privately writable (set). |
 
-Visibility is set per-attribute and per-method. Violating access control produces a **failure** (not a compile error, since Phograph is dynamically typed), which can be caught with a try annotation or control annotation.
+Visibility is set per-attribute and per-method via the `Access` enum (`Public`, `Protected`, `Private`). Violating access control produces a **failure** (not a compile error, since Phograph is dynamically typed), which can be caught with a try annotation or control annotation.
 
 **Design rationale:** Attributes default to **private** (the safe default). Methods default to **public** (the useful default). This matches the principle of least surprise: you must explicitly expose data, but all behavior is visible by default.
 
@@ -1190,12 +1219,16 @@ Inspired by LabVIEW and the natural marriage with SwiftUI, a Phograph class can 
 This means building a UI is declarative: place controls on the front panel, and they become wirable data sources/sinks in the dataflow graph.
 
 **How it works:**
-1. The programmer designs the front panel by placing SwiftUI-like controls (Button, Slider, TextField, Toggle, Label, Image, etc.) from a palette.
-2. Each control generates a corresponding terminal on the block diagram: a Slider produces an output terminal of type Real; a TextField produces a String output and accepts a String input (for pre-filling).
-3. The programmer wires these terminals to operations in the block diagram.
-4. At runtime, user interaction with the front panel pushes values into the graph; graph outputs update the display elements.
+1. The programmer designs the front panel by placing SwiftUI-like controls from a palette.
+2. Each control is **bound to a class attribute**. The control type is inferred from the attribute's default value:
+   - Boolean default -> Toggle (switch)
+   - String default -> TextField
+   - Numeric default (Integer or Real) -> number field / Slider
+   - Other types -> Label (read-only display)
+3. The programmer wires these attribute terminals to operations in the block diagram.
+4. At runtime, user interaction with the front panel pushes values into the graph via attribute changes; graph outputs update the display elements through observable attribute bindings.
 
-**SwiftUI mapping:** The front panel compiles to a SwiftUI `View` struct. Each control maps to a SwiftUI view with appropriate property wrappers: Slider → `@State var sliderValue: Double`, TextField → `@Binding var text: String`, etc. (See §14 for details.)
+**SwiftUI mapping:** The front panel compiles to a SwiftUI `View` struct. Each control maps to a SwiftUI view with appropriate property wrappers: Slider -> `@State var sliderValue: Double`, TextField -> `@Binding var text: String`, Toggle -> `@State var isOn: Bool`, etc. (See §14 for details.)
 
 Not every class needs a front panel. Classes without one are pure logic / data classes. Classes with a front panel are **view classes** -- they have UI.
 
@@ -1208,14 +1241,14 @@ A single class can have both: a front panel for controls and a canvas for a cust
 
 ### Actor-Based Concurrency for Objects (Phograph Extension)
 
-Inspired by Swift Concurrency and Erlang, each Phograph class instance is conceptually a **Swift actor**:
+Inspired by Swift Concurrency and Erlang, a class can be marked as an **actor** by setting `ClassDef.is_actor = true`. When codegen runs, actor classes emit the Swift `actor` keyword instead of `class`:
 
 - Instance attributes are **actor-isolated**: only the instance's own methods can access them directly.
-- Method calls from outside the instance are automatically `await`ed (asynchronous cross-actor access).
+- Method calls from outside the instance are automatically `await`ed (asynchronous cross-actor access). Semantically, method calls are serialized per instance.
 - This eliminates shared mutable state bugs: two operations can never simultaneously mutate the same object.
 - In the visual graph, wires that cross an actor boundary are rendered as **dashed lines** to indicate async access. The compiler verifies that values crossing boundaries are `Sendable`.
 
-**Opt-out:** Classes can be marked as `@nonactor` for performance-critical cases where the programmer guarantees single-threaded access. This compiles to a plain Swift class instead of an actor.
+**Opt-out:** Classes without `is_actor` (the default) compile to a plain Swift `class`. Set `is_actor = true` only for classes that need concurrency safety.
 
 ### Composition
 
@@ -1233,16 +1266,18 @@ Phograph adds **protocols** -- named sets of method signatures that any class ca
 
 #### Defining a Protocol
 
-A protocol is created in the Classes window of a section, like a class, but with a distinct icon (diamond shape). A protocol defines:
+A protocol (`ProtocolDef`) is created in the Classes window of a section, like a class, but with a distinct icon (diamond shape). A protocol defines:
 
-- **Required methods**: method names and arities that conforming classes must implement
-- **Optional methods**: methods that conforming classes may implement (with a default behavior of doing nothing / failing)
+- **`name`**: the protocol name
+- **`required_methods`**: list of method names that conforming classes must implement
 - **No attributes**: protocols cannot define instance or class attributes
 - **No implementation**: protocol methods have no code -- they are signatures only
 
+Protocols are stored on the `Section` alongside classes.
+
 #### Declaring Conformance
 
-A class declares conformance to a protocol by drawing a visual link from the class icon to the protocol icon (similar to the inheritance link but dashed). The editor verifies that the class implements all required methods.
+A class declares conformance by listing protocol names in its `conforms_to` array. The editor verifies that the class implements all required methods. In the codegen, conformance compiles to Swift protocol conformance in the class declaration.
 
 A class can conform to **multiple protocols** while inheriting from only one superclass:
 
@@ -1395,6 +1430,16 @@ Case 1:1  Input: {name, age, ...rest}
   -- rest is a dict of remaining keys
 ```
 
+#### Pattern Matching Guards
+
+Each case can have **guards** (`CaseGuard`) attached to its input pins. Guards are checked before evaluating the case body. Three guard kinds are supported:
+
+- **TypeMatch**: the input value must be of a specific type (e.g., `Integer`, `String`, or a class name). `guard.kind = TypeMatch`, `guard.match_type = "Integer"`.
+- **ValueMatch**: the input value must equal a specific literal. `guard.kind = ValueMatch`, `guard.match_val = <value>`.
+- **Wildcard**: matches any value (default). Used for the "else" case.
+
+Guards enable type-based and value-based multi-case dispatch without explicit test operations in the case body. Multiple guards on a single case form a conjunction -- all must match for the case to execute.
+
 #### Pattern Matching Order
 
 Cases are tried in order (1, 2, 3, ...). The first case whose patterns all match executes. If no case matches, the method **fails** (which can be caught by a try annotation or control annotation on the caller).
@@ -1407,25 +1452,24 @@ For the canvas-based UI system (§11), Phograph needs a way to automatically upd
 
 #### Observable Attributes
 
-Any class attribute can be marked as **observable** (distinct visibility symbol: concentric circles). When an observable attribute's value changes, the system automatically notifies all registered observers.
+Any class attribute can be marked as **observable** (distinct visibility symbol: concentric circles). When an observable attribute's value changes via `set_attr`, the system automatically fires all registered observer callbacks with the attribute name, old value, and new value. Objects maintain per-attribute and any-attribute observer lists internally.
 
-#### Observer Methods
+#### Observer Primitives
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
-| `observe` | object, attribute-name, observer, method-ref | observation | Register an observer. When the attribute changes, the method is called with (object, new-value, old-value). Returns an observation handle. |
-| `unobserve` | observation | -- | Remove an observation |
-| `observe-any` | object, observer, method-ref | observation | Observe all observable attributes on object |
+| `observe` | object, attribute-name | observer-id | Register an observer on a specific attribute. Returns an integer observer handle. |
+| `unobserve` | object, observer-id | null | Remove an observation by its handle |
+| `observe-any` | object | observer-id | Observe all attribute changes on an object |
 
 #### Reactive Bindings for UI
 
-A **binding** connects a data source to a UI shape, so changes propagate automatically:
+A **binding** connects a data source to a target object, so attribute changes propagate automatically:
 
 | Primitive | Inputs | Outputs | Description |
 |-----------|--------|---------|-------------|
-| `bind` | source-object, attribute-name, target-shape, target-attribute | binding | One-way binding: when source attribute changes, target attribute updates and shape redraws |
-| `bind-two-way` | object, attribute, shape, shape-attribute | binding | Two-way binding: changes in either direction propagate to the other |
-| `unbind` | binding | -- | Remove a binding |
+| `bind` | source-object, source-attr, target-object, target-attr | observer-id | One-way binding: when source attribute changes, target attribute updates automatically. Returns an observer handle. |
+| `unbind` | object, observer-id | null | Remove a binding by its handle |
 
 Example: bind a data model's `name` attribute to a `Label`'s `text`:
 
@@ -1442,11 +1486,12 @@ This is the primary mechanism for keeping UI in sync with data, replacing the AB
 
 ### Persistent Variables
 
-Persistents are Phograph's global variables with automatic persistence:
+Persistents are Phograph's global variables with automatic persistence, represented by `NodeType::Persistent` in the graph:
 
 - **Icon shape:** Oval
 - **Created via:** `Opers Menu > Persistent` on a blank operation, then named
-- **No nodes by default.** Add a root node to read; add a terminal node to write
+- **Write mode:** when an input is connected to the node, the value is stored in the persistent store
+- **Read mode:** when no input is connected, the node reads the stored value (or returns the default if not yet written)
 - **Value dialog** shows current type and value; type selected from popup (null, integer, real, string, list, dict, boolean, etc.)
 
 ### Persistence Behavior (Phograph Redesign)
@@ -2436,17 +2481,17 @@ These sections wrap Swift/platform APIs into Phograph primitives with Phograph-n
 
 Documented weaknesses of the original Prograph, with their status in Phograph:
 
-### 1. Unlabeled Inputs/Outputs
-No inline labels on wires or nodes. Understanding a method requires reading comments or memorizing arity conventions. **Status: open.** Allow optional labels on input/output nodes in the Phograph editor. Optional type annotations (§4) add labels when used.
+### 1. Unlabeled Inputs/Outputs -- PARTIALLY ADDRESSED
+No inline labels on wires or nodes. Understanding a method requires reading comments or memorizing arity conventions. **Status: partially addressed.** Pin definitions (`PinDef`) now carry names, and optional type annotations (§4) add labels. Wire names are displayed in the IDE.
 
 ### 2. Non-Routable Wiring
 Wires could not be manually routed around obstacles, creating visual "spaghetti" for complex methods. **Status: partially addressed.** Automatic wire routing with manual override in the Phograph editor. Reroute/knot nodes (§5) allow explicit wire path control.
 
-### 3. No Inline Grouping
-No mechanism to group operations without creating a full named method. **Status: partially addressed.** Inline expression nodes (§5) handle simple cases. Anonymous grouping / visual regions for larger groups remain open for the IDE.
+### 3. No Inline Grouping -- ADDRESSED
+No mechanism to group operations without creating a full named method. **Status: addressed.** Inline expression nodes (§5) handle simple cases. `NodeType::LocalMethod` embeds a complete method body inline without creating a named method. Visual regions for larger groups remain open for the IDE.
 
-### 4. Confusing Conditionals -- PARTIALLY ADDRESSED
-The if-then-else pattern via case structure and control annotations was "far and away the most confusing construct in the language." **Status: partially addressed.** Pattern matching on cases (§9) makes the case system dramatically more intuitive by letting cases declare what they expect (type, value, structure) rather than imperatively testing for it. The underlying control annotation system is retained for advanced use.
+### 4. Confusing Conditionals -- ADDRESSED
+The if-then-else pattern via case structure and control annotations was "far and away the most confusing construct in the language." **Status: addressed.** Pattern matching guards on cases (§9) -- TypeMatch, ValueMatch, and Wildcard -- let cases declare what they expect rather than imperatively testing for it. The underlying control annotation system is retained for advanced use.
 
 ### 5. Window Proliferation (IDE)
 Opening methods, classes, and subclasses in the original generated many overlapping windows. **Status: open.** The Phograph IDE should use tabbed interface, split views, and breadcrumb navigation.

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 10: JSON and Dates - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 10: JSON and Dates</h1>
+<p><span class="badge intermediate">Intermediate</span></p>
+
+<p>
+Real-world programs often exchange data as JSON and work with dates and times.
+Phograph provides built-in nodes for both.
+</p>
+
+<h2>Parsing and encoding JSON</h2>
+
+<p>
+The <code>json-parse</code> node takes a JSON string and produces a Phograph
+value &mdash; a number, string, list, or dictionary depending on the content.
+The <code>json-encode</code> node does the reverse: it takes any Phograph value
+and produces a JSON string.
+</p>
+
+<pre><code>  constant '{"name":"Ada","age":36}' --&gt; json-parse --&gt; get "name" --&gt; log
+                                                         outputs: "Ada"
+</code></pre>
+
+<pre><code>  dict ["x", 10, "y", 20] --&gt; json-encode --&gt; log
+                                outputs: '{"x":10,"y":20}'
+</code></pre>
+
+<h2>Round-tripping</h2>
+
+<p>
+You can chain the two nodes to verify that encoding and parsing are inverses:
+</p>
+
+<pre><code>  value --&gt; json-encode --&gt; json-parse --&gt; equal? --&gt; log
+    \---------------------------------------/          outputs: true
+</code></pre>
+
+<h2>Date primitives</h2>
+
+<p>
+Phograph includes several date and time nodes:
+</p>
+
+<ul>
+  <li><code>date-now</code> &mdash; returns the current date and time.</li>
+  <li><code>date-create</code> &mdash; builds a date from year, month, day, hour, minute, second.</li>
+  <li><code>date-components</code> &mdash; extracts year, month, day, etc. from a date.</li>
+  <li><code>date-add</code> &mdash; adds a duration to a date.</li>
+  <li><code>date-diff</code> &mdash; returns the difference between two dates.</li>
+</ul>
+
+<pre><code>  date-create(2026, 3, 5, 9, 0, 0) --&gt; date-add(hours 2) --&gt; date-components
+                                                                outputs: hour = 11
+</code></pre>
+
+<h2>Time helpers</h2>
+
+<p>
+Duration values are created with helper nodes that convert human-friendly
+units into an internal duration type:
+</p>
+
+<pre><code>  seconds 90      -- 90 seconds
+  minutes 5       -- 5 minutes (300 seconds)
+  hours 2         -- 2 hours
+  days 7          -- 7 days
+</code></pre>
+
+<p>
+These plug directly into <code>date-add</code> and can be compared with
+<code>date-diff</code> results.
+</p>
+
+<pre><code>  date-now --&gt; date-add(days 30) --&gt; log   -- prints a date 30 days from now
+</code></pre>
+
+<h2>What you learned</h2>
+
+<ul>
+  <li><code>json-parse</code> converts a JSON string into a Phograph value.</li>
+  <li><code>json-encode</code> converts a Phograph value back to a JSON string.</li>
+  <li>Date primitives (<code>date-now</code>, <code>date-create</code>, <code>date-components</code>,
+      <code>date-add</code>, <code>date-diff</code>) let you construct, inspect, and manipulate dates.</li>
+  <li>Time helpers (<code>seconds</code>, <code>minutes</code>, <code>hours</code>,
+      <code>days</code>) create duration values for arithmetic on dates.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="09-execution-wires.html">&larr; Prev: Execution Wires</a>
+  <a href="11-loops.html">Next: Loops &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

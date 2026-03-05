@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 9: Execution Wires - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 9: Execution Wires</h1>
+<p><span class="badge intermediate">Intermediate</span></p>
+
+<p>
+In a pure dataflow graph, nodes execute as soon as their inputs are ready.
+That works well for computation, but what about <em>side effects</em> that must
+happen in a specific order? Execution wires solve this problem.
+</p>
+
+<h2>When data flow isn&rsquo;t enough</h2>
+
+<p>
+Consider logging two messages. Both <code>log</code> nodes have their input
+ready at the same time, so the runtime is free to execute them in any order.
+If you need &ldquo;Hello&rdquo; to always print before &ldquo;World&rdquo;,
+data flow alone cannot guarantee that.
+</p>
+
+<pre><code>  constant "Hello" --&gt; log    (could run second)
+  constant "World" --&gt; log    (could run first)
+</code></pre>
+
+<h2>What execution wires look like</h2>
+
+<p>
+Execution wires are drawn as <strong>dashed gray lines</strong> on the canvas.
+They connect an <em>execution output</em> pin on one node to an
+<em>execution input</em> pin on another. Unlike data wires, execution wires
+carry no value &mdash; they are pure sequencing signals.
+</p>
+
+<pre><code>  constant "Hello" --&gt; log ===&gt; log &lt;-- constant "World"
+                         (exec wire, dashed gray)
+</code></pre>
+
+<p>
+The second <code>log</code> will not fire until the first one has finished,
+regardless of whether its data input is already available.
+</p>
+
+<h2>How execution wires interact with data</h2>
+
+<p>
+A node with an execution input waits for <strong>both</strong> conditions:
+</p>
+
+<ol>
+  <li>All data inputs are ready (normal dataflow rule).</li>
+  <li>The execution wire has fired (the upstream node completed).</li>
+</ol>
+
+<p>
+This means execution wires add ordering constraints on top of the dataflow
+schedule without replacing it.
+</p>
+
+<h2>Common use cases</h2>
+
+<ul>
+  <li><strong>Ordered logging</strong> &mdash; ensure log messages appear in a predictable sequence.</li>
+  <li><strong>Sequential I/O</strong> &mdash; read a file, then write a transformed version.</li>
+  <li><strong>Database writes</strong> &mdash; insert a record before reading it back.</li>
+  <li><strong>Initialization</strong> &mdash; set up state before other nodes run.</li>
+</ul>
+
+<pre><code>  http-get --&gt; json-parse --&gt; transform ===&gt; db-insert ===&gt; log "done"
+                                         (exec)        (exec)
+</code></pre>
+
+<h2>What you learned</h2>
+
+<ul>
+  <li><strong>Execution wires</strong> are dashed gray lines that enforce ordering without carrying data.</li>
+  <li>A node with an execution input waits for both data readiness <em>and</em> the execution trigger.</li>
+  <li>Use execution wires whenever side effects must happen in a specific sequence.</li>
+  <li>They complement dataflow &mdash; they add constraints, they don&rsquo;t replace it.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="08-debugging.html">&larr; Prev: Debugging</a>
+  <a href="10-json-and-dates.html">Next: JSON and Dates &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

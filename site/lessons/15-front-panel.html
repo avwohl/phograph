@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 15: Front Panel - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 15: Front Panel</h1>
+<p><span class="badge advanced">Advanced</span></p>
+
+<p>
+The <strong>front panel</strong> is a UI control surface for a class. It lets
+you interact with a running program through sliders, text fields, buttons,
+and other controls &mdash; without modifying the graph.
+</p>
+
+<h2>Controls and attributes</h2>
+
+<p>
+Each control on the front panel is <strong>bound to a class attribute</strong>.
+When you move a slider, the bound attribute updates. When code changes the
+attribute, the control reflects the new value.
+</p>
+
+<pre><code>  class Synth
+    attribute frequency: 440.0
+    attribute volume: 0.8
+  front panel:
+    slider "Frequency" --&gt; bound to frequency (range 20..20000)
+    slider "Volume"    --&gt; bound to volume    (range 0..1)
+</code></pre>
+
+<h2>Observable attributes</h2>
+
+<p>
+Attributes can be <strong>observed</strong> so that other parts of the program
+react when they change:
+</p>
+
+<ul>
+  <li><code>observe(attr, callback)</code> &mdash; call a method when the attribute changes.</li>
+  <li><code>bind(attr, target, target_attr)</code> &mdash; keep two attributes in sync.</li>
+  <li><code>unobserve(attr, callback)</code> &mdash; remove an observer.</li>
+</ul>
+
+<pre><code>  observe(frequency, on-freq-changed)
+  method on-freq-changed(new_value):
+    new_value --&gt; update-oscillator
+</code></pre>
+
+<h2>Pattern matching with case guards</h2>
+
+<p>
+When an observed attribute can hold different types or distinct values, you
+can use <strong>case guards</strong> to dispatch to different logic branches
+based on the value&rsquo;s type or content.
+</p>
+
+<pre><code>  observe(input, handler)
+
+  method handler(value):
+    case value is String  --&gt; log "got a string"
+    case value is Number  --&gt; log "got a number"
+    case value == "reset" --&gt; reset-state
+    case _                --&gt; log "unknown"
+</code></pre>
+
+<p>
+Cases are checked top to bottom. The first matching guard wins. The wildcard
+<code>_</code> matches anything and serves as a default.
+</p>
+
+<h2>Building a front panel</h2>
+
+<p>
+Define a class with attributes, open the front panel editor, add controls
+(sliders, text fields, toggles, buttons), and bind each to an attribute.
+</p>
+
+<pre><code>  class Counter
+    attribute count: 0
+  front panel:
+    label "Count" --&gt; displays count
+    button "Increment" --&gt; calls increment method
+  method increment:
+    self.count --&gt; + 1 --&gt; set self.count
+</code></pre>
+
+<h2>What you learned</h2>
+
+<ul>
+  <li>The <strong>front panel</strong> provides a UI control view bound to class attributes.</li>
+  <li>Changes to controls update attributes, and attribute changes update controls.</li>
+  <li><strong>Observable attributes</strong> let you register callbacks with <code>observe</code>, synchronize values with <code>bind</code>, and clean up with <code>unobserve</code>.</li>
+  <li><strong>Case guards</strong> dispatch based on type or value for flexible pattern matching.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="14-local-methods.html">&larr; Prev: Local Methods and Eval Nodes</a>
+  <span></span>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

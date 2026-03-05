@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 12: List Annotations - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 12: List Annotations</h1>
+<p><span class="badge intermediate">Intermediate</span></p>
+
+<p>
+When you need to apply an operation to every element of a list, you could
+write a loop &mdash; but Phograph offers a more declarative approach.
+<strong>List annotations</strong> tell the runtime to automatically map a node
+over a list of inputs.
+</p>
+
+<h2>ListMap</h2>
+
+<p>
+The <code>ListMap</code> annotation marks a node so that it runs once per
+element of its list input. The results are collected into a new list.
+</p>
+
+<pre><code>  constant [1, 2, 3, 4] --&gt; [* (ListMap)] &lt;-- constant 10
+                              outputs: [10, 20, 30, 40]
+</code></pre>
+
+<p>
+Here the <code>*</code> node is annotated with ListMap. The left input is a
+list, so the node fires four times &mdash; once per element &mdash; multiplying
+each by 10.
+</p>
+
+<h2>Scalar broadcasting</h2>
+
+<p>
+When one input is a list and another is a scalar (single value), the scalar
+is <strong>broadcast</strong> &mdash; reused for every element. In the example
+above, <code>10</code> is a scalar and is paired with each element of the list.
+</p>
+
+<pre><code>  constant ["a","b","c"] --&gt; [concat (ListMap)] &lt;-- constant "-suffix"
+                              outputs: ["a-suffix", "b-suffix", "c-suffix"]
+</code></pre>
+
+<h2>Partition</h2>
+
+<p>
+The <code>Partition</code> annotation splits a list into two lists based on
+a boolean predicate. Elements for which the predicate returns true go into
+the first output; the rest go into the second.
+</p>
+
+<pre><code>  constant [1,2,3,4,5,6] --&gt; [is-even? (Partition)]
+                              output 1 (true):  [2, 4, 6]
+                              output 2 (false): [1, 3, 5]
+</code></pre>
+
+<h2>Compared to explicit loops</h2>
+
+<p>
+List annotations and loops can accomplish similar tasks, but they have
+different strengths:
+</p>
+
+<ul>
+  <li><strong>ListMap</strong> is concise and declarative. Use it when you want to transform every element independently.</li>
+  <li><strong>Partition</strong> is ideal for filtering or splitting data.</li>
+  <li><strong>Loops</strong> (Lesson 11) are more flexible &mdash; they support accumulators, early exit, and complex iteration patterns.</li>
+</ul>
+
+<pre><code>  Loop version of the multiply example:
+
+  constant [1,2,3,4] --&gt; [loop: map-times-10]
+  shift register "result" starts at []
+  body: element * 10 --&gt; append to result
+  output: [10, 20, 30, 40]
+
+  ListMap version (much simpler):
+
+  constant [1,2,3,4] --&gt; [* (ListMap)] &lt;-- constant 10
+  output: [10, 20, 30, 40]
+</code></pre>
+
+<h2>What you learned</h2>
+
+<ul>
+  <li><strong>ListMap</strong> applies a node to every element of a list, collecting results into a new list.</li>
+  <li><strong>Scalar broadcasting</strong> reuses non-list inputs for each element automatically.</li>
+  <li><strong>Partition</strong> splits a list into two based on a boolean predicate.</li>
+  <li>List annotations are more concise than explicit loops for element-wise operations.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="11-loops.html">&larr; Prev: Loops</a>
+  <a href="13-networking.html">Next: HTTP Networking &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 11: Loops - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 11: Loops</h1>
+<p><span class="badge intermediate">Intermediate</span></p>
+
+<p>
+Loops in a dataflow language work differently from textual <code>for</code>
+and <code>while</code> loops. In Phograph, a loop is a node whose body method
+is called repeatedly until a termination condition is met.
+</p>
+
+<h2>How loops work</h2>
+
+<p>
+A node marked with <code>is_loop</code> executes its body method over and over.
+Each iteration, the method&rsquo;s outputs feed back as inputs to the next
+iteration. The initial inputs come from the wires connected to the loop node.
+</p>
+
+<pre><code>  constant 0 --&gt; [loop: count-up] --&gt; log
+                     body: increment
+                     terminates when value reaches 10
+</code></pre>
+
+<h2>Termination modes</h2>
+
+<p>
+Each loop has a termination mode that controls when iteration stops:
+</p>
+
+<ul>
+  <li><strong>FinishOnSuccess</strong> &mdash; stop when the body succeeds (returns a value). The successful value is the loop&rsquo;s output.</li>
+  <li><strong>TerminateOnFailure</strong> &mdash; stop when the body fails. The last successful value is the output.</li>
+  <li><strong>FailOnSuccess</strong> &mdash; keep looping while the body fails; stop and output when it succeeds.</li>
+  <li><strong>FailOnFailure</strong> &mdash; keep looping while the body succeeds; stop when it fails.</li>
+</ul>
+
+<h2>Shift registers</h2>
+
+<p>
+A <strong>shift register</strong> carries state from one iteration to the next.
+You wire an initial value into the loop node, and each iteration the body
+reads the current value and produces a new one.
+</p>
+
+<pre><code>  Example: sum a list [1, 2, 3, 4, 5]
+
+  constant [1,2,3,4,5] --&gt; [loop: sum-list]
+  shift register "acc" starts at 0
+  body: acc + current-element --&gt; acc (next iteration)
+  terminates when list is exhausted
+  output: 15
+</code></pre>
+
+<h2>Example: count to 10</h2>
+
+<pre><code>  constant 1 --&gt; [loop: counter]
+  shift register "i" starts at 1
+  body:
+    i --&gt; log
+    i --&gt; + 1 --&gt; i (next)
+    i --&gt; >= 10 --&gt; if true, succeed
+  termination: FinishOnSuccess
+  output: 10
+</code></pre>
+
+<p>
+Each iteration, the body logs the current count, increments it, and checks
+whether the target has been reached. When <code>i</code> reaches 10 the body
+succeeds and the loop finishes.
+</p>
+
+<h2>What you learned</h2>
+
+<ul>
+  <li>Loops in Phograph are nodes with <code>is_loop</code> that call a body method repeatedly.</li>
+  <li>Outputs of each iteration feed back as inputs to the next.</li>
+  <li>Four termination modes control when the loop stops: FinishOnSuccess, TerminateOnFailure, FailOnSuccess, FailOnFailure.</li>
+  <li><strong>Shift registers</strong> carry accumulator state across iterations.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="10-json-and-dates.html">&larr; Prev: JSON and Dates</a>
+  <a href="12-list-annotations.html">Next: List Annotations &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 13: HTTP Networking - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 13: HTTP Networking</h1>
+<p><span class="badge advanced">Advanced</span></p>
+
+<p>
+Phograph can talk to web APIs using built-in HTTP nodes. Combined with JSON
+parsing (Lesson 10), you can fetch remote data, post updates, and integrate
+with any REST service.
+</p>
+
+<h2>http-get</h2>
+
+<p>
+The <code>http-get</code> node takes a URL string and returns the response body.
+If the request succeeds (HTTP 2xx), the body is returned as a string. If it
+fails, the node produces an error.
+</p>
+
+<pre><code>  constant "https://api.example.com/users/1" --&gt; http-get --&gt; json-parse --&gt; get "name"
+                                                                              outputs: "Alice"
+</code></pre>
+
+<h2>http-post</h2>
+
+<p>
+The <code>http-post</code> node sends data to a URL. It takes two inputs:
+the URL and the request body (typically a JSON string). The response body is
+returned as a string.
+</p>
+
+<pre><code>  dict ["name","Bob","role","admin"] --&gt; json-encode --\
+                                                        --&gt; http-post --&gt; log
+  constant "https://api.example.com/users" -----------/
+</code></pre>
+
+<h2>Working with APIs</h2>
+
+<p>
+A typical API workflow combines several nodes into a pipeline:
+</p>
+
+<ol>
+  <li>Build the URL (concatenate base URL with path and query parameters).</li>
+  <li>Call <code>http-get</code> or <code>http-post</code>.</li>
+  <li>Parse the response with <code>json-parse</code>.</li>
+  <li>Extract the fields you need with <code>get</code>.</li>
+</ol>
+
+<pre><code>  constant "https://api.weather.com/forecast?city=" --&gt; concat &lt;-- constant "London"
+    --&gt; http-get
+    --&gt; json-parse
+    --&gt; get "temperature"
+    --&gt; log
+</code></pre>
+
+<h2>Error handling with try</h2>
+
+<p>
+Network requests can fail &mdash; the server might be down, the URL might be
+wrong, or the response might not be valid JSON. The <code>try</code> annotation
+wraps a node so that errors are caught instead of crashing the program.
+</p>
+
+<pre><code>  constant "https://bad-url.example" --&gt; [http-get (try)]
+    success --&gt; json-parse --&gt; log
+    failure --&gt; log "Request failed"
+</code></pre>
+
+<p>
+When the <code>try</code> annotation is applied, the node produces two
+outputs: a success path and a failure path. You wire downstream logic to
+whichever path you need.
+</p>
+
+<h2>What you learned</h2>
+
+<ul>
+  <li><code>http-get</code> fetches a URL and returns the response body as a string.</li>
+  <li><code>http-post</code> sends data to a URL and returns the response.</li>
+  <li>Combine HTTP nodes with <code>json-parse</code> to work with REST APIs.</li>
+  <li>The <code>try</code> annotation provides error handling for nodes that may fail.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="12-list-annotations.html">&larr; Prev: List Annotations</a>
+  <a href="14-local-methods.html">Next: Local Methods and Eval Nodes &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

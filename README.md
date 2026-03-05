@@ -86,9 +86,46 @@ If you add/remove source files:
     brew install xcodegen   # one-time
     xcodegen generate
 
-## Language Specification
+## Documentation
 
-See `docs/prograph_language.md` for the complete language specification (~2650 lines) covering data types, primitives, evaluation rules, scene graph, and compilation.
+- [Learn Phograph](https://avwohl.github.io/phograph/) -- step-by-step tutorial covering dataflow basics through OOP and advanced patterns
+- [IDE Guide](https://avwohl.github.io/phograph/guide.html) -- canvas navigation, keyboard shortcuts, debugger, and export
+- [Language Reference](https://avwohl.github.io/phograph/reference.html) -- complete reference for all data types, primitives, and evaluation rules
+
+The full language specification is also available at `docs/prograph_language.md` (~2650 lines).
+
+## Library System
+
+Phograph supports plugin libraries that add new primitives to the environment.
+
+- **Install:** Place a library folder (containing `manifest.json` and implementation files) in `~/Library/Application Support/Phograph/Libraries/`
+- **Manage:** Use **Libraries > Manage Libraries...** to view installed libraries, check versions, and toggle availability
+- **Use:** Library primitives appear in the right-click context menu and fuzzy finder (Cmd+K) alongside built-in nodes
+- **Create:** A library needs a `manifest.json` declaring its name, version, and primitives (with input/output counts). See `docs/prograph_language.md` for the library specification.
+
+## Examples
+
+Open the Example Browser with **Cmd+Shift+E** to explore built-in examples:
+
+- **Basics** -- arithmetic, string ops, control flow
+- **Lists** -- map, filter, sort, list comprehensions
+- **Classes** -- OOP with inheritance, instance generators, get/set
+- **Graphics** -- scene graph shapes, canvas rendering
+- **Patterns** -- loops, spreads, broadcasts, error handling
+
+## Contributing
+
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b my-feature`)
+3. Make your changes -- follow existing code style (SwiftUI views, C++ core)
+4. Build and test (`xcodebuild -scheme Phograph -destination 'platform=macOS' build`)
+5. Open a pull request against `main`
+
+For C++ engine changes, also run the core tests:
+
+    cd phograph_core && cmake -B build && cmake --build build && ctest --test-dir build
 
 ## License
 

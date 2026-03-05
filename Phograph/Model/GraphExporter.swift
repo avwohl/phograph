@@ -17,23 +17,29 @@ enum GraphExporter {
 
     private static func headerColor(for nodeType: String) -> RGBColor {
         switch nodeType {
-        case "input_bar":   return RGBColor(r: 0.2,  g: 0.55, b: 0.3)
-        case "output_bar":  return RGBColor(r: 0.7,  g: 0.2,  b: 0.2)
-        case "constant":    return RGBColor(r: 0.5,  g: 0.45, b: 0.2)
-        case "primitive":   return RGBColor(r: 0.25, g: 0.35, b: 0.6)
-        case "method_call": return RGBColor(r: 0.4,  g: 0.25, b: 0.55)
-        default:            return RGBColor(r: 0.4,  g: 0.4,  b: 0.4)
+        case "input_bar":          return RGBColor(r: 0.2,  g: 0.55, b: 0.3)
+        case "output_bar":         return RGBColor(r: 0.7,  g: 0.2,  b: 0.2)
+        case "constant":           return RGBColor(r: 0.5,  g: 0.45, b: 0.2)
+        case "primitive":          return RGBColor(r: 0.25, g: 0.35, b: 0.6)
+        case "method_call":        return RGBColor(r: 0.4,  g: 0.25, b: 0.55)
+        case "instance_generator": return RGBColor(r: 0.8,  g: 0.5,  b: 0.0)
+        case "get":                return RGBColor(r: 0.2,  g: 0.5,  b: 0.45)
+        case "set":                return RGBColor(r: 0.55, g: 0.3,  b: 0.2)
+        default:                   return RGBColor(r: 0.4,  g: 0.4,  b: 0.4)
         }
     }
 
     private static func bodyColor(for nodeType: String) -> RGBColor {
         switch nodeType {
-        case "input_bar":   return RGBColor(r: 0.85, g: 0.95, b: 0.87)
-        case "output_bar":  return RGBColor(r: 0.97, g: 0.88, b: 0.88)
-        case "constant":    return RGBColor(r: 0.98, g: 0.96, b: 0.88)
-        case "primitive":   return RGBColor(r: 0.92, g: 0.94, b: 0.98)
-        case "method_call": return RGBColor(r: 0.95, g: 0.92, b: 0.98)
-        default:            return RGBColor(r: 0.95, g: 0.95, b: 0.95)
+        case "input_bar":          return RGBColor(r: 0.85, g: 0.95, b: 0.87)
+        case "output_bar":         return RGBColor(r: 0.97, g: 0.88, b: 0.88)
+        case "constant":           return RGBColor(r: 0.98, g: 0.96, b: 0.88)
+        case "primitive":          return RGBColor(r: 0.92, g: 0.94, b: 0.98)
+        case "method_call":        return RGBColor(r: 0.95, g: 0.92, b: 0.98)
+        case "instance_generator": return RGBColor(r: 0.98, g: 0.94, b: 0.85)
+        case "get":                return RGBColor(r: 0.88, g: 0.96, b: 0.94)
+        case "set":                return RGBColor(r: 0.97, g: 0.92, b: 0.88)
+        default:                   return RGBColor(r: 0.95, g: 0.95, b: 0.95)
         }
     }
 
@@ -146,22 +152,107 @@ enum GraphExporter {
     // MARK: - PDF Export
 
     #if os(macOS)
-    static func exportPDF(graph: GraphModel, to url: URL) throws {
-        let bounds = graphBounds(graph)
-        let pinR: CGFloat = 6
-        let headerH: CGFloat = 28
 
-        var mediaBox = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
+    /// Standard paper size in points (72 pt = 1 inch)
+    struct PaperSize {
+        let width: CGFloat
+        let height: CGFloat
+        static let letter = PaperSize(width: 612, height: 792)
+        static let a4 = PaperSize(width: 595.28, height: 841.89)
+    }
+
+    static func exportPDF(graph: GraphModel, to url: URL, paperSize: PaperSize = .letter) throws {
+        let bounds = graphBounds(graph)
+        let margin: CGFloat = 36
+        let overlap: CGFloat = 36
+        let printableW = paperSize.width - margin * 2
+        let printableH = paperSize.height - margin * 2
+        let footerH: CGFloat = 14
+
+        // If graph fits on one page, produce a single page
+        let singlePage = bounds.width <= printableW && bounds.height <= (printableH - footerH)
+
+        let tileStepX = printableW - overlap
+        let tileStepY = printableH - footerH - overlap
+        let cols = singlePage ? 1 : max(1, Int(ceil(bounds.width / tileStepX)))
+        let rows = singlePage ? 1 : max(1, Int(ceil(bounds.height / tileStepY)))
+        let totalPages = cols * rows
+
+        var mediaBox = CGRect(x: 0, y: 0, width: paperSize.width, height: paperSize.height)
         guard let consumer = CGDataConsumer(url: url as CFURL),
               let ctx = CGContext(consumer: consumer, mediaBox: &mediaBox, nil) else {
             throw NSError(domain: "GraphExporter", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create PDF context"])
         }
 
-        ctx.beginPDFPage(nil)
+        var pageNum = 0
+        for row in 0..<rows {
+            for col in 0..<cols {
+                pageNum += 1
+                ctx.beginPDFPage(nil)
 
-        // Translate so graph bounds map to page origin, flip Y for top-left origin
-        ctx.translateBy(x: -bounds.minX, y: bounds.maxY)
-        ctx.scaleBy(x: 1, y: -1)
+                // Tile viewport in graph coordinates
+                let tileX = bounds.minX + CGFloat(col) * tileStepX
+                let tileY = bounds.minY + CGFloat(row) * tileStepY
+                let tileW = singlePage ? bounds.width : printableW
+                let tileH = singlePage ? bounds.height : (printableH - footerH)
+
+                // Clip to printable area
+                ctx.saveGState()
+                ctx.clip(to: CGRect(x: margin, y: margin + footerH, width: printableW, height: tileH))
+
+                // Transform: map tile viewport to printable area, flip Y
+                ctx.translateBy(x: margin, y: margin + footerH + tileH)
+                ctx.scaleBy(x: 1, y: -1)
+                ctx.translateBy(x: -tileX, y: -tileY)
+
+                // Render all graph content (CG clips what's outside)
+                renderGraphContent(graph: graph, ctx: ctx)
+
+                ctx.restoreGState()
+
+                // Footer
+                let footerAttrs: [NSAttributedString.Key: Any] = [
+                    .font: NSFont.systemFont(ofSize: 9),
+                    .foregroundColor: NSColor.gray
+                ]
+
+                if totalPages > 1 {
+                    // Page number centered
+                    let pageStr = "Page \(pageNum) of \(totalPages)" as NSString
+                    let pageSize = pageStr.size(withAttributes: footerAttrs)
+                    pageStr.draw(at: CGPoint(
+                        x: (paperSize.width - pageSize.width) / 2,
+                        y: margin
+                    ), withAttributes: footerAttrs)
+
+                    // Grid reference top-right (e.g., A1, B2)
+                    let colLetter = String(UnicodeScalar(65 + col)!) // A, B, C...
+                    let gridRef = "\(colLetter)\(row + 1)" as NSString
+                    let gridSize = gridRef.size(withAttributes: footerAttrs)
+                    gridRef.draw(at: CGPoint(
+                        x: paperSize.width - margin - gridSize.width,
+                        y: paperSize.height - margin - gridSize.height
+                    ), withAttributes: footerAttrs)
+
+                    // Light dashed border around printable area
+                    ctx.setStrokeColor(CGColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 0.5))
+                    ctx.setLineWidth(0.5)
+                    ctx.setLineDash(phase: 0, lengths: [4, 4])
+                    ctx.stroke(CGRect(x: margin, y: margin + footerH, width: printableW, height: tileH))
+                    ctx.setLineDash(phase: 0, lengths: [])
+                }
+
+                ctx.endPDFPage()
+            }
+        }
+
+        ctx.closePDF()
+    }
+
+    /// Renders all wires and nodes into the current CGContext (graph coordinates)
+    private static func renderGraphContent(graph: GraphModel, ctx: CGContext) {
+        let pinR: CGFloat = 6
+        let headerH: CGFloat = 28
 
         // Wires
         for wire in graph.wires {
@@ -227,9 +318,6 @@ enum GraphExporter {
                 ctx.fillEllipse(in: CGRect(x: px - pinR, y: y + h - pinR, width: pinR * 2, height: pinR * 2))
             }
         }
-
-        ctx.endPDFPage()
-        ctx.closePDF()
     }
     #endif
 }

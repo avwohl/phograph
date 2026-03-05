@@ -161,6 +161,14 @@ struct ClassBrowserView: View {
                         .frame(width: 8, height: 8)
                     Text(attr)
                         .font(.caption)
+                    Spacer()
+                    Button(action: { insertGetNode(className: classDef.name, attrName: attr) }) {
+                        Image(systemName: "plus.circle")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Insert get \(attr) node")
                 }
             }
 
@@ -178,7 +186,37 @@ struct ClassBrowserView: View {
                         .foregroundColor(.secondary)
                         .font(.caption)
                 }
+                Spacer()
+                Button(action: { insertInstanceGenerator(className: classDef.name) }) {
+                    Image(systemName: "plus.circle")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Insert new \(classDef.name) node")
             }
         }
+    }
+
+    private func insertInstanceGenerator(className: String) {
+        guard let graph = viewModel.currentGraph else { return }
+        let label = "new \(className)"
+        let node = GraphNodeModel(x: 200, y: 200, label: label, nodeType: "instance_generator")
+        node.outputPins.append(PinModel(name: "out0", index: 0))
+        node.height = node.computeHeight()
+        node.width = max(node.width, CGFloat(label.count) * 9.5 + 40)
+        graph.addNode(node)
+    }
+
+    private func insertGetNode(className: String, attrName: String) {
+        guard let graph = viewModel.currentGraph else { return }
+        let label = "get \(attrName)"
+        let node = GraphNodeModel(x: 200, y: 200, label: label, nodeType: "get")
+        node.inputPins.append(PinModel(name: "in0", index: 0))
+        node.outputPins.append(PinModel(name: "out0", index: 0))
+        node.outputPins.append(PinModel(name: "out1", index: 1))
+        node.height = node.computeHeight()
+        node.width = max(node.width, CGFloat(label.count) * 9.5 + 40)
+        graph.addNode(node)
     }
 }

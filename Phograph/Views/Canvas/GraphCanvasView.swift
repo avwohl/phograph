@@ -61,6 +61,7 @@ struct GraphCanvasView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
 
                 // Console overlay at bottom
                 if viewModel.showConsole && !viewModel.consoleOutput.isEmpty {
@@ -518,6 +519,27 @@ struct GraphCanvasView: View {
                 body: Color(red: 0.95, green: 0.92, blue: 0.98),
                 border: Color(red: 0.4, green: 0.25, blue: 0.55).opacity(0.5)
             )
+        case "instance_generator":
+            return NodeColors(
+                header: Color(red: 0.8, green: 0.5, blue: 0.0),
+                headerText: .white,
+                body: Color(red: 0.98, green: 0.94, blue: 0.85),
+                border: Color(red: 0.8, green: 0.5, blue: 0.0).opacity(0.5)
+            )
+        case "get":
+            return NodeColors(
+                header: Color(red: 0.2, green: 0.5, blue: 0.45),
+                headerText: .white,
+                body: Color(red: 0.88, green: 0.96, blue: 0.94),
+                border: Color(red: 0.2, green: 0.5, blue: 0.45).opacity(0.5)
+            )
+        case "set":
+            return NodeColors(
+                header: Color(red: 0.55, green: 0.3, blue: 0.2),
+                headerText: .white,
+                body: Color(red: 0.97, green: 0.92, blue: 0.88),
+                border: Color(red: 0.55, green: 0.3, blue: 0.2).opacity(0.5)
+            )
         default:
             return NodeColors(
                 header: Color(red: 0.4, green: 0.4, blue: 0.4),
@@ -725,6 +747,90 @@ struct GraphCanvasView: View {
             }
         }
 
+        // Classes submenu
+        let allClasses = viewModel.project?.sections.flatMap(\.classes) ?? []
+        if !allClasses.isEmpty {
+            menu.addItem(NSMenuItem.separator())
+            let classesItem = NSMenuItem(title: "Classes", action: nil, keyEquivalent: "")
+            let classesSub = NSMenu()
+
+            for classDef in allClasses {
+                let classItem = NSMenuItem(title: classDef.name, action: nil, keyEquivalent: "")
+                let classSub = NSMenu()
+
+                // "new ClassName"
+                let newItem = NSMenuItem(title: "new \(classDef.name)", action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+                newItem.representedObject = { [weak viewModel] in
+                    self.insertInstanceGenerator(className: classDef.name)
+                } as () -> Void
+                newItem.target = CanvasMenuTarget.shared
+                classSub.addItem(newItem)
+
+                // Get submenu
+                if !classDef.attributes.isEmpty {
+                    let getItem = NSMenuItem(title: "Get", action: nil, keyEquivalent: "")
+                    let getSub = NSMenu()
+                    for attr in classDef.attributes {
+                        let item = NSMenuItem(title: attr, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+                        item.representedObject = { [weak viewModel] in
+                            self.insertGetNode(className: classDef.name, attrName: attr)
+                        } as () -> Void
+                        item.target = CanvasMenuTarget.shared
+                        getSub.addItem(item)
+                    }
+                    getItem.submenu = getSub
+                    classSub.addItem(getItem)
+
+                    // Set submenu
+                    let setItem = NSMenuItem(title: "Set", action: nil, keyEquivalent: "")
+                    let setSub = NSMenu()
+                    for attr in classDef.attributes {
+                        let item = NSMenuItem(title: attr, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+                        item.representedObject = { [weak viewModel] in
+                            self.insertSetNode(className: classDef.name, attrName: attr)
+                        } as () -> Void
+                        item.target = CanvasMenuTarget.shared
+                        setSub.addItem(item)
+                    }
+                    setItem.submenu = setSub
+                    classSub.addItem(setItem)
+                }
+
+                // Class methods
+                for method in classDef.methods {
+                    let mItem = NSMenuItem(title: method.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+                    mItem.representedObject = { [weak viewModel] in
+                        self.insertMethodCall(name: method.name, inputs: method.numInputs, outputs: method.numOutputs)
+                    } as () -> Void
+                    mItem.target = CanvasMenuTarget.shared
+                    classSub.addItem(mItem)
+                }
+
+                classItem.submenu = classSub
+                classesSub.addItem(classItem)
+            }
+
+            classesItem.submenu = classesSub
+            menu.addItem(classesItem)
+        }
+
+        // Methods submenu (universal methods across all sections)
+        let allMethods = viewModel.project?.sections.flatMap(\.methods) ?? []
+        if !allMethods.isEmpty {
+            let methodsItem = NSMenuItem(title: "Methods", action: nil, keyEquivalent: "")
+            let methodsSub = NSMenu()
+            for method in allMethods {
+                let mItem = NSMenuItem(title: method.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
+                mItem.representedObject = { [weak viewModel] in
+                    self.insertMethodCall(name: method.name, inputs: method.numInputs, outputs: method.numOutputs)
+                } as () -> Void
+                mItem.target = CanvasMenuTarget.shared
+                methodsSub.addItem(mItem)
+            }
+            methodsItem.submenu = methodsSub
+            menu.addItem(methodsItem)
+        }
+
         // Breakpoint toggle (if clicking on a node)
         let graphPt = editor.screenToGraph(CGPoint(x: location.x, y: view.bounds.height - location.y))
         if let node = viewModel.currentGraph?.nodeAt(point: graphPt), node.engineNodeId != 0 {
@@ -771,6 +877,62 @@ struct GraphCanvasView: View {
         node.outputPins.append(PinModel(name: "out0", index: 0))
         node.constantValue = "0"
         node.height = node.computeHeight()
+        graph.addNode(node)
+    }
+
+    private func insertInstanceGenerator(className: String) {
+        guard let graph = viewModel.currentGraph else { return }
+        let pt = insertionPoint
+        let label = "new \(className)"
+        let node = GraphNodeModel(x: pt.x - 80, y: pt.y - 20, label: label, nodeType: "instance_generator")
+        node.outputPins.append(PinModel(name: "out0", index: 0))
+        node.height = node.computeHeight()
+        let labelWidth = CGFloat(label.count) * 9.5 + 40
+        node.width = max(node.width, labelWidth)
+        graph.addNode(node)
+    }
+
+    private func insertGetNode(className: String, attrName: String) {
+        guard let graph = viewModel.currentGraph else { return }
+        let pt = insertionPoint
+        let label = "get \(attrName)"
+        let node = GraphNodeModel(x: pt.x - 80, y: pt.y - 20, label: label, nodeType: "get")
+        node.inputPins.append(PinModel(name: "in0", index: 0))
+        node.outputPins.append(PinModel(name: "out0", index: 0))
+        node.outputPins.append(PinModel(name: "out1", index: 1))
+        node.height = node.computeHeight()
+        let labelWidth = CGFloat(label.count) * 9.5 + 40
+        node.width = max(node.width, labelWidth)
+        graph.addNode(node)
+    }
+
+    private func insertSetNode(className: String, attrName: String) {
+        guard let graph = viewModel.currentGraph else { return }
+        let pt = insertionPoint
+        let label = "set \(attrName)"
+        let node = GraphNodeModel(x: pt.x - 80, y: pt.y - 20, label: label, nodeType: "set")
+        node.inputPins.append(PinModel(name: "in0", index: 0))
+        node.inputPins.append(PinModel(name: "in1", index: 1))
+        node.outputPins.append(PinModel(name: "out0", index: 0))
+        node.height = node.computeHeight()
+        let labelWidth = CGFloat(label.count) * 9.5 + 40
+        node.width = max(node.width, labelWidth)
+        graph.addNode(node)
+    }
+
+    private func insertMethodCall(name: String, inputs: Int, outputs: Int) {
+        guard let graph = viewModel.currentGraph else { return }
+        let pt = insertionPoint
+        let node = GraphNodeModel(x: pt.x - 80, y: pt.y - 20, label: name, nodeType: "method_call")
+        for i in 0..<inputs {
+            node.inputPins.append(PinModel(name: "in\(i)", index: i))
+        }
+        for i in 0..<outputs {
+            node.outputPins.append(PinModel(name: "out\(i)", index: i))
+        }
+        node.height = node.computeHeight()
+        let labelWidth = CGFloat(name.count) * 9.5 + 40
+        node.width = max(node.width, labelWidth)
         graph.addNode(node)
     }
 }

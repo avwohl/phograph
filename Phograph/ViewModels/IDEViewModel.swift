@@ -453,6 +453,28 @@ class IDEViewModel: ObservableObject {
                 }
             }
         }
+        // Append class-derived names
+        if let sections = project?.sections {
+            for section in sections {
+                for classDef in section.classes {
+                    names.append("new \(classDef.name)")
+                    for attr in classDef.attributes {
+                        let getName = "get \(attr)"
+                        let setName = "set \(attr)"
+                        if !names.contains(getName) { names.append(getName) }
+                        if !names.contains(setName) { names.append(setName) }
+                    }
+                    for method in classDef.methods {
+                        names.append("\(classDef.name)/\(method.name)")
+                    }
+                }
+                // Universal methods
+                for method in section.methods {
+                    let mName = method.name
+                    if !names.contains(mName) { names.append(mName) }
+                }
+            }
+        }
         return names
     }
 

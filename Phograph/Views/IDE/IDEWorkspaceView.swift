@@ -136,6 +136,63 @@ struct IDEWorkspaceView: View {
 
     private func addNodeFromFuzzyFinder(name: String) {
         guard let graph = viewModel.currentGraph else { return }
+
+        // Detect class-derived node types by prefix/pattern
+        if name.hasPrefix("new ") {
+            let className = String(name.dropFirst(4))
+            let node = GraphNodeModel(x: 200, y: 200, label: name, nodeType: "instance_generator")
+            node.outputPins.append(PinModel(name: "out0", index: 0))
+            node.height = node.computeHeight()
+            node.width = max(node.width, CGFloat(name.count) * 9.5 + 40)
+            graph.addNode(node)
+            viewModel.showFuzzyFinder = false
+            return
+        }
+
+        if name.hasPrefix("get ") {
+            let node = GraphNodeModel(x: 200, y: 200, label: name, nodeType: "get")
+            node.inputPins.append(PinModel(name: "in0", index: 0))
+            node.outputPins.append(PinModel(name: "out0", index: 0))
+            node.outputPins.append(PinModel(name: "out1", index: 1))
+            node.height = node.computeHeight()
+            node.width = max(node.width, CGFloat(name.count) * 9.5 + 40)
+            graph.addNode(node)
+            viewModel.showFuzzyFinder = false
+            return
+        }
+
+        if name.hasPrefix("set ") {
+            let node = GraphNodeModel(x: 200, y: 200, label: name, nodeType: "set")
+            node.inputPins.append(PinModel(name: "in0", index: 0))
+            node.inputPins.append(PinModel(name: "in1", index: 1))
+            node.outputPins.append(PinModel(name: "out0", index: 0))
+            node.height = node.computeHeight()
+            node.width = max(node.width, CGFloat(name.count) * 9.5 + 40)
+            graph.addNode(node)
+            viewModel.showFuzzyFinder = false
+            return
+        }
+
+        if name.contains("/") {
+            // ClassName/methodName format — look up method pin counts
+            let parts = name.split(separator: "/", maxSplits: 1)
+            let methodName = parts.count > 1 ? String(parts[1]) : name
+            var numIn = 1, numOut = 1
+            if let method = viewModel.project?.findMethod(methodName) {
+                numIn = method.numInputs
+                numOut = method.numOutputs
+            }
+            let node = GraphNodeModel(x: 200, y: 200, label: methodName, nodeType: "method_call")
+            for i in 0..<numIn { node.inputPins.append(PinModel(name: "in\(i)", index: i)) }
+            for i in 0..<numOut { node.outputPins.append(PinModel(name: "out\(i)", index: i)) }
+            node.height = node.computeHeight()
+            node.width = max(node.width, CGFloat(methodName.count) * 9.5 + 40)
+            graph.addNode(node)
+            viewModel.showFuzzyFinder = false
+            return
+        }
+
+        // Default: primitive or library node
         let node = GraphNodeModel(x: 200, y: 200, label: name, nodeType: "primitive")
 
         // Look up correct pin counts from library primitives
@@ -149,8 +206,15 @@ struct IDEWorkspaceView: View {
             }
             node.libraryName = result.library.manifest.name
         } else {
-            node.inputPins = [PinModel(name: "in", index: 0)]
-            node.outputPins = [PinModel(name: "out", index: 0)]
+            // Check if it's a known universal method
+            if let method = viewModel.project?.findMethod(name) {
+                node.nodeType = "method_call"
+                for i in 0..<method.numInputs { node.inputPins.append(PinModel(name: "in\(i)", index: i)) }
+                for i in 0..<method.numOutputs { node.outputPins.append(PinModel(name: "out\(i)", index: i)) }
+            } else {
+                node.inputPins = [PinModel(name: "in", index: 0)]
+                node.outputPins = [PinModel(name: "out", index: 0)]
+            }
         }
 
         node.height = node.computeHeight()

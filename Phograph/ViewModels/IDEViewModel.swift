@@ -107,7 +107,12 @@ class IDEViewModel: ObservableObject {
     func loadProject(json: String, from url: URL? = nil) {
         projectJSON = json
         let model = ProjectModel(name: url?.deletingPathExtension().lastPathComponent ?? "Untitled")
-        _ = model.loadFromJSON(json)
+        do {
+            try model.loadFromJSON(json)
+        } catch {
+            consoleOutput += "Error parsing project: \(error.localizedDescription)\n"
+            statusMessage = "Parse failed"
+        }
         model.filePath = url
         self.project = model
 

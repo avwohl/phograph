@@ -13,12 +13,27 @@ class ProjectModel: ObservableObject, Identifiable {
         self.name = name
     }
 
+    enum LoadError: LocalizedError {
+        case invalidJSON
+        case noSections
+
+        var errorDescription: String? {
+            switch self {
+            case .invalidJSON: return "Invalid JSON"
+            case .noSections: return "Project has no \"sections\" array"
+            }
+        }
+    }
+
     /// Load project from JSON string
-    func loadFromJSON(_ json: String) -> Bool {
+    func loadFromJSON(_ json: String) throws {
         guard let data = json.data(using: .utf8),
-              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let sectionsArray = root["sections"] as? [[String: Any]] else {
-            return false
+              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw LoadError.invalidJSON
+        }
+
+        guard let sectionsArray = root["sections"] as? [[String: Any]] else {
+            throw LoadError.noSections
         }
 
         var newSections: [SectionModel] = []
@@ -85,7 +100,6 @@ class ProjectModel: ObservableObject, Identifiable {
         }
 
         self.isDirty = false
-        return true
     }
 
     /// Find a method model by name (searches section methods and class methods)

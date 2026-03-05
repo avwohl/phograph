@@ -66,6 +66,14 @@ enum GraphExporter {
         )
     }
 
+    /// Cubic bezier midpoint at t=0.5
+    private static func cubicMidpoint(p0: CGPoint, c1: CGPoint, c2: CGPoint, p3: CGPoint) -> CGPoint {
+        CGPoint(
+            x: p0.x / 8 + 3 * c1.x / 8 + 3 * c2.x / 8 + p3.x / 8,
+            y: p0.y / 8 + 3 * c1.y / 8 + 3 * c2.y / 8 + p3.y / 8
+        )
+    }
+
     // MARK: - SVG Export
 
     static func exportSVG(graph: GraphModel) -> String {
@@ -87,17 +95,48 @@ enum GraphExporter {
 
         // Wires first (behind nodes)
         for wire in graph.wires {
-            guard let src = graph.nodes.first(where: { $0.id == wire.sourceNodeId }),
-                  let dst = graph.nodes.first(where: { $0.id == wire.destNodeId }) else { continue }
+            guard let src = graph.nodes.first(where: { $0.id == wire.sourceNodeId }) else { continue }
             let sx = src.x + pinX(index: wire.sourcePin, count: src.outputPins.count, nodeWidth: src.width)
             let sy = src.y + src.height
-            let ex = dst.x + pinX(index: wire.destPin, count: dst.inputPins.count, nodeWidth: dst.width)
-            let ey = dst.y
+
+            let ex: CGFloat, ey: CGFloat
+            let isDangling: Bool
+            if let destId = wire.destNodeId, let destPin = wire.destPin,
+               let dst = graph.nodes.first(where: { $0.id == destId }) {
+                ex = dst.x + pinX(index: destPin, count: dst.inputPins.count, nodeWidth: dst.width)
+                ey = dst.y
+                isDangling = false
+            } else if let dp = wire.danglingEndpoint {
+                ex = dp.x; ey = dp.y
+                isDangling = true
+            } else {
+                continue
+            }
+
             let dy = max(abs(ey - sy) * 0.4, 30)
+            let dashAttr = isDangling ? " stroke-dasharray=\"6,4\"" : ""
+            let strokeColor = isDangling ? "rgb(255,149,0)" : "rgba(51,51,51,0.55)"
             svg += """
             <path d="M \(f(sx)) \(f(sy)) C \(f(sx)) \(f(sy+dy)) \(f(ex)) \(f(ey-dy)) \(f(ex)) \(f(ey))"
-                  fill="none" stroke="rgba(51,51,51,0.55)" stroke-width="1.5"/>
+                  fill="none" stroke="\(strokeColor)" stroke-width="1.5"\(dashAttr)/>
             """
+
+            // Dangling endpoint circle
+            if isDangling {
+                svg += "<circle cx=\"\(f(ex))\" cy=\"\(f(ey))\" r=\"5\" fill=\"rgb(255,149,0)\"/>"
+            }
+
+            // Wire name label
+            if !wire.name.isEmpty {
+                let mid = cubicMidpoint(
+                    p0: CGPoint(x: sx, y: sy),
+                    c1: CGPoint(x: sx, y: sy + dy),
+                    c2: CGPoint(x: ex, y: ey - dy),
+                    p3: CGPoint(x: ex, y: ey)
+                )
+                svg += "<rect x=\"\(f(mid.x - 20))\" y=\"\(f(mid.y - 8))\" width=\"40\" height=\"16\" rx=\"3\" fill=\"white\" stroke=\"#ccc\" stroke-width=\"0.5\"/>"
+                svg += "<text x=\"\(f(mid.x))\" y=\"\(f(mid.y))\" text-anchor=\"middle\" dominant-baseline=\"central\" font-size=\"10\" fill=\"#333\">\(escapeXML(wire.name))</text>"
+            }
         }
 
         // Nodes
@@ -256,21 +295,75 @@ enum GraphExporter {
 
         // Wires
         for wire in graph.wires {
-            guard let src = graph.nodes.first(where: { $0.id == wire.sourceNodeId }),
-                  let dst = graph.nodes.first(where: { $0.id == wire.destNodeId }) else { continue }
+            guard let src = graph.nodes.first(where: { $0.id == wire.sourceNodeId }) else { continue }
             let sx = src.x + pinX(index: wire.sourcePin, count: src.outputPins.count, nodeWidth: src.width)
             let sy = src.y + src.height
-            let ex = dst.x + pinX(index: wire.destPin, count: dst.inputPins.count, nodeWidth: dst.width)
-            let ey = dst.y
+
+            let ex: CGFloat, ey: CGFloat
+            let isDangling: Bool
+            if let destId = wire.destNodeId, let destPin = wire.destPin,
+               let dst = graph.nodes.first(where: { $0.id == destId }) {
+                ex = dst.x + pinX(index: destPin, count: dst.inputPins.count, nodeWidth: dst.width)
+                ey = dst.y
+                isDangling = false
+            } else if let dp = wire.danglingEndpoint {
+                ex = dp.x; ey = dp.y
+                isDangling = true
+            } else {
+                continue
+            }
+
             let dy = max(abs(ey - sy) * 0.4, 30)
 
-            ctx.setStrokeColor(CGColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 0.55))
+            if isDangling {
+                ctx.setStrokeColor(CGColor(red: 1.0, green: 0.58, blue: 0.0, alpha: 1.0))
+                ctx.setLineDash(phase: 0, lengths: [6, 4])
+            } else {
+                ctx.setStrokeColor(CGColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 0.55))
+                ctx.setLineDash(phase: 0, lengths: [])
+            }
             ctx.setLineWidth(1.5)
             ctx.move(to: CGPoint(x: sx, y: sy))
             ctx.addCurve(to: CGPoint(x: ex, y: ey),
                          control1: CGPoint(x: sx, y: sy + dy),
                          control2: CGPoint(x: ex, y: ey - dy))
             ctx.strokePath()
+            ctx.setLineDash(phase: 0, lengths: [])
+
+            // Dangling endpoint circle
+            if isDangling {
+                ctx.setFillColor(CGColor(red: 1.0, green: 0.58, blue: 0.0, alpha: 1.0))
+                ctx.fillEllipse(in: CGRect(x: ex - 5, y: ey - 5, width: 10, height: 10))
+            }
+
+            // Wire name label
+            if !wire.name.isEmpty {
+                let mid = cubicMidpoint(
+                    p0: CGPoint(x: sx, y: sy),
+                    c1: CGPoint(x: sx, y: sy + dy),
+                    c2: CGPoint(x: ex, y: ey - dy),
+                    p3: CGPoint(x: ex, y: ey)
+                )
+                let nameAttrs: [NSAttributedString.Key: Any] = [
+                    .font: NSFont.systemFont(ofSize: 10),
+                    .foregroundColor: NSColor.darkGray
+                ]
+                let nameStr = wire.name as NSString
+                let nameSize = nameStr.size(withAttributes: nameAttrs)
+                // White pill background
+                let pillRect = CGRect(
+                    x: mid.x - nameSize.width / 2 - 3,
+                    y: mid.y - nameSize.height / 2 - 1,
+                    width: nameSize.width + 6,
+                    height: nameSize.height + 2
+                )
+                ctx.setFillColor(CGColor.white)
+                ctx.fill(pillRect)
+                ctx.setStrokeColor(CGColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 1))
+                ctx.setLineWidth(0.5)
+                ctx.stroke(pillRect)
+                nameStr.draw(at: CGPoint(x: mid.x - nameSize.width / 2, y: mid.y - nameSize.height / 2), withAttributes: nameAttrs)
+            }
         }
 
         // Nodes

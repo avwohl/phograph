@@ -8,6 +8,10 @@ struct InspectorPanelView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if let graph = viewModel.currentGraph,
+                   let wireId = graph.selectedWireIds.first,
+                   let wire = graph.wires.first(where: { $0.id == wireId }) {
+                    wireInspector(wire, graph: graph)
+                } else if let graph = viewModel.currentGraph,
                    let nodeId = graph.selectedNodeIds.first,
                    let node = graph.nodes.first(where: { $0.id == nodeId }) {
                     nodeInspector(node)
@@ -135,6 +139,52 @@ struct InspectorPanelView: View {
                     Text(tv)
                         .font(.system(.caption, design: .monospaced))
                         .foregroundColor(.yellow)
+                }
+            }
+        }
+    }
+
+    private func wireInspector(_ wire: GraphWireModel, graph: GraphModel) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack {
+                Image(systemName: "line.diagonal")
+                    .foregroundColor(.blue)
+                Text("Wire")
+                    .font(.headline)
+            }
+
+            Divider()
+
+            // Editable name
+            LabeledContent("Name") {
+                TextField("Wire name", text: Binding(
+                    get: { wire.name },
+                    set: { wire.name = $0; graph.objectWillChange.send() }
+                ))
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: 140)
+            }
+
+            // Source info
+            if let srcNode = graph.nodes.first(where: { $0.id == wire.sourceNodeId }) {
+                LabeledContent("Source") {
+                    Text("\(srcNode.label) [pin \(wire.sourcePin)]")
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            // Dest info
+            if let destId = wire.destNodeId, let destPin = wire.destPin,
+               let destNode = graph.nodes.first(where: { $0.id == destId }) {
+                LabeledContent("Dest") {
+                    Text("\(destNode.label) [pin \(destPin)]")
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                LabeledContent("Dest") {
+                    Text("Dangling")
+                        .foregroundColor(.orange)
                 }
             }
         }

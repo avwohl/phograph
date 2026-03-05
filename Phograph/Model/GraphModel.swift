@@ -7,6 +7,7 @@ class GraphModel: ObservableObject {
     @Published var nodes: [GraphNodeModel] = []
     @Published var wires: [GraphWireModel] = []
     @Published var selectedNodeIds: Set<UUID> = []
+    @Published var selectedWireIds: Set<UUID> = []
     @Published var methodName: String = ""
     @Published var caseIndex: Int = 0
 
@@ -19,6 +20,8 @@ class GraphModel: ObservableObject {
     }
 
     func removeNode(id: UUID) {
+        let removedWireIds = Set(wires.filter { $0.sourceNodeId == id || $0.destNodeId == id }.map(\.id))
+        selectedWireIds.subtract(removedWireIds)
         nodes.removeAll { $0.id == id }
         wires.removeAll { $0.sourceNodeId == id || $0.destNodeId == id }
     }
@@ -29,23 +32,53 @@ class GraphModel: ObservableObject {
 
     func removeWire(id: UUID) {
         wires.removeAll { $0.id == id }
+        selectedWireIds.remove(id)
     }
 
     func selectNode(id: UUID, exclusive: Bool = true) {
         if exclusive {
             selectedNodeIds = [id]
+            selectedWireIds.removeAll()
         } else {
             selectedNodeIds.insert(id)
         }
     }
 
+    func selectWire(id: UUID, exclusive: Bool = true) {
+        if exclusive {
+            selectedWireIds = [id]
+            selectedNodeIds.removeAll()
+        } else {
+            selectedWireIds.insert(id)
+        }
+    }
+
     func deselectAll() {
         selectedNodeIds.removeAll()
+        selectedWireIds.removeAll()
     }
 
     /// Find a wire connected to a specific input pin
     func wireToInput(nodeId: UUID, pinIndex: Int) -> GraphWireModel? {
         wires.first { $0.destNodeId == nodeId && $0.destPin == pinIndex }
+    }
+
+    /// Reconnect a dangling wire to a destination pin
+    func reconnectWire(id: UUID, destNodeId: UUID, destPin: Int) {
+        guard let wire = wires.first(where: { $0.id == id }) else { return }
+        wire.destNodeId = destNodeId
+        wire.destPin = destPin
+        wire.danglingEndpoint = nil
+        objectWillChange.send()
+    }
+
+    /// Disconnect a wire's destination, making it dangling
+    func disconnectWireDest(id: UUID, endpoint: CGPoint) {
+        guard let wire = wires.first(where: { $0.id == id }) else { return }
+        wire.destNodeId = nil
+        wire.destPin = nil
+        wire.danglingEndpoint = endpoint
+        objectWillChange.send()
     }
 
     /// Find the nearest input pin to a graph point within a threshold
@@ -120,6 +153,8 @@ class GraphModel: ObservableObject {
             var numOutputs: Int
             var constantValue: String?
             var libraryName: String?
+            var inputNames: [String]?
+            var outputNames: [String]?
         }
 
         var rawNodes: [RawNode] = []
@@ -138,23 +173,26 @@ class GraphModel: ObservableObject {
             }
 
             let libName = nodeDict["library"] as? String
+            let inNames = nodeDict["input_names"] as? [String]
+            let outNames = nodeDict["output_names"] as? [String]
 
             rawNodes.append(RawNode(
                 nodeId: nodeId, name: name, nodeType: typeStr,
                 numInputs: numIn, numOutputs: numOut, constantValue: constVal,
-                libraryName: libName
+                libraryName: libName, inputNames: inNames, outputNames: outNames
             ))
         }
 
         // Parse wires for topological sorting
-        var wiresRaw: [(src: Int, srcPin: Int, dst: Int, dstPin: Int)] = []
+        var wiresRaw: [(src: Int, srcPin: Int, dst: Int, dstPin: Int, name: String)] = []
         if let wiresArray = caseDict["wires"] as? [[String: Any]] {
             for w in wiresArray {
                 let srcNode = w["source_node"] as? Int ?? 0
                 let srcPin = w["source_pin"] as? Int ?? 0
                 let dstNode = w["target_node"] as? Int ?? 0
                 let dstPin = w["target_pin"] as? Int ?? 0
-                wiresRaw.append((srcNode, srcPin, dstNode, dstPin))
+                let wireName = w["name"] as? String ?? ""
+                wiresRaw.append((srcNode, srcPin, dstNode, dstPin, wireName))
             }
         }
 
@@ -247,10 +285,12 @@ class GraphModel: ObservableObject {
                 node.engineNodeId = UInt32(rn.nodeId)
 
                 for i in 0..<rn.numInputs {
-                    node.inputPins.append(PinModel(name: "in\(i)", index: i))
+                    let pinName = rn.inputNames?[safe: i] ?? "in\(i)"
+                    node.inputPins.append(PinModel(name: pinName, index: i))
                 }
                 for i in 0..<rn.numOutputs {
-                    node.outputPins.append(PinModel(name: "out\(i)", index: i))
+                    let pinName = rn.outputNames?[safe: i] ?? "out\(i)"
+                    node.outputPins.append(PinModel(name: pinName, index: i))
                 }
                 node.constantValue = rn.constantValue
                 node.libraryName = rn.libraryName
@@ -272,10 +312,12 @@ class GraphModel: ObservableObject {
         for w in wiresRaw {
             guard let srcUUID = nodeIdToUUID[w.src],
                   let dstUUID = nodeIdToUUID[w.dst] else { continue }
-            graph.wires.append(GraphWireModel(
+            let wire = GraphWireModel(
                 sourceNodeId: srcUUID, sourcePin: w.srcPin,
                 destNodeId: dstUUID, destPin: w.dstPin
-            ))
+            )
+            wire.name = w.name
+            graph.wires.append(wire)
         }
 
         return graph
@@ -346,10 +388,25 @@ class PinModel: Identifiable {
     }
 }
 
-struct GraphWireModel: Identifiable {
+class GraphWireModel: ObservableObject, Identifiable {
     let id = UUID()
     let sourceNodeId: UUID
     let sourcePin: Int
-    let destNodeId: UUID
-    let destPin: Int
+    @Published var destNodeId: UUID?
+    @Published var destPin: Int?
+    @Published var name: String = ""
+    @Published var danglingEndpoint: CGPoint?
+
+    init(sourceNodeId: UUID, sourcePin: Int, destNodeId: UUID? = nil, destPin: Int? = nil) {
+        self.sourceNodeId = sourceNodeId
+        self.sourcePin = sourcePin
+        self.destNodeId = destNodeId
+        self.destPin = destPin
+    }
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }

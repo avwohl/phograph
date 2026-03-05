@@ -223,7 +223,11 @@ class IDEViewModel: ObservableObject {
         for id in graph.selectedNodeIds {
             graph.removeNode(id: id)
         }
+        for id in graph.selectedWireIds {
+            graph.removeWire(id: id)
+        }
         graph.selectedNodeIds.removeAll()
+        graph.selectedWireIds.removeAll()
     }
 
     func selectAll() {

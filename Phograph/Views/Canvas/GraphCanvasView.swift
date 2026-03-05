@@ -20,6 +20,9 @@ struct GraphCanvasView: View {
                     // White background
                     Color.white
                         .ignoresSafeArea()
+                        .onTapGesture {
+                            viewModel.currentGraph?.deselectAll()
+                        }
 
                     // Graph content (scrollable via pan + zoom)
                     graphContent
@@ -558,27 +561,121 @@ struct GraphCanvasView: View {
 
     // MARK: - Wire rendering
 
+    /// Compute bezier geometry for a wire. Returns (start, end, control1, control2) or nil if can't resolve.
+    private func wireGeometry(wire: GraphWireModel, graph: GraphModel) -> (start: CGPoint, end: CGPoint, c1: CGPoint, c2: CGPoint)? {
+        guard let src = graph.nodes.first(where: { $0.id == wire.sourceNodeId }) else { return nil }
+        let startX = src.x + pinX(index: wire.sourcePin, count: src.outputPins.count, nodeWidth: src.width)
+        let startY = src.y + src.height
+        let start = CGPoint(x: startX, y: startY)
+
+        let end: CGPoint
+        if let destId = wire.destNodeId, let destPin = wire.destPin,
+           let dst = graph.nodes.first(where: { $0.id == destId }) {
+            let endX = dst.x + pinX(index: destPin, count: dst.inputPins.count, nodeWidth: dst.width)
+            end = CGPoint(x: endX, y: dst.y)
+        } else if let dangling = wire.danglingEndpoint {
+            end = dangling
+        } else {
+            return nil
+        }
+
+        let dy = max(abs(end.y - start.y) * 0.4, 30)
+        let c1 = CGPoint(x: start.x, y: start.y + dy)
+        let c2 = CGPoint(x: end.x, y: end.y - dy)
+        return (start, end, c1, c2)
+    }
+
+    /// Cubic bezier midpoint at t=0.5
+    private func bezierMidpoint(p0: CGPoint, c1: CGPoint, c2: CGPoint, p3: CGPoint) -> CGPoint {
+        // B(0.5) = P0/8 + 3*C1/8 + 3*C2/8 + P3/8
+        CGPoint(
+            x: p0.x / 8 + 3 * c1.x / 8 + 3 * c2.x / 8 + p3.x / 8,
+            y: p0.y / 8 + 3 * c1.y / 8 + 3 * c2.y / 8 + p3.y / 8
+        )
+    }
+
     private func wireView(wire: GraphWireModel, graph: GraphModel) -> some View {
-        let sourceNode = graph.nodes.first { $0.id == wire.sourceNodeId }
-        let destNode = graph.nodes.first { $0.id == wire.destNodeId }
+        let geo = wireGeometry(wire: wire, graph: graph)
+        let isSelected = graph.selectedWireIds.contains(wire.id)
+        let isDangling = wire.destNodeId == nil
 
         return Group {
-            if let src = sourceNode, let dst = destNode {
-                let startX = src.x + pinX(index: wire.sourcePin, count: src.outputPins.count, nodeWidth: src.width)
-                let startY = src.y + src.height
-                let endX = dst.x + pinX(index: wire.destPin, count: dst.inputPins.count, nodeWidth: dst.width)
-                let endY = dst.y
-
-                Path { path in
-                    path.move(to: CGPoint(x: startX, y: startY))
-                    let dy = max(abs(endY - startY) * 0.4, 30)
-                    path.addCurve(
-                        to: CGPoint(x: endX, y: endY),
-                        control1: CGPoint(x: startX, y: startY + dy),
-                        control2: CGPoint(x: endX, y: endY - dy)
-                    )
+            if let g = geo {
+                let path = Path { p in
+                    p.move(to: g.start)
+                    p.addCurve(to: g.end, control1: g.c1, control2: g.c2)
                 }
-                .stroke(Color.black.opacity(0.55), lineWidth: 1.5)
+
+                // Invisible wide stroke for hit testing
+                path.stroke(Color.clear, lineWidth: 10)
+                    .contentShape(path.strokedPath(StrokeStyle(lineWidth: 10)))
+                    .onTapGesture {
+                        graph.selectWire(id: wire.id)
+                    }
+
+                // Visual stroke
+                if isSelected {
+                    path.stroke(Color.blue, lineWidth: 2)
+                } else if isDangling {
+                    path.stroke(Color.orange, style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
+                } else {
+                    path.stroke(Color.black.opacity(0.55), lineWidth: 1.5)
+                }
+
+                // Wire name label at midpoint
+                if !wire.name.isEmpty {
+                    let mid = bezierMidpoint(p0: g.start, c1: g.c1, c2: g.c2, p3: g.end)
+                    Text(wire.name)
+                        .font(.system(size: 10))
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.white)
+                                .shadow(color: .black.opacity(0.15), radius: 1, x: 0, y: 0.5)
+                        )
+                        .position(mid)
+                }
+
+                // Dangling endpoint circle (draggable)
+                if isDangling, let dangling = wire.danglingEndpoint {
+                    Circle()
+                        .fill(Color.orange)
+                        .frame(width: 10, height: 10)
+                        .position(dangling)
+                        .gesture(
+                            DragGesture(minimumDistance: 1)
+                                .onChanged { value in
+                                    // Update dangling endpoint position in graph coords
+                                    // value.location is relative to the circle's position frame
+                                    let newPos = CGPoint(
+                                        x: dangling.x + value.translation.width,
+                                        y: dangling.y + value.translation.height
+                                    )
+                                    wire.danglingEndpoint = newPos
+                                    graph.objectWillChange.send()
+                                }
+                                .onEnded { value in
+                                    let finalPos = CGPoint(
+                                        x: dangling.x + value.translation.width,
+                                        y: dangling.y + value.translation.height
+                                    )
+                                    // Try to snap to a nearby input pin
+                                    if let target = graph.findNearestInputPin(at: finalPos, threshold: 25),
+                                       target.nodeId != wire.sourceNodeId {
+                                        // Remove any existing wire to this input
+                                        if let existing = graph.wireToInput(nodeId: target.nodeId, pinIndex: target.pinIndex),
+                                           existing.id != wire.id {
+                                            graph.removeWire(id: existing.id)
+                                        }
+                                        graph.reconnectWire(id: wire.id, destNodeId: target.nodeId, destPin: target.pinIndex)
+                                    } else {
+                                        wire.danglingEndpoint = finalPos
+                                        graph.objectWillChange.send()
+                                    }
+                                }
+                        )
+                }
             }
         }
     }

@@ -26,6 +26,9 @@ class GraphEditorViewModel: ObservableObject {
     var wireDragSourceNodeId: UUID?
     var wireDragSourcePinIndex: Int = 0
 
+    /// When reconnecting an existing wire (preserves name), this holds the wire's ID
+    var reconnectingWireId: UUID?
+
     weak var graph: GraphModel?
     private var dragNodeId: UUID?
     private var dragStartOffset: CGPoint = .zero
@@ -131,8 +134,9 @@ class GraphEditorViewModel: ObservableObject {
         let srcNodeId = wire.sourceNodeId
         let srcPin = wire.sourcePin
 
-        // Remove the wire
-        graph.removeWire(id: wire.id)
+        // Disconnect the wire's dest (make it dangling) instead of deleting
+        graph.disconnectWireDest(id: wire.id, endpoint: graphPos)
+        reconnectingWireId = wire.id
 
         // Find the output pin's graph position
         if let srcNode = graph.nodes.first(where: { $0.id == srcNodeId }) {
@@ -160,6 +164,7 @@ class GraphEditorViewModel: ObservableObject {
     func endWireDragAndConnect() -> Bool {
         isDraggingWire = false
         guard let graph = graph, let sourceNodeId = wireDragSourceNodeId else {
+            reconnectingWireId = nil
             return false
         }
 
@@ -167,13 +172,18 @@ class GraphEditorViewModel: ObservableObject {
         var connected = false
 
         // We're dragging from an output, looking for an input pin to connect to
-        if let target = graph.findNearestInputPin(at: dropPoint, threshold: 25 / zoomScale) {
-            // Don't connect to the same node
-            if target.nodeId != sourceNodeId {
-                // Remove any existing wire to this input (one wire per input)
-                if let existing = graph.wireToInput(nodeId: target.nodeId, pinIndex: target.pinIndex) {
-                    graph.removeWire(id: existing.id)
-                }
+        if let target = graph.findNearestInputPin(at: dropPoint, threshold: 25 / zoomScale),
+           target.nodeId != sourceNodeId {
+            // Remove any existing wire to this input (one wire per input)
+            if let existing = graph.wireToInput(nodeId: target.nodeId, pinIndex: target.pinIndex) {
+                graph.removeWire(id: existing.id)
+            }
+
+            if let wireId = reconnectingWireId {
+                // Reconnect existing wire (preserves name)
+                graph.reconnectWire(id: wireId, destNodeId: target.nodeId, destPin: target.pinIndex)
+            } else {
+                // Create new wire
                 let wire = GraphWireModel(
                     sourceNodeId: sourceNodeId,
                     sourcePin: wireDragSourcePinIndex,
@@ -181,11 +191,23 @@ class GraphEditorViewModel: ObservableObject {
                     destPin: target.pinIndex
                 )
                 graph.addWire(wire)
-                connected = true
             }
+            connected = true
+        } else if let wireId = reconnectingWireId {
+            // Dropped on empty space while reconnecting — leave dangling
+            graph.disconnectWireDest(id: wireId, endpoint: dropPoint)
+        } else {
+            // Dropped on empty space with new wire — create dangling wire
+            let wire = GraphWireModel(
+                sourceNodeId: sourceNodeId,
+                sourcePin: wireDragSourcePinIndex
+            )
+            wire.danglingEndpoint = dropPoint
+            graph.addWire(wire)
         }
 
         wireDragSourceNodeId = nil
+        reconnectingWireId = nil
         return connected
     }
 

@@ -51,12 +51,12 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Hello, World!" } },
-                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Hello, World!" }, "output_names": ["msg"] },
+                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["msg"] },
                                 { "id": 4, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "msg" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 4
@@ -83,23 +83,24 @@ struct ExampleCatalog {
                           "name": "main",
                           "num_inputs": 0,
                           "num_outputs": 1,
+                          "output_names": ["result"],
                           "cases": [
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 3 } },
-                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 4 } },
-                                { "id": 4, "type": "primitive", "name": "+", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 5, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 2 } },
-                                { "id": 6, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 7, "type": "output_bar", "num_inputs": 1, "num_outputs": 0 }
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 3 }, "output_names": ["a"] },
+                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 4 }, "output_names": ["b"] },
+                                { "id": 4, "type": "primitive", "name": "+", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["sum"] },
+                                { "id": 5, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 2 }, "output_names": ["k"] },
+                                { "id": 6, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["product"] },
+                                { "id": 7, "type": "output_bar", "num_inputs": 1, "num_outputs": 0, "input_names": ["result"] }
                               ],
                               "wires": [
                                 { "source_node": 2, "source_pin": 0, "target_node": 4, "target_pin": 0 },
                                 { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 1 },
-                                { "source_node": 4, "source_pin": 0, "target_node": 6, "target_pin": 0 },
+                                { "source_node": 4, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "sum" },
                                 { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 1 },
-                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 0 }
+                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "result" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 7
@@ -138,41 +139,41 @@ struct ExampleCatalog {
                           "cases": [
                             {
                               "nodes": [
-                                { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 2, "type": "primitive", "name": "<=", "num_inputs": 2, "num_outputs": 1, "annotation": "nextCaseOnFailure" },
-                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 } },
-                                { "id": 4, "type": "output_bar", "num_inputs": 1, "num_outputs": 0 }
+                                { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 1, "output_names": ["n"] },
+                                { "id": 2, "type": "primitive", "name": "<=", "num_inputs": 2, "num_outputs": 1, "annotation": "nextCaseOnFailure", "input_names": ["n", "limit"], "output_names": ["ok?"] },
+                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 }, "output_names": ["limit"] },
+                                { "id": 4, "type": "output_bar", "num_inputs": 1, "num_outputs": 0, "input_names": ["result"] }
                               ],
                               "wires": [
-                                { "source_node": 1, "source_pin": 0, "target_node": 2, "target_pin": 0 },
+                                { "source_node": 1, "source_pin": 0, "target_node": 2, "target_pin": 0, "name": "n" },
                                 { "source_node": 3, "source_pin": 0, "target_node": 2, "target_pin": 1 },
-                                { "source_node": 1, "source_pin": 0, "target_node": 4, "target_pin": 0 }
+                                { "source_node": 1, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "n" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 4
                             },
                             {
                               "nodes": [
-                                { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 1 },
+                                { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 1, "output_names": ["n"] },
                                 { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 } },
-                                { "id": 3, "type": "primitive", "name": "-", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 3, "type": "primitive", "name": "-", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["diff"] },
                                 { "id": 4, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 2 } },
-                                { "id": 5, "type": "primitive", "name": "-", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 6, "type": "method_call", "name": "fib", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 7, "type": "method_call", "name": "fib", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 8, "type": "primitive", "name": "+", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 9, "type": "output_bar", "num_inputs": 1, "num_outputs": 0 }
+                                { "id": 5, "type": "primitive", "name": "-", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["diff"] },
+                                { "id": 6, "type": "method_call", "name": "fib", "num_inputs": 1, "num_outputs": 1, "input_names": ["n"], "output_names": ["result"] },
+                                { "id": 7, "type": "method_call", "name": "fib", "num_inputs": 1, "num_outputs": 1, "input_names": ["n"], "output_names": ["result"] },
+                                { "id": 8, "type": "primitive", "name": "+", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["sum"] },
+                                { "id": 9, "type": "output_bar", "num_inputs": 1, "num_outputs": 0, "input_names": ["result"] }
                               ],
                               "wires": [
-                                { "source_node": 1, "source_pin": 0, "target_node": 3, "target_pin": 0 },
+                                { "source_node": 1, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "n" },
                                 { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 1 },
-                                { "source_node": 1, "source_pin": 0, "target_node": 5, "target_pin": 0 },
+                                { "source_node": 1, "source_pin": 0, "target_node": 5, "target_pin": 0, "name": "n" },
                                 { "source_node": 4, "source_pin": 0, "target_node": 5, "target_pin": 1 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 6, "target_pin": 0 },
-                                { "source_node": 5, "source_pin": 0, "target_node": 7, "target_pin": 0 },
-                                { "source_node": 6, "source_pin": 0, "target_node": 8, "target_pin": 0 },
-                                { "source_node": 7, "source_pin": 0, "target_node": 8, "target_pin": 1 },
-                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 0 }
+                                { "source_node": 3, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "n-1" },
+                                { "source_node": 5, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "n-2" },
+                                { "source_node": 6, "source_pin": 0, "target_node": 8, "target_pin": 0, "name": "fib(n-1)" },
+                                { "source_node": 7, "source_pin": 0, "target_node": 8, "target_pin": 1, "name": "fib(n-2)" },
+                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 0, "name": "result" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 9
@@ -187,13 +188,13 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 10 } },
-                                { "id": 3, "type": "method_call", "name": "fib", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 4, "type": "output_bar", "num_inputs": 1, "num_outputs": 0 }
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 10 }, "output_names": ["n"] },
+                                { "id": 3, "type": "method_call", "name": "fib", "num_inputs": 1, "num_outputs": 1, "input_names": ["n"], "output_names": ["result"] },
+                                { "id": 4, "type": "output_bar", "num_inputs": 1, "num_outputs": 0, "input_names": ["result"] }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "n" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "fib(10)" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 4
@@ -223,35 +224,35 @@ struct ExampleCatalog {
                           "cases": [
                             {
                               "nodes": [
-                                { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 2, "type": "primitive", "name": "<=", "num_inputs": 2, "num_outputs": 1, "annotation": "nextCaseOnFailure" },
-                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 } },
-                                { "id": 4, "type": "output_bar", "num_inputs": 1, "num_outputs": 0 }
+                                { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 1, "output_names": ["n"] },
+                                { "id": 2, "type": "primitive", "name": "<=", "num_inputs": 2, "num_outputs": 1, "annotation": "nextCaseOnFailure", "input_names": ["n", "limit"], "output_names": ["ok?"] },
+                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 }, "output_names": ["limit"] },
+                                { "id": 4, "type": "output_bar", "num_inputs": 1, "num_outputs": 0, "input_names": ["result"] }
                               ],
                               "wires": [
-                                { "source_node": 1, "source_pin": 0, "target_node": 2, "target_pin": 0 },
+                                { "source_node": 1, "source_pin": 0, "target_node": 2, "target_pin": 0, "name": "n" },
                                 { "source_node": 3, "source_pin": 0, "target_node": 2, "target_pin": 1 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 }
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "1" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 4
                             },
                             {
                               "nodes": [
-                                { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 1 },
+                                { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 1, "output_names": ["n"] },
                                 { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 } },
-                                { "id": 3, "type": "primitive", "name": "-", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 4, "type": "method_call", "name": "factorial", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 5, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 6, "type": "output_bar", "num_inputs": 1, "num_outputs": 0 }
+                                { "id": 3, "type": "primitive", "name": "-", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["diff"] },
+                                { "id": 4, "type": "method_call", "name": "factorial", "num_inputs": 1, "num_outputs": 1, "input_names": ["n"], "output_names": ["result"] },
+                                { "id": 5, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["product"] },
+                                { "id": 6, "type": "output_bar", "num_inputs": 1, "num_outputs": 0, "input_names": ["result"] }
                               ],
                               "wires": [
-                                { "source_node": 1, "source_pin": 0, "target_node": 3, "target_pin": 0 },
+                                { "source_node": 1, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "n" },
                                 { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 1 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 },
-                                { "source_node": 1, "source_pin": 0, "target_node": 5, "target_pin": 0 },
-                                { "source_node": 4, "source_pin": 0, "target_node": 5, "target_pin": 1 },
-                                { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 0 }
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "n-1" },
+                                { "source_node": 1, "source_pin": 0, "target_node": 5, "target_pin": 0, "name": "n" },
+                                { "source_node": 4, "source_pin": 0, "target_node": 5, "target_pin": 1, "name": "(n-1)!" },
+                                { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "n!" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 6
@@ -266,13 +267,13 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 5 } },
-                                { "id": 3, "type": "method_call", "name": "factorial", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 4, "type": "output_bar", "num_inputs": 1, "num_outputs": 0 }
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 5 }, "output_names": ["n"] },
+                                { "id": 3, "type": "method_call", "name": "factorial", "num_inputs": 1, "num_outputs": 1, "input_names": ["n"], "output_names": ["result"] },
+                                { "id": 4, "type": "output_bar", "num_inputs": 1, "num_outputs": 0, "input_names": ["result"] }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "5" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "120" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 4
@@ -303,15 +304,15 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 } },
-                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": -3 } },
-                                { "id": 4, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 2 } },
-                                { "id": 5, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 6, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 }, "output_names": ["a"] },
+                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": -3 }, "output_names": ["b"] },
+                                { "id": 4, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 2 }, "output_names": ["c"] },
+                                { "id": 5, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["product"] },
+                                { "id": 6, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["product"] },
                                 { "id": 7, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 4 } },
-                                { "id": 8, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 9, "type": "primitive", "name": "-", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 10, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 8, "type": "primitive", "name": "*", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["product"] },
+                                { "id": 9, "type": "primitive", "name": "-", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["diff"] },
+                                { "id": 10, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 11, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
@@ -319,11 +320,11 @@ struct ExampleCatalog {
                                 { "source_node": 3, "source_pin": 0, "target_node": 5, "target_pin": 1 },
                                 { "source_node": 7, "source_pin": 0, "target_node": 6, "target_pin": 0 },
                                 { "source_node": 2, "source_pin": 0, "target_node": 6, "target_pin": 1 },
-                                { "source_node": 6, "source_pin": 0, "target_node": 8, "target_pin": 0 },
-                                { "source_node": 4, "source_pin": 0, "target_node": 8, "target_pin": 1 },
-                                { "source_node": 5, "source_pin": 0, "target_node": 9, "target_pin": 0 },
-                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 1 },
-                                { "source_node": 9, "source_pin": 0, "target_node": 10, "target_pin": 0 }
+                                { "source_node": 6, "source_pin": 0, "target_node": 8, "target_pin": 0, "name": "4a" },
+                                { "source_node": 4, "source_pin": 0, "target_node": 8, "target_pin": 1, "name": "c" },
+                                { "source_node": 5, "source_pin": 0, "target_node": 9, "target_pin": 0, "name": "b\u{00B2}" },
+                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 1, "name": "4ac" },
+                                { "source_node": 9, "source_pin": 0, "target_node": 10, "target_pin": 0, "name": "b\u{00B2}-4ac" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 11
@@ -363,25 +364,25 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "primitive", "name": "shape-rect", "num_inputs": 4, "num_outputs": 1 },
+                                { "id": 2, "type": "primitive", "name": "shape-rect", "num_inputs": 4, "num_outputs": 1, "input_names": ["x", "y", "w", "h"], "output_names": ["shape"] },
                                 { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 50 } },
                                 { "id": 4, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 50 } },
                                 { "id": 5, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 100 } },
                                 { "id": 6, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 80 } },
-                                { "id": 7, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 7, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1, "input_names": ["shape", "color"], "output_names": ["shape"] },
                                 { "id": 8, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "red" } },
-                                { "id": 9, "type": "primitive", "name": "shape-oval", "num_inputs": 4, "num_outputs": 1 },
+                                { "id": 9, "type": "primitive", "name": "shape-oval", "num_inputs": 4, "num_outputs": 1, "input_names": ["x", "y", "w", "h"], "output_names": ["shape"] },
                                 { "id": 10, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 200 } },
                                 { "id": 11, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 100 } },
                                 { "id": 12, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 120 } },
                                 { "id": 13, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 80 } },
-                                { "id": 14, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 14, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1, "input_names": ["shape", "color"], "output_names": ["shape"] },
                                 { "id": 15, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "blue" } },
-                                { "id": 16, "type": "primitive", "name": "shape-group", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 17, "type": "primitive", "name": "create-canvas", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 16, "type": "primitive", "name": "shape-group", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["group"] },
+                                { "id": 17, "type": "primitive", "name": "create-canvas", "num_inputs": 2, "num_outputs": 1, "input_names": ["w", "h"], "output_names": ["canvas"] },
                                 { "id": 18, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 400 } },
                                 { "id": 19, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 300 } },
-                                { "id": 20, "type": "primitive", "name": "canvas-render", "num_inputs": 2, "num_outputs": 0 },
+                                { "id": 20, "type": "primitive", "name": "canvas-render", "num_inputs": 2, "num_outputs": 0, "input_names": ["canvas", "scene"] },
                                 { "id": 21, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
@@ -389,20 +390,20 @@ struct ExampleCatalog {
                                 { "source_node": 4, "source_pin": 0, "target_node": 2, "target_pin": 1 },
                                 { "source_node": 5, "source_pin": 0, "target_node": 2, "target_pin": 2 },
                                 { "source_node": 6, "source_pin": 0, "target_node": 2, "target_pin": 3 },
-                                { "source_node": 2, "source_pin": 0, "target_node": 7, "target_pin": 0 },
+                                { "source_node": 2, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "rect" },
                                 { "source_node": 8, "source_pin": 0, "target_node": 7, "target_pin": 1 },
                                 { "source_node": 10, "source_pin": 0, "target_node": 9, "target_pin": 0 },
                                 { "source_node": 11, "source_pin": 0, "target_node": 9, "target_pin": 1 },
                                 { "source_node": 12, "source_pin": 0, "target_node": 9, "target_pin": 2 },
                                 { "source_node": 13, "source_pin": 0, "target_node": 9, "target_pin": 3 },
-                                { "source_node": 9, "source_pin": 0, "target_node": 14, "target_pin": 0 },
+                                { "source_node": 9, "source_pin": 0, "target_node": 14, "target_pin": 0, "name": "oval" },
                                 { "source_node": 15, "source_pin": 0, "target_node": 14, "target_pin": 1 },
-                                { "source_node": 7, "source_pin": 0, "target_node": 16, "target_pin": 0 },
-                                { "source_node": 14, "source_pin": 0, "target_node": 16, "target_pin": 1 },
+                                { "source_node": 7, "source_pin": 0, "target_node": 16, "target_pin": 0, "name": "red rect" },
+                                { "source_node": 14, "source_pin": 0, "target_node": 16, "target_pin": 1, "name": "blue oval" },
                                 { "source_node": 18, "source_pin": 0, "target_node": 17, "target_pin": 0 },
                                 { "source_node": 19, "source_pin": 0, "target_node": 17, "target_pin": 1 },
-                                { "source_node": 17, "source_pin": 0, "target_node": 20, "target_pin": 0 },
-                                { "source_node": 16, "source_pin": 0, "target_node": 20, "target_pin": 1 }
+                                { "source_node": 17, "source_pin": 0, "target_node": 20, "target_pin": 0, "name": "canvas" },
+                                { "source_node": 16, "source_pin": 0, "target_node": 20, "target_pin": 1, "name": "scene" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 21
@@ -434,18 +435,18 @@ struct ExampleCatalog {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
                                 { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Bouncing Ball - animation stub" } },
-                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
-                                { "id": 4, "type": "primitive", "name": "shape-oval", "num_inputs": 4, "num_outputs": 1 },
+                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["msg"] },
+                                { "id": 4, "type": "primitive", "name": "shape-oval", "num_inputs": 4, "num_outputs": 1, "input_names": ["x", "y", "w", "h"], "output_names": ["shape"] },
                                 { "id": 5, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 100 } },
                                 { "id": 6, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 100 } },
                                 { "id": 7, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 30 } },
                                 { "id": 8, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 30 } },
-                                { "id": 9, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 9, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1, "input_names": ["shape", "color"], "output_names": ["shape"] },
                                 { "id": 10, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "green" } },
-                                { "id": 11, "type": "primitive", "name": "create-canvas", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 11, "type": "primitive", "name": "create-canvas", "num_inputs": 2, "num_outputs": 1, "input_names": ["w", "h"], "output_names": ["canvas"] },
                                 { "id": 12, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 400 } },
                                 { "id": 13, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 300 } },
-                                { "id": 14, "type": "primitive", "name": "canvas-render", "num_inputs": 2, "num_outputs": 0 },
+                                { "id": 14, "type": "primitive", "name": "canvas-render", "num_inputs": 2, "num_outputs": 0, "input_names": ["canvas", "scene"] },
                                 { "id": 15, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
@@ -454,12 +455,12 @@ struct ExampleCatalog {
                                 { "source_node": 6, "source_pin": 0, "target_node": 4, "target_pin": 1 },
                                 { "source_node": 7, "source_pin": 0, "target_node": 4, "target_pin": 2 },
                                 { "source_node": 8, "source_pin": 0, "target_node": 4, "target_pin": 3 },
-                                { "source_node": 4, "source_pin": 0, "target_node": 9, "target_pin": 0 },
+                                { "source_node": 4, "source_pin": 0, "target_node": 9, "target_pin": 0, "name": "ball" },
                                 { "source_node": 10, "source_pin": 0, "target_node": 9, "target_pin": 1 },
                                 { "source_node": 12, "source_pin": 0, "target_node": 11, "target_pin": 0 },
                                 { "source_node": 13, "source_pin": 0, "target_node": 11, "target_pin": 1 },
-                                { "source_node": 11, "source_pin": 0, "target_node": 14, "target_pin": 0 },
-                                { "source_node": 9, "source_pin": 0, "target_node": 14, "target_pin": 1 }
+                                { "source_node": 11, "source_pin": 0, "target_node": 14, "target_pin": 0, "name": "canvas" },
+                                { "source_node": 9, "source_pin": 0, "target_node": 14, "target_pin": 1, "name": "green ball" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 15
@@ -499,16 +500,16 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Hello" } },
-                                { "id": 3, "type": "primitive", "name": "length", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
-                                { "id": 5, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Hello" }, "output_names": ["str"] },
+                                { "id": 3, "type": "primitive", "name": "length", "num_inputs": 1, "num_outputs": 1, "input_names": ["str"], "output_names": ["len"] },
+                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
+                                { "id": 5, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 6, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 },
-                                { "source_node": 2, "source_pin": 0, "target_node": 4, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 5, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "str" },
+                                { "source_node": 2, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "str" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 5, "target_pin": 0, "name": "len" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 6
@@ -539,14 +540,14 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "the quick brown fox jumps" } },
-                                { "id": 3, "type": "primitive", "name": "length", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "the quick brown fox jumps" }, "output_names": ["text"] },
+                                { "id": 3, "type": "primitive", "name": "length", "num_inputs": 1, "num_outputs": 1, "input_names": ["str"], "output_names": ["len"] },
+                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 5, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "text" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "count" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 5
@@ -589,23 +590,23 @@ struct ExampleCatalog {
                                 { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 5 } },
                                 { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 } },
                                 { "id": 4, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 3 } },
-                                { "id": 5, "type": "primitive", "name": "append", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 6, "type": "primitive", "name": "append", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 7, "type": "primitive", "name": "sort", "num_inputs": 1, "num_outputs": 1 },
+                                { "id": 5, "type": "primitive", "name": "append", "num_inputs": 2, "num_outputs": 1, "input_names": ["list", "elem"], "output_names": ["list"] },
+                                { "id": 6, "type": "primitive", "name": "append", "num_inputs": 2, "num_outputs": 1, "input_names": ["list", "elem"], "output_names": ["list"] },
+                                { "id": 7, "type": "primitive", "name": "sort", "num_inputs": 1, "num_outputs": 1, "input_names": ["list"], "output_names": ["sorted"] },
                                 { "id": 8, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 0 } },
-                                { "id": 9, "type": "primitive", "name": "get-nth", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 10, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 9, "type": "primitive", "name": "get-nth", "num_inputs": 2, "num_outputs": 1, "input_names": ["list", "idx"], "output_names": ["elem"] },
+                                { "id": 10, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 11, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
                                 { "source_node": 2, "source_pin": 0, "target_node": 5, "target_pin": 0 },
                                 { "source_node": 3, "source_pin": 0, "target_node": 5, "target_pin": 1 },
-                                { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 0 },
+                                { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "(5,1)" },
                                 { "source_node": 4, "source_pin": 0, "target_node": 6, "target_pin": 1 },
-                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 0 },
-                                { "source_node": 7, "source_pin": 0, "target_node": 9, "target_pin": 0 },
+                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "(5,1,3)" },
+                                { "source_node": 7, "source_pin": 0, "target_node": 9, "target_pin": 0, "name": "sorted" },
                                 { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 1 },
-                                { "source_node": 9, "source_pin": 0, "target_node": 10, "target_pin": 0 }
+                                { "source_node": 9, "source_pin": 0, "target_node": 10, "target_pin": 0, "name": "first" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 11
@@ -636,28 +637,28 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "primitive", "name": "dict-create", "num_inputs": 0, "num_outputs": 1 },
+                                { "id": 2, "type": "primitive", "name": "dict-create", "num_inputs": 0, "num_outputs": 1, "output_names": ["dict"] },
                                 { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Alice" } },
                                 { "id": 4, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "555-1234" } },
-                                { "id": 5, "type": "primitive", "name": "dict-set", "num_inputs": 3, "num_outputs": 1 },
+                                { "id": 5, "type": "primitive", "name": "dict-set", "num_inputs": 3, "num_outputs": 1, "input_names": ["dict", "key", "val"], "output_names": ["dict"] },
                                 { "id": 6, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Bob" } },
                                 { "id": 7, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "555-5678" } },
-                                { "id": 8, "type": "primitive", "name": "dict-set", "num_inputs": 3, "num_outputs": 1 },
-                                { "id": 9, "type": "primitive", "name": "dict-get", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 8, "type": "primitive", "name": "dict-set", "num_inputs": 3, "num_outputs": 1, "input_names": ["dict", "key", "val"], "output_names": ["dict"] },
+                                { "id": 9, "type": "primitive", "name": "dict-get", "num_inputs": 2, "num_outputs": 1, "input_names": ["dict", "key"], "output_names": ["val"] },
                                 { "id": 10, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Alice" } },
-                                { "id": 11, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 11, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 12, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 5, "target_pin": 0 },
+                                { "source_node": 2, "source_pin": 0, "target_node": 5, "target_pin": 0, "name": "empty" },
                                 { "source_node": 3, "source_pin": 0, "target_node": 5, "target_pin": 1 },
                                 { "source_node": 4, "source_pin": 0, "target_node": 5, "target_pin": 2 },
-                                { "source_node": 5, "source_pin": 0, "target_node": 8, "target_pin": 0 },
+                                { "source_node": 5, "source_pin": 0, "target_node": 8, "target_pin": 0, "name": "+Alice" },
                                 { "source_node": 6, "source_pin": 0, "target_node": 8, "target_pin": 1 },
                                 { "source_node": 7, "source_pin": 0, "target_node": 8, "target_pin": 2 },
-                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 0 },
+                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 0, "name": "phonebook" },
                                 { "source_node": 10, "source_pin": 0, "target_node": 9, "target_pin": 1 },
-                                { "source_node": 9, "source_pin": 0, "target_node": 11, "target_pin": 0 }
+                                { "source_node": 9, "source_pin": 0, "target_node": 11, "target_pin": 0, "name": "number" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 12
@@ -697,27 +698,27 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "primitive", "name": "shape-rect", "num_inputs": 4, "num_outputs": 1 },
+                                { "id": 2, "type": "primitive", "name": "shape-rect", "num_inputs": 4, "num_outputs": 1, "input_names": ["x", "y", "w", "h"], "output_names": ["shape"] },
                                 { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 10 } },
                                 { "id": 4, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 100 } },
                                 { "id": 5, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 15 } },
                                 { "id": 6, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 80 } },
-                                { "id": 7, "type": "primitive", "name": "shape-oval", "num_inputs": 4, "num_outputs": 1 },
+                                { "id": 7, "type": "primitive", "name": "shape-oval", "num_inputs": 4, "num_outputs": 1, "input_names": ["x", "y", "w", "h"], "output_names": ["shape"] },
                                 { "id": 8, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 200 } },
                                 { "id": 9, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 150 } },
                                 { "id": 10, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 20 } },
                                 { "id": 11, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 20 } },
-                                { "id": 12, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 12, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1, "input_names": ["shape", "color"], "output_names": ["shape"] },
                                 { "id": 13, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "white" } },
-                                { "id": 14, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 14, "type": "primitive", "name": "shape-set-fill", "num_inputs": 2, "num_outputs": 1, "input_names": ["shape", "color"], "output_names": ["shape"] },
                                 { "id": 15, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "white" } },
-                                { "id": 16, "type": "primitive", "name": "shape-group", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 17, "type": "primitive", "name": "create-canvas", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 16, "type": "primitive", "name": "shape-group", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["group"] },
+                                { "id": 17, "type": "primitive", "name": "create-canvas", "num_inputs": 2, "num_outputs": 1, "input_names": ["w", "h"], "output_names": ["canvas"] },
                                 { "id": 18, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 400 } },
                                 { "id": 19, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 300 } },
-                                { "id": 20, "type": "primitive", "name": "canvas-render", "num_inputs": 2, "num_outputs": 0 },
+                                { "id": 20, "type": "primitive", "name": "canvas-render", "num_inputs": 2, "num_outputs": 0, "input_names": ["canvas", "scene"] },
                                 { "id": 21, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "Pong - timer + input not yet available" } },
-                                { "id": 22, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 22, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["msg"] },
                                 { "id": 23, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
@@ -729,16 +730,16 @@ struct ExampleCatalog {
                                 { "source_node": 9, "source_pin": 0, "target_node": 7, "target_pin": 1 },
                                 { "source_node": 10, "source_pin": 0, "target_node": 7, "target_pin": 2 },
                                 { "source_node": 11, "source_pin": 0, "target_node": 7, "target_pin": 3 },
-                                { "source_node": 2, "source_pin": 0, "target_node": 12, "target_pin": 0 },
+                                { "source_node": 2, "source_pin": 0, "target_node": 12, "target_pin": 0, "name": "paddle" },
                                 { "source_node": 13, "source_pin": 0, "target_node": 12, "target_pin": 1 },
-                                { "source_node": 7, "source_pin": 0, "target_node": 14, "target_pin": 0 },
+                                { "source_node": 7, "source_pin": 0, "target_node": 14, "target_pin": 0, "name": "ball" },
                                 { "source_node": 15, "source_pin": 0, "target_node": 14, "target_pin": 1 },
-                                { "source_node": 12, "source_pin": 0, "target_node": 16, "target_pin": 0 },
-                                { "source_node": 14, "source_pin": 0, "target_node": 16, "target_pin": 1 },
+                                { "source_node": 12, "source_pin": 0, "target_node": 16, "target_pin": 0, "name": "paddle" },
+                                { "source_node": 14, "source_pin": 0, "target_node": 16, "target_pin": 1, "name": "ball" },
                                 { "source_node": 18, "source_pin": 0, "target_node": 17, "target_pin": 0 },
                                 { "source_node": 19, "source_pin": 0, "target_node": 17, "target_pin": 1 },
-                                { "source_node": 17, "source_pin": 0, "target_node": 20, "target_pin": 0 },
-                                { "source_node": 16, "source_pin": 0, "target_node": 20, "target_pin": 1 },
+                                { "source_node": 17, "source_pin": 0, "target_node": 20, "target_pin": 0, "name": "canvas" },
+                                { "source_node": 16, "source_pin": 0, "target_node": 20, "target_pin": 1, "name": "scene" },
                                 { "source_node": 21, "source_pin": 0, "target_node": 22, "target_pin": 0 }
                               ],
                               "input_bar_id": 1,
@@ -779,24 +780,24 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "user@example.com" } },
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "user@example.com" }, "output_names": ["email"] },
                                 { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "@" } },
-                                { "id": 4, "type": "primitive", "name": "concat", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 5, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
-                                { "id": 6, "type": "primitive", "name": "length", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 7, "type": "primitive", "name": ">", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 4, "type": "primitive", "name": "concat", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["joined"] },
+                                { "id": 5, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
+                                { "id": 6, "type": "primitive", "name": "length", "num_inputs": 1, "num_outputs": 1, "input_names": ["str"], "output_names": ["len"] },
+                                { "id": 7, "type": "primitive", "name": ">", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["result"] },
                                 { "id": 8, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 5 } },
-                                { "id": 9, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 9, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 10, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 4, "target_pin": 0 },
+                                { "source_node": 2, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "email" },
                                 { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 1 },
-                                { "source_node": 4, "source_pin": 0, "target_node": 5, "target_pin": 0 },
-                                { "source_node": 2, "source_pin": 0, "target_node": 6, "target_pin": 0 },
-                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 0 },
+                                { "source_node": 4, "source_pin": 0, "target_node": 5, "target_pin": 0, "name": "joined" },
+                                { "source_node": 2, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "email" },
+                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "len" },
                                 { "source_node": 8, "source_pin": 0, "target_node": 7, "target_pin": 1 },
-                                { "source_node": 7, "source_pin": 0, "target_node": 9, "target_pin": 0 }
+                                { "source_node": 7, "source_pin": 0, "target_node": 9, "target_pin": 0, "name": "valid?" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 10
@@ -827,20 +828,20 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "myP@ss123" } },
-                                { "id": 3, "type": "primitive", "name": "length", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": ">=", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "myP@ss123" }, "output_names": ["pw"] },
+                                { "id": 3, "type": "primitive", "name": "length", "num_inputs": 1, "num_outputs": 1, "input_names": ["str"], "output_names": ["len"] },
+                                { "id": 4, "type": "primitive", "name": ">=", "num_inputs": 2, "num_outputs": 1, "input_names": ["a", "b"], "output_names": ["ok?"] },
                                 { "id": 5, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 8 } },
-                                { "id": 6, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
-                                { "id": 7, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 6, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
+                                { "id": 7, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 8, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 },
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "pw" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "len" },
                                 { "source_node": 5, "source_pin": 0, "target_node": 4, "target_pin": 1 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 6, "target_pin": 0 },
-                                { "source_node": 4, "source_pin": 0, "target_node": 7, "target_pin": 0 }
+                                { "source_node": 3, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "len" },
+                                { "source_node": 4, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "strong?" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 8
@@ -880,12 +881,12 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "HTTP GET - networking primitives not yet available" } },
-                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "HTTP GET - networking primitives not yet available" }, "output_names": ["msg"] },
+                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["msg"] },
                                 { "id": 4, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "msg" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 4
@@ -916,12 +917,12 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "JSON Parse - parsing primitives not yet available" } },
-                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "string", "value": "JSON Parse - parsing primitives not yet available" }, "output_names": ["msg"] },
+                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["msg"] },
                                 { "id": 4, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "msg" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 4
@@ -960,14 +961,14 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "value": 10, "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 3, "type": "primitive", "name": "fibonacci", "library": "math", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "value": 10, "num_inputs": 0, "num_outputs": 1, "output_names": ["n"] },
+                                { "id": 3, "type": "primitive", "name": "fibonacci", "library": "math", "num_inputs": 1, "num_outputs": 1, "input_names": ["n"], "output_names": ["result"] },
+                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 5, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "n" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "fib(10)" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 5
@@ -997,14 +998,14 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "value": 97, "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 3, "type": "primitive", "name": "is-prime", "library": "math", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "value": 97, "num_inputs": 0, "num_outputs": 1, "output_names": ["n"] },
+                                { "id": 3, "type": "primitive", "name": "is-prime", "library": "math", "num_inputs": 1, "num_outputs": 1, "input_names": ["n"], "output_names": ["prime?"] },
+                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 5, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "97" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "prime?" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 5
@@ -1034,14 +1035,14 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "value": "Hello, Phograph!", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 3, "type": "primitive", "name": "sha256", "library": "crypto", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "value": "Hello, Phograph!", "num_inputs": 0, "num_outputs": 1, "output_names": ["text"] },
+                                { "id": 3, "type": "primitive", "name": "sha256", "library": "crypto", "num_inputs": 1, "num_outputs": 1, "input_names": ["data"], "output_names": ["hash"] },
+                                { "id": 4, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 5, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "text" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "hash" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 5
@@ -1071,12 +1072,12 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "primitive", "name": "uuid", "library": "crypto", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "primitive", "name": "uuid", "library": "crypto", "num_inputs": 0, "num_outputs": 1, "output_names": ["uuid"] },
+                                { "id": 3, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 4, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 3, "target_pin": 0, "name": "uuid" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 4
@@ -1106,18 +1107,18 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "value": "/tmp/phograph_test.txt", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 3, "type": "constant", "value": "Hello from Phograph!", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": "file-write-text", "library": "fileio", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 5, "type": "primitive", "name": "file-read-text", "library": "fileio", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 6, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "value": "/tmp/phograph_test.txt", "num_inputs": 0, "num_outputs": 1, "output_names": ["path"] },
+                                { "id": 3, "type": "constant", "value": "Hello from Phograph!", "num_inputs": 0, "num_outputs": 1, "output_names": ["text"] },
+                                { "id": 4, "type": "primitive", "name": "file-write-text", "library": "fileio", "num_inputs": 2, "num_outputs": 1, "input_names": ["path", "text"], "output_names": ["ok"] },
+                                { "id": 5, "type": "primitive", "name": "file-read-text", "library": "fileio", "num_inputs": 1, "num_outputs": 1, "input_names": ["path"], "output_names": ["text"] },
+                                { "id": 6, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 7, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 4, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 1 },
-                                { "source_node": 2, "source_pin": 0, "target_node": 5, "target_pin": 0 },
-                                { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 4, "target_pin": 0, "name": "path" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 1, "name": "text" },
+                                { "source_node": 2, "source_pin": 0, "target_node": 5, "target_pin": 0, "name": "path" },
+                                { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "contents" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 7
@@ -1147,18 +1148,18 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "primitive", "name": "locale-language", "library": "locale", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 3, "type": "primitive", "name": "locale-country", "library": "locale", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": "locale-timezone", "library": "locale", "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 5, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
-                                { "id": 6, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
-                                { "id": 7, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "primitive", "name": "locale-language", "library": "locale", "num_inputs": 0, "num_outputs": 1, "output_names": ["lang"] },
+                                { "id": 3, "type": "primitive", "name": "locale-country", "library": "locale", "num_inputs": 0, "num_outputs": 1, "output_names": ["country"] },
+                                { "id": 4, "type": "primitive", "name": "locale-timezone", "library": "locale", "num_inputs": 0, "num_outputs": 1, "output_names": ["tz"] },
+                                { "id": 5, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
+                                { "id": 6, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
+                                { "id": 7, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 8, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 5, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 6, "target_pin": 0 },
-                                { "source_node": 4, "source_pin": 0, "target_node": 7, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 5, "target_pin": 0, "name": "lang" },
+                                { "source_node": 3, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "country" },
+                                { "source_node": 4, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "tz" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 8
@@ -1188,14 +1189,14 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "value": 44100, "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 3, "type": "constant", "value": false, "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 4, "type": "primitive", "name": "sound-init", "library": "sound", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 5, "type": "constant", "value": 440.0, "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 6, "type": "constant", "value": 1.0, "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 7, "type": "primitive", "name": "tone-sine", "library": "sound", "num_inputs": 3, "num_outputs": 1 },
-                                { "id": 8, "type": "primitive", "name": "sound-play", "library": "sound", "num_inputs": 1, "num_outputs": 1 },
-                                { "id": 9, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 2, "type": "constant", "value": 44100, "num_inputs": 0, "num_outputs": 1, "output_names": ["rate"] },
+                                { "id": 3, "type": "constant", "value": false, "num_inputs": 0, "num_outputs": 1, "output_names": ["stereo"] },
+                                { "id": 4, "type": "primitive", "name": "sound-init", "library": "sound", "num_inputs": 2, "num_outputs": 1, "input_names": ["rate", "stereo"], "output_names": ["ctx"] },
+                                { "id": 5, "type": "constant", "value": 440.0, "num_inputs": 0, "num_outputs": 1, "output_names": ["freq"] },
+                                { "id": 6, "type": "constant", "value": 1.0, "num_inputs": 0, "num_outputs": 1, "output_names": ["dur"] },
+                                { "id": 7, "type": "primitive", "name": "tone-sine", "library": "sound", "num_inputs": 3, "num_outputs": 1, "input_names": ["freq", "dur", "rate"], "output_names": ["buf"] },
+                                { "id": 8, "type": "primitive", "name": "sound-play", "library": "sound", "num_inputs": 1, "num_outputs": 1, "input_names": ["buf"], "output_names": ["ok"] },
+                                { "id": 9, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 10, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
@@ -1203,9 +1204,9 @@ struct ExampleCatalog {
                                 { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 1 },
                                 { "source_node": 5, "source_pin": 0, "target_node": 7, "target_pin": 0 },
                                 { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 1 },
-                                { "source_node": 2, "source_pin": 0, "target_node": 7, "target_pin": 2 },
-                                { "source_node": 7, "source_pin": 0, "target_node": 8, "target_pin": 0 },
-                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 0 }
+                                { "source_node": 2, "source_pin": 0, "target_node": 7, "target_pin": 2, "name": "rate" },
+                                { "source_node": 7, "source_pin": 0, "target_node": 8, "target_pin": 0, "name": "audio" },
+                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 0, "name": "ok" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 10
@@ -1235,13 +1236,13 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "value": 100, "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 3, "type": "primitive", "name": "bitmap-create", "library": "bitmap", "num_inputs": 2, "num_outputs": 1 },
+                                { "id": 2, "type": "constant", "value": 100, "num_inputs": 0, "num_outputs": 1, "output_names": ["size"] },
+                                { "id": 3, "type": "primitive", "name": "bitmap-create", "library": "bitmap", "num_inputs": 2, "num_outputs": 1, "input_names": ["w", "h"], "output_names": ["bmp"] },
                                 { "id": 4, "type": "constant", "value": 255, "num_inputs": 0, "num_outputs": 1 },
                                 { "id": 5, "type": "constant", "value": 0, "num_inputs": 0, "num_outputs": 1 },
-                                { "id": 6, "type": "primitive", "name": "color-rgb", "library": "bitmap", "num_inputs": 3, "num_outputs": 1 },
-                                { "id": 7, "type": "primitive", "name": "bitmap-fill", "library": "bitmap", "num_inputs": 2, "num_outputs": 1 },
-                                { "id": 8, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0 },
+                                { "id": 6, "type": "primitive", "name": "color-rgb", "library": "bitmap", "num_inputs": 3, "num_outputs": 1, "input_names": ["r", "g", "b"], "output_names": ["color"] },
+                                { "id": 7, "type": "primitive", "name": "bitmap-fill", "library": "bitmap", "num_inputs": 2, "num_outputs": 1, "input_names": ["bmp", "color"], "output_names": ["bmp"] },
+                                { "id": 8, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
                                 { "id": 9, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
                               ],
                               "wires": [
@@ -1250,9 +1251,9 @@ struct ExampleCatalog {
                                 { "source_node": 4, "source_pin": 0, "target_node": 6, "target_pin": 0 },
                                 { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 1 },
                                 { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 2 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 7, "target_pin": 0 },
-                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 1 },
-                                { "source_node": 7, "source_pin": 0, "target_node": 8, "target_pin": 0 }
+                                { "source_node": 3, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "bitmap" },
+                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 1, "name": "red" },
+                                { "source_node": 7, "source_pin": 0, "target_node": 8, "target_pin": 0, "name": "filled" }
                               ],
                               "input_bar_id": 1,
                               "output_bar_id": 9

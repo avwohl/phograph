@@ -68,7 +68,7 @@ struct PhographApp: App {
                     viewModel.deleteSelected()
                 }
                 .keyboardShortcut(.delete, modifiers: [])
-                .disabled(viewModel.currentGraph?.selectedNodeIds.isEmpty ?? true)
+                .disabled((viewModel.currentGraph?.selectedNodeIds.isEmpty ?? true) && (viewModel.currentGraph?.selectedWireIds.isEmpty ?? true))
 
                 Button("Select All") {
                     viewModel.selectAll()

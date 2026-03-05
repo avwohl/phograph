@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Language Reference - Phograph</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="./">Phograph Docs</a>
+  <a href="./">Home</a>
+  <a href="guide.html">IDE Guide</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Language Reference</h1>
+
+<p>
+Phograph is a visual, object-oriented, dataflow programming language
+descended from Prograph. This reference covers its core concepts, data
+types, primitives, and control flow.
+</p>
+
+<h2>Contents</h2>
+
+<ul>
+  <li><a href="#dataflow">Dataflow Model</a></li>
+  <li><a href="#structure">Program Structure</a></li>
+  <li><a href="#types">Data Types</a></li>
+  <li><a href="#nodes">Node Types</a></li>
+  <li><a href="#primitives">Primitives Reference</a></li>
+  <li><a href="#control">Control Flow</a></li>
+  <li><a href="#loops">Loops and List Annotations</a></li>
+  <li><a href="#classes">Classes and Objects</a></li>
+  <li><a href="#errors">Error Handling</a></li>
+  <li><a href="#async">Concurrency and Async</a></li>
+</ul>
+
+<!-- ===== DATAFLOW ===== -->
+
+<h2 id="dataflow">Dataflow Model</h2>
+
+<p>
+Data flows <strong>from top to bottom</strong> through a directed acyclic
+graph of operation nodes. A node executes when <em>all its input data is
+available</em> (data-driven firing rule). Execution order depends solely on
+data dependencies, not spatial position.
+</p>
+
+<p>Phograph has two kinds of wires:</p>
+
+<ul>
+  <li><strong>Data wires</strong> (solid lines) &mdash; carry values between nodes.</li>
+  <li><strong>Execution wires</strong> (dashed lines) &mdash; enforce ordering
+      for side-effecting operations.</li>
+</ul>
+
+<p>
+A node with an execution-in pin fires only after the upstream execution wire
+has triggered, even if all data inputs are already available. Execution wires
+are optional &mdash; pure-dataflow graphs need none.
+</p>
+
+<!-- ===== STRUCTURE ===== -->
+
+<h2 id="structure">Program Structure</h2>
+
+<p>
+A <strong>Project</strong> contains one or more <strong>Sections</strong>.
+Each section has three compartments:
+</p>
+
+<ul>
+  <li><strong>Classes</strong> &mdash; object-oriented code and data</li>
+  <li><strong>Universal Methods</strong> &mdash; standalone functions</li>
+  <li><strong>Persistents</strong> &mdash; global persistent variables</li>
+</ul>
+
+<h3>Methods and Cases</h3>
+
+<p>
+A <strong>method</strong> has one or more <strong>cases</strong>. Each case
+is a separate dataflow graph with an <strong>input bar</strong> (parameters)
+and an <strong>output bar</strong> (return values). When a method is called,
+case 1 runs first. If a control annotation triggers &ldquo;next case,&rdquo;
+case 2 runs, and so on.
+</p>
+
+<p>
+Every method has a defined <strong>arity</strong> &mdash; a fixed number of
+inputs and outputs. Inputs can be marked <strong>optional</strong> (with a
+default value) or <strong>variadic</strong> (collects into a list).
+</p>
+
+<!-- ===== TYPES ===== -->
+
+<h2 id="types">Data Types</h2>
+
+<p>Phograph has thirteen data types:</p>
+
+<table>
+  <tr><th>Type</th><th>Description</th></tr>
+  <tr><td><strong>Integer</strong></td><td>64-bit signed whole numbers</td></tr>
+  <tr><td><strong>Real</strong></td><td>64-bit IEEE 754 floating point</td></tr>
+  <tr><td><strong>String</strong></td><td>UTF-8 text</td></tr>
+  <tr><td><strong>Boolean</strong></td><td><code>true</code> / <code>false</code></td></tr>
+  <tr><td><strong>List</strong></td><td>Ordered, mixed-type collection (1-indexed)</td></tr>
+  <tr><td><strong>Dict</strong></td><td>Key-value map (keys must be hashable)</td></tr>
+  <tr><td><strong>Data</strong></td><td>Raw binary byte buffer</td></tr>
+  <tr><td><strong>Date</strong></td><td>Point in time with nanosecond precision</td></tr>
+  <tr><td><strong>Object</strong></td><td>Instance of a user-defined class</td></tr>
+  <tr><td><strong>External</strong></td><td>Opaque reference to a platform resource</td></tr>
+  <tr><td><strong>Error</strong></td><td>Error with message, code, and details</td></tr>
+  <tr><td><strong>Enum</strong></td><td>Enum value with optional associated data</td></tr>
+  <tr><td><strong>Null</strong></td><td>The single &ldquo;nothing&rdquo; value</td></tr>
+</table>
+
+<p>
+Phograph is <strong>dynamically typed</strong>. Types are checked at runtime.
+Optional type annotations can be added to pins for documentation and validation.
+</p>
+
+<p>
+Lists are <strong>1-indexed</strong> (the first element is at position 1),
+following the original Prograph convention.
+</p>
+
+<!-- ===== NODES ===== -->
+
+<h2 id="nodes">Node Types</h2>
+
+<table>
+  <tr><th>Type</th><th>Appearance</th><th>Description</th></tr>
+  <tr><td>Primitive</td><td>Rectangle with bottom line</td><td>Built-in operation</td></tr>
+  <tr><td>Universal method</td><td>Rectangle with name</td><td>Call to a standalone method</td></tr>
+  <tr><td>Local method</td><td>Rectangle with side lines</td><td>Grouped operations within a parent method</td></tr>
+  <tr><td>Instance generator</td><td>Octagon</td><td>Creates a new object</td></tr>
+  <tr><td>Constant</td><td>Horizontal line with value</td><td>Supplies a fixed value</td></tr>
+  <tr><td>Get</td><td>Special icon</td><td>Reads an attribute from an object</td></tr>
+  <tr><td>Set</td><td>Special icon</td><td>Writes an attribute on an object</td></tr>
+  <tr><td>Persistent</td><td>Oval</td><td>Accesses a global variable</td></tr>
+  <tr><td>Evaluation</td><td>Rectangle with expression</td><td>Inline formula</td></tr>
+  <tr><td>Inject</td><td>Rectangle with inject pin</td><td>Dynamic dispatch by name</td></tr>
+</table>
+
+<p>
+Nodes have <strong>input pins</strong> at the top and <strong>output
+pins</strong> at the bottom. Pin shapes indicate type compatibility: circles
+for scalars, hexagons for booleans, squares for collections, diamonds for
+optionals, pentagons for objects, triangles for execution flow.
+</p>
+
+<!-- ===== PRIMITIVES ===== -->
+
+<h2 id="primitives">Primitives Reference</h2>
+
+<h3>Arithmetic</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>+</code></td><td>a, b</td><td>sum</td><td>Addition</td></tr>
+  <tr><td><code>-</code></td><td>a, b</td><td>difference</td><td>Subtraction</td></tr>
+  <tr><td><code>*</code></td><td>a, b</td><td>product</td><td>Multiplication</td></tr>
+  <tr><td><code>/</code></td><td>a, b</td><td>quotient</td><td>Division</td></tr>
+  <tr><td><code>mod</code></td><td>a, b</td><td>remainder</td><td>Modulo</td></tr>
+  <tr><td><code>abs</code></td><td>n</td><td>|n|</td><td>Absolute value</td></tr>
+  <tr><td><code>round</code></td><td>n</td><td>rounded</td><td>Round to nearest integer</td></tr>
+  <tr><td><code>floor</code></td><td>n</td><td>floor</td><td>Floor</td></tr>
+  <tr><td><code>ceiling</code></td><td>n</td><td>ceiling</td><td>Ceiling</td></tr>
+  <tr><td><code>sqrt</code></td><td>n</td><td>root</td><td>Square root</td></tr>
+  <tr><td><code>power</code></td><td>base, exp</td><td>result</td><td>Exponentiation</td></tr>
+  <tr><td><code>min</code></td><td>a, b</td><td>minimum</td><td>Minimum of two</td></tr>
+  <tr><td><code>max</code></td><td>a, b</td><td>maximum</td><td>Maximum of two</td></tr>
+  <tr><td><code>clamp</code></td><td>val, lo, hi</td><td>clamped</td><td>Clamp to range</td></tr>
+  <tr><td><code>pi</code></td><td>&mdash;</td><td>3.14&hellip;</td><td>Pi constant</td></tr>
+  <tr><td><code>sin</code></td><td>rad</td><td>sine</td><td>Sine</td></tr>
+  <tr><td><code>cos</code></td><td>rad</td><td>cosine</td><td>Cosine</td></tr>
+  <tr><td><code>tan</code></td><td>rad</td><td>tangent</td><td>Tangent</td></tr>
+  <tr><td><code>ln</code></td><td>n</td><td>log</td><td>Natural logarithm</td></tr>
+  <tr><td><code>log10</code></td><td>n</td><td>log</td><td>Base-10 logarithm</td></tr>
+  <tr><td><code>rand</code></td><td>&mdash;</td><td>real</td><td>Random number [0, 1)</td></tr>
+</table>
+
+<h3>Comparison</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>=</code></td><td>a, b</td><td>boolean</td><td>Equality</td></tr>
+  <tr><td><code>!=</code></td><td>a, b</td><td>boolean</td><td>Not equal</td></tr>
+  <tr><td><code>&lt;</code></td><td>a, b</td><td>boolean</td><td>Less than</td></tr>
+  <tr><td><code>&gt;</code></td><td>a, b</td><td>boolean</td><td>Greater than</td></tr>
+  <tr><td><code>&lt;=</code></td><td>a, b</td><td>boolean</td><td>Less than or equal</td></tr>
+  <tr><td><code>&gt;=</code></td><td>a, b</td><td>boolean</td><td>Greater than or equal</td></tr>
+</table>
+
+<h3>Logic</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>and</code></td><td>a, b</td><td>boolean</td><td>Logical AND</td></tr>
+  <tr><td><code>or</code></td><td>a, b</td><td>boolean</td><td>Logical OR</td></tr>
+  <tr><td><code>not</code></td><td>a</td><td>boolean</td><td>Logical NOT</td></tr>
+</table>
+
+<h3>String</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>concat</code></td><td>a, b</td><td>string</td><td>Join two strings</td></tr>
+  <tr><td><code>length</code></td><td>string</td><td>integer</td><td>Number of characters</td></tr>
+  <tr><td><code>to-string</code></td><td>any</td><td>string</td><td>Convert to text</td></tr>
+  <tr><td><code>split</code></td><td>string, sep</td><td>list</td><td>Split by separator</td></tr>
+  <tr><td><code>trim</code></td><td>string</td><td>string</td><td>Strip whitespace</td></tr>
+  <tr><td><code>replace</code></td><td>str, old, new</td><td>string</td><td>Replace all occurrences</td></tr>
+  <tr><td><code>uppercase</code></td><td>string</td><td>string</td><td>Convert to uppercase</td></tr>
+  <tr><td><code>lowercase</code></td><td>string</td><td>string</td><td>Convert to lowercase</td></tr>
+  <tr><td><code>string-contains?</code></td><td>str, sub</td><td>boolean</td><td>Test if contains substring</td></tr>
+  <tr><td><code>string-starts-with?</code></td><td>str, prefix</td><td>boolean</td><td>Test prefix</td></tr>
+  <tr><td><code>string-ends-with?</code></td><td>str, suffix</td><td>boolean</td><td>Test suffix</td></tr>
+  <tr><td><code>char-at</code></td><td>str, index</td><td>string</td><td>Character at position (1-indexed)</td></tr>
+</table>
+
+<h3>List</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>get-nth</code></td><td>list, index</td><td>element</td><td>Get element (1-indexed)</td></tr>
+  <tr><td><code>set-nth</code></td><td>list, idx, val</td><td>list</td><td>Set element (returns new list)</td></tr>
+  <tr><td><code>append</code></td><td>list, element</td><td>list</td><td>Add element to end</td></tr>
+  <tr><td><code>length</code></td><td>list</td><td>integer</td><td>Number of elements</td></tr>
+  <tr><td><code>first</code></td><td>list</td><td>element</td><td>First element</td></tr>
+  <tr><td><code>rest</code></td><td>list</td><td>list</td><td>All but first element</td></tr>
+  <tr><td><code>sort</code></td><td>list</td><td>list</td><td>Sort ascending</td></tr>
+  <tr><td><code>reverse</code></td><td>list</td><td>list</td><td>Reverse order</td></tr>
+  <tr><td><code>empty?</code></td><td>list</td><td>boolean</td><td>True if empty</td></tr>
+  <tr><td><code>contains?</code></td><td>list, elem</td><td>boolean</td><td>Test membership</td></tr>
+  <tr><td><code>map</code></td><td>list, method-ref</td><td>list</td><td>Apply to each element</td></tr>
+  <tr><td><code>filter</code></td><td>list, method-ref</td><td>list</td><td>Keep matching elements</td></tr>
+  <tr><td><code>reduce</code></td><td>list, init, method-ref</td><td>value</td><td>Fold/reduce</td></tr>
+  <tr><td><code>zip</code></td><td>list1, list2</td><td>pairs</td><td>Combine element-wise</td></tr>
+  <tr><td><code>unique</code></td><td>list</td><td>list</td><td>Remove duplicates</td></tr>
+</table>
+
+<h3>Dict</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>dict-create</code></td><td>&mdash;</td><td>dict</td><td>Empty dict</td></tr>
+  <tr><td><code>dict-get</code></td><td>dict, key</td><td>value</td><td>Get value (fails if absent)</td></tr>
+  <tr><td><code>dict-set</code></td><td>dict, key, val</td><td>dict</td><td>Set key (returns new dict)</td></tr>
+  <tr><td><code>dict-remove</code></td><td>dict, key</td><td>dict</td><td>Remove key</td></tr>
+  <tr><td><code>dict-has?</code></td><td>dict, key</td><td>boolean</td><td>Check if key exists</td></tr>
+  <tr><td><code>dict-keys</code></td><td>dict</td><td>list</td><td>All keys</td></tr>
+  <tr><td><code>dict-values</code></td><td>dict</td><td>list</td><td>All values</td></tr>
+  <tr><td><code>dict-size</code></td><td>dict</td><td>integer</td><td>Number of entries</td></tr>
+  <tr><td><code>dict-merge</code></td><td>d1, d2</td><td>dict</td><td>Merge (d2 wins on conflict)</td></tr>
+</table>
+
+<h3>Console / Debug</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>log</code></td><td>value(s)</td><td>&mdash;</td><td>Print to console</td></tr>
+  <tr><td><code>inspect</code></td><td>value</td><td>value</td><td>Print and pass through</td></tr>
+  <tr><td><code>breakpoint</code></td><td>&mdash;</td><td>&mdash;</td><td>Pause if debugger attached</td></tr>
+</table>
+
+<h3>Type Checking</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>type-of</code></td><td>value</td><td>string</td><td>Type name</td></tr>
+  <tr><td><code>integer?</code></td><td>value</td><td>boolean</td><td>Is integer?</td></tr>
+  <tr><td><code>real?</code></td><td>value</td><td>boolean</td><td>Is real?</td></tr>
+  <tr><td><code>string?</code></td><td>value</td><td>boolean</td><td>Is string?</td></tr>
+  <tr><td><code>list?</code></td><td>value</td><td>boolean</td><td>Is list?</td></tr>
+  <tr><td><code>null?</code></td><td>value</td><td>boolean</td><td>Is null?</td></tr>
+  <tr><td><code>error?</code></td><td>value</td><td>boolean</td><td>Is error?</td></tr>
+  <tr><td><code>class-of</code></td><td>object</td><td>string</td><td>Class name</td></tr>
+  <tr><td><code>instance-of?</code></td><td>obj, class</td><td>boolean</td><td>Is instance of class?</td></tr>
+</table>
+
+<h3>Networking</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>http-get</code></td><td>url</td><td>response</td><td>Async HTTP GET</td></tr>
+  <tr><td><code>http-post</code></td><td>url, body, type</td><td>response</td><td>Async HTTP POST</td></tr>
+  <tr><td><code>json-parse</code></td><td>string</td><td>value</td><td>Parse JSON</td></tr>
+  <tr><td><code>json-encode</code></td><td>value</td><td>string</td><td>Encode as JSON</td></tr>
+</table>
+
+<h3>Date/Time</h3>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>date-now</code></td><td>&mdash;</td><td>date</td><td>Current date/time</td></tr>
+  <tr><td><code>date-create</code></td><td>y, m, d, h, m, s</td><td>date</td><td>Create from components</td></tr>
+  <tr><td><code>date-format</code></td><td>date, fmt</td><td>string</td><td>Format as string</td></tr>
+  <tr><td><code>date-diff</code></td><td>d1, d2</td><td>real</td><td>Difference in seconds</td></tr>
+  <tr><td><code>date-add</code></td><td>date, secs</td><td>date</td><td>Add duration</td></tr>
+</table>
+
+<!-- ===== CONTROL FLOW ===== -->
+
+<h2 id="control">Control Flow</h2>
+
+<h3>Success and Failure</h3>
+
+<p>Every node execution has one of three outcomes:</p>
+
+<ol>
+  <li><strong>Success</strong> &mdash; completed normally, produced output.</li>
+  <li><strong>Failure</strong> &mdash; a controlled outcome that triggers a
+      control annotation. Not an error.</li>
+  <li><strong>Error</strong> &mdash; an unrecoverable problem.</li>
+</ol>
+
+<h3>Control Annotations</h3>
+
+<p>
+An annotation on a node tells the engine what to do on success or failure.
+The most important annotations:
+</p>
+
+<table>
+  <tr><th>Annotation</th><th>Meaning</th></tr>
+  <tr><td><code>nextCaseOnFailure</code></td><td>If this node fails, try the next case</td></tr>
+  <tr><td><code>nextCaseOnSuccess</code></td><td>If this node succeeds, try the next case</td></tr>
+  <tr><td><code>continueOnFailure</code></td><td>If this node fails, skip it and continue</td></tr>
+  <tr><td><code>terminateOnSuccess</code></td><td>If this node succeeds, exit the loop</td></tr>
+  <tr><td><code>terminateOnFailure</code></td><td>If this node fails, exit the loop</td></tr>
+  <tr><td><code>failOnFailure</code></td><td>Propagate failure to the caller</td></tr>
+</table>
+
+<h3>The if Primitive</h3>
+
+<p>
+For simple conditionals within a single case: <code>if(condition,
+then-value, else-value)</code> outputs whichever value matches the condition.
+</p>
+
+<!-- ===== LOOPS ===== -->
+
+<h2 id="loops">Loops and List Annotations</h2>
+
+<h3>Loop (counted)</h3>
+<p>
+Created by wrapping a method call. The output of each iteration feeds back
+as input for the next. A <code>terminate</code> annotation ends the loop.
+</p>
+
+<h3>Repeat (indefinite)</h3>
+<p>
+Executes repeatedly with no counter until a <code>terminate</code> or
+<code>finish</code> annotation fires inside.
+</p>
+
+<h3>List Annotation (ellipsis)</h3>
+<p>
+Mark an input with an ellipsis: the operation runs once per list element.
+Mark the output too: results are gathered into a list. This turns any
+scalar operation into a map over a list &mdash; no explicit loop needed.
+</p>
+
+<h3>Spreads (automatic broadcasting)</h3>
+<p>
+A scalar operation that receives a List on an input automatically executes
+once per element, producing a List of results. Multiple list inputs are
+zipped. This makes most explicit loops unnecessary.
+</p>
+
+<!-- ===== CLASSES ===== -->
+
+<h2 id="classes">Classes and Objects</h2>
+
+<h3>Defining a class</h3>
+<p>
+A class has <strong>attributes</strong> (data) and <strong>methods</strong>
+(behavior). Attributes can be instance-level or class-level. Methods receive
+the object as their first input (<code>self</code>).
+</p>
+
+<h3>Instance generators</h3>
+<p>
+An octagonal node creates a new object. If the class has an <code>init</code>
+method, it runs automatically. Extra inputs on the generator are passed to
+<code>init</code>.
+</p>
+
+<h3>Get and Set</h3>
+<p>
+<strong>Get</strong> reads an attribute: 1 input (object), 2 outputs (object
+pass-through, value). <strong>Set</strong> writes an attribute: 2 inputs
+(object, value), 1 output (modified object).
+</p>
+
+<h3>Inheritance</h3>
+<p>
+Single inheritance. A child class inherits all attributes and methods from
+its parent. Methods can be overridden. Use <code>/methodName</code> for
+dynamic dispatch based on the object&rsquo;s class.
+</p>
+
+<h3>Method call syntaxes</h3>
+
+<table>
+  <tr><th>Syntax</th><th>Description</th></tr>
+  <tr><td><code>/MethodName</code></td><td>Dynamic dispatch &mdash; determined by the first input&rsquo;s class</td></tr>
+  <tr><td><code>//MethodName</code></td><td>Context dispatch &mdash; within the same class</td></tr>
+  <tr><td><code>ClassName/MethodName</code></td><td>Explicit &mdash; call a specific class&rsquo;s method</td></tr>
+</table>
+
+<!-- ===== ERRORS ===== -->
+
+<h2 id="errors">Error Handling</h2>
+
+<p>
+An <strong>Error</strong> is a value (not an exception) with a message,
+code, and optional details dict.
+</p>
+
+<table>
+  <tr><th>Primitive</th><th>Description</th></tr>
+  <tr><td><code>error-create</code></td><td>Create an error value</td></tr>
+  <tr><td><code>error-message</code></td><td>Get message string</td></tr>
+  <tr><td><code>error-code</code></td><td>Get code string</td></tr>
+  <tr><td><code>error?</code></td><td>Test if a value is an error</td></tr>
+  <tr><td><code>fail-with</code></td><td>Fail the current method with an error</td></tr>
+</table>
+
+<p>
+The <strong>try annotation</strong> catches failures and converts them to
+Error values on a dedicated error output pin (visually a dashed red wire).
+</p>
+
+<p>
+<strong>Error cluster wiring</strong>: fallible operations can chain an
+error-in/error-out pin. If any operation fails, subsequent operations skip
+and the error flows through to the end.
+</p>
+
+<!-- ===== ASYNC ===== -->
+
+<h2 id="async">Concurrency and Async</h2>
+
+<p>
+Async operations return <strong>Futures</strong>. A Future resolves later;
+downstream operations automatically wait for the value (no explicit
+<code>await</code> needed &mdash; it falls out of the firing rule).
+</p>
+
+<table>
+  <tr><th>Primitive</th><th>Description</th></tr>
+  <tr><td><code>future-value</code></td><td>Block until resolved</td></tr>
+  <tr><td><code>future-resolved?</code></td><td>Non-blocking check</td></tr>
+  <tr><td><code>future-then</code></td><td>Chain a callback</td></tr>
+  <tr><td><code>future-all</code></td><td>Wait for all futures</td></tr>
+  <tr><td><code>future-any</code></td><td>Wait for first future</td></tr>
+  <tr><td><code>dispatch</code></td><td>Run method on background thread</td></tr>
+</table>
+
+<p>
+<strong>Channels</strong> enable producer-consumer patterns:
+<code>channel-create</code>, <code>channel-send</code>,
+<code>channel-receive</code>.
+</p>
+
+<footer>
+  <a href="./">Phograph Docs</a> &middot;
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDE Guide - Phograph</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="./">Phograph Docs</a>
+  <a href="./">Home</a>
+  <a href="reference.html">Language Reference</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>IDE Usage Guide</h1>
+
+<p>
+Phograph is a macOS application for building programs visually. This guide
+covers the IDE&rsquo;s windows, menus, and workflows.
+</p>
+
+<h2>The Workspace</h2>
+
+<p>The main window has four areas:</p>
+
+<ul>
+  <li><strong>Sidebar</strong> (left) &mdash; the Class Browser. Shows sections,
+      classes, methods, and cases. Click a method to open it on the canvas.
+      Toggle with <kbd>Cmd</kbd>+<kbd>0</kbd>.</li>
+  <li><strong>Canvas</strong> (center) &mdash; the dataflow graph editor.
+      Nodes and wires live here.</li>
+  <li><strong>Inspector</strong> (right) &mdash; shows properties of the
+      selected node (name, value, type, annotations). Toggle with
+      <kbd>Cmd</kbd>+<kbd>Option</kbd>+<kbd>0</kbd>.</li>
+  <li><strong>Console</strong> (bottom) &mdash; output from <code>log</code>
+      and <code>inspect</code> nodes, plus run/debug status. Toggle with
+      <kbd>Cmd</kbd>+<kbd>Y</kbd>.</li>
+</ul>
+
+<h2>File Menu</h2>
+
+<table>
+  <tr><th>Command</th><th>Shortcut</th><th>Description</th></tr>
+  <tr><td>New Project</td><td><kbd>Cmd</kbd>+<kbd>N</kbd></td><td>Create an empty project</td></tr>
+  <tr><td>Open Project&hellip;</td><td><kbd>Cmd</kbd>+<kbd>O</kbd></td><td>Open a <code>.phograph.json</code> file</td></tr>
+  <tr><td>Browse Examples&hellip;</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td><td>Open the Example Browser</td></tr>
+  <tr><td>Save Project</td><td><kbd>Cmd</kbd>+<kbd>S</kbd></td><td>Save to the current file</td></tr>
+  <tr><td>Save Project As&hellip;</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Save to a new file</td></tr>
+</table>
+
+<h2>Edit Menu</h2>
+
+<table>
+  <tr><th>Command</th><th>Shortcut</th><th>Description</th></tr>
+  <tr><td>Delete</td><td><kbd>Delete</kbd></td><td>Remove selected nodes</td></tr>
+  <tr><td>Select All</td><td><kbd>Cmd</kbd>+<kbd>A</kbd></td><td>Select every node on the canvas</td></tr>
+  <tr><td>Duplicate</td><td><kbd>Cmd</kbd>+<kbd>D</kbd></td><td>Duplicate selected nodes</td></tr>
+</table>
+
+<h2>View Menu</h2>
+
+<table>
+  <tr><th>Command</th><th>Shortcut</th><th>Description</th></tr>
+  <tr><td>Zoom In</td><td><kbd>Cmd</kbd>+<kbd>=</kbd></td><td>Increase canvas zoom</td></tr>
+  <tr><td>Zoom Out</td><td><kbd>Cmd</kbd>+<kbd>-</kbd></td><td>Decrease canvas zoom</td></tr>
+  <tr><td>Fit to Window</td><td><kbd>Cmd</kbd>+<kbd>1</kbd></td><td>Zoom to fit all nodes</td></tr>
+  <tr><td>Toggle Sidebar</td><td><kbd>Cmd</kbd>+<kbd>0</kbd></td><td>Show/hide the Class Browser</td></tr>
+  <tr><td>Toggle Inspector</td><td><kbd>Cmd</kbd>+<kbd>Option</kbd>+<kbd>0</kbd></td><td>Show/hide the Inspector</td></tr>
+  <tr><td>Toggle Console</td><td><kbd>Cmd</kbd>+<kbd>Y</kbd></td><td>Show/hide the Console</td></tr>
+</table>
+
+<h2>Run Menu</h2>
+
+<table>
+  <tr><th>Command</th><th>Shortcut</th><th>Description</th></tr>
+  <tr><td>Run</td><td><kbd>Cmd</kbd>+<kbd>R</kbd></td><td>Run the selected method at full speed</td></tr>
+  <tr><td>Debug</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td><td>Run with the debugger attached</td></tr>
+  <tr><td>Stop</td><td><kbd>Cmd</kbd>+<kbd>.</kbd></td><td>Stop the current execution</td></tr>
+  <tr><td>Continue</td><td><kbd>Cmd</kbd>+<kbd>\</kbd></td><td>Resume from a breakpoint</td></tr>
+  <tr><td>Step Over</td><td><kbd>Cmd</kbd>+<kbd>'</kbd></td><td>Execute one node, skip method calls</td></tr>
+  <tr><td>Step Into</td><td><kbd>Cmd</kbd>+<kbd>;</kbd></td><td>Execute one node, enter method calls</td></tr>
+  <tr><td>Clear Console</td><td><kbd>Cmd</kbd>+<kbd>K</kbd></td><td>Clear the console output</td></tr>
+</table>
+
+<h2>Libraries Menu</h2>
+
+<table>
+  <tr><th>Command</th><th>Shortcut</th><th>Description</th></tr>
+  <tr><td>Manage Libraries&hellip;</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td><td>Open the Library Manager</td></tr>
+  <tr><td>Refresh Library Catalog</td><td>&mdash;</td><td>Re-scan installed libraries</td></tr>
+</table>
+
+<h2>Working with the Canvas</h2>
+
+<h3>Adding nodes</h3>
+
+<ul>
+  <li>Double-click empty space (or press <kbd>Tab</kbd>) to open the
+      <strong>node picker</strong>. Type to search for primitives, methods,
+      or class operations.</li>
+  <li>Drag from the node picker onto the canvas to place a node.</li>
+</ul>
+
+<h3>Connecting wires</h3>
+
+<ul>
+  <li>Click an <strong>output pin</strong> (bottom of a node), then click an
+      <strong>input pin</strong> (top of another node) to create a wire.</li>
+  <li>A single output can fan out to multiple inputs.</li>
+  <li>Each input accepts at most one wire.</li>
+</ul>
+
+<h3>Selecting and moving</h3>
+
+<ul>
+  <li>Click a node to select it. Hold <kbd>Shift</kbd> to add to the selection.</li>
+  <li>Drag to move selected nodes.</li>
+  <li>Right-click for the context menu (delete, duplicate, toggle breakpoint).</li>
+</ul>
+
+<h2>The Class Browser</h2>
+
+<p>
+The sidebar lists your project&rsquo;s structure as a tree:
+<strong>Section &gt; Class &gt; Method &gt; Case</strong>.
+Click any method or case to view it on the canvas.
+</p>
+
+<p>
+Universal methods (not attached to a class) appear directly under the section.
+The entry point is typically the <code>main</code> method.
+</p>
+
+<h2>The Inspector</h2>
+
+<p>
+When a node is selected, the Inspector shows its editable properties:
+</p>
+
+<ul>
+  <li><strong>Name / Label</strong> &mdash; the node&rsquo;s display name.</li>
+  <li><strong>Value</strong> &mdash; for constant nodes, the literal value.</li>
+  <li><strong>Type</strong> &mdash; the node type (primitive, method call, constant, etc.).</li>
+  <li><strong>Annotations</strong> &mdash; control annotations like
+      <code>nextCaseOnFailure</code>.</li>
+  <li><strong>Input/Output counts</strong> &mdash; for input/output bars.</li>
+</ul>
+
+<h2>The Example Browser</h2>
+
+<p>
+Open with <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>. Examples are
+organized by category (Math, String Processing, Data Structures, etc.).
+Click one to load it into the workspace.
+</p>
+
+<h2>Running a Program</h2>
+
+<ol>
+  <li>Select a method in the Class Browser (usually <code>main</code>).</li>
+  <li>Press <kbd>Cmd</kbd>+<kbd>R</kbd> to run.</li>
+  <li>Output appears in the Console. The status bar shows success or error.</li>
+</ol>
+
+<h2>Debugging</h2>
+
+<ol>
+  <li>Right-click a node and choose <strong>Toggle Breakpoint</strong>.
+      A red dot appears on the node.</li>
+  <li>Press <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> to start a debug session.</li>
+  <li>Execution pauses at breakpoints. The paused node is highlighted yellow.</li>
+  <li>Use <strong>Step Over</strong>, <strong>Step Into</strong>, or
+      <strong>Continue</strong> to advance.</li>
+  <li>Wire values are shown as labels during debugging (trace overlay).</li>
+  <li>Press <kbd>Cmd</kbd>+<kbd>.</kbd> to stop at any time.</li>
+</ol>
+
+<h2>Saving and Loading</h2>
+
+<p>
+Projects are saved as <code>.phograph.json</code> files. The JSON format
+stores sections, classes, methods, cases, nodes, and wires. You can
+version-control these files with git.
+</p>
+
+<footer>
+  <a href="./">Phograph Docs</a> &middot;
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

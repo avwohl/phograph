@@ -27,6 +27,11 @@ struct PhographApp: App {
                 }
                 .keyboardShortcut("o", modifiers: .command)
 
+                Button("Browse Examples...") {
+                    viewModel.showExampleBrowser = true
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
+
                 Divider()
 
                 Button("Save Project") {
@@ -41,6 +46,142 @@ struct PhographApp: App {
                 .keyboardShortcut("s", modifiers: [.command, .shift])
                 .disabled(viewModel.project == nil)
             }
+
+            // Edit menu additions
+            CommandGroup(after: .pasteboard) {
+                Divider()
+
+                Button("Delete") {
+                    viewModel.deleteSelected()
+                }
+                .keyboardShortcut(.delete, modifiers: [])
+                .disabled(viewModel.currentGraph?.selectedNodeIds.isEmpty ?? true)
+
+                Button("Select All") {
+                    viewModel.selectAll()
+                }
+                .keyboardShortcut("a", modifiers: .command)
+                .disabled(viewModel.currentGraph == nil)
+
+                Button("Duplicate") {
+                    viewModel.duplicateSelected()
+                }
+                .keyboardShortcut("d", modifiers: .command)
+                .disabled(viewModel.currentGraph?.selectedNodeIds.isEmpty ?? true)
+            }
+
+            // View menu
+            CommandMenu("View") {
+                Button("Zoom In") {
+                    viewModel.zoomIn()
+                }
+                .keyboardShortcut("=", modifiers: .command)
+
+                Button("Zoom Out") {
+                    viewModel.zoomOut()
+                }
+                .keyboardShortcut("-", modifiers: .command)
+
+                Button("Fit to Window") {
+                    viewModel.fitToWindow()
+                }
+                .keyboardShortcut("1", modifiers: .command)
+
+                Divider()
+
+                Button("\(viewModel.showSidebar ? "Hide" : "Show") Sidebar") {
+                    viewModel.showSidebar.toggle()
+                }
+                .keyboardShortcut("0", modifiers: .command)
+
+                Button("\(viewModel.showInspector ? "Hide" : "Show") Inspector") {
+                    viewModel.showInspector.toggle()
+                }
+                .keyboardShortcut("0", modifiers: [.command, .option])
+
+                Button("\(viewModel.showConsole ? "Hide" : "Show") Console") {
+                    viewModel.showConsole.toggle()
+                }
+                .keyboardShortcut("y", modifiers: .command)
+            }
+
+            // Run menu
+            CommandMenu("Run") {
+                Button("Run") {
+                    viewModel.runCurrentMethod()
+                }
+                .keyboardShortcut("r", modifiers: .command)
+                .disabled(viewModel.selectedMethodName == nil)
+
+                Button("Debug") {
+                    viewModel.debugRun()
+                }
+                .keyboardShortcut("r", modifiers: [.command, .shift])
+                .disabled(viewModel.selectedMethodName == nil)
+
+                Button("Stop") {
+                    viewModel.stopExecution()
+                }
+                .keyboardShortcut(".", modifiers: .command)
+                .disabled(!viewModel.isRunning && !viewModel.isDebugging)
+
+                Divider()
+
+                Button("Continue") {
+                    viewModel.debugContinue()
+                }
+                .keyboardShortcut("\\", modifiers: .command)
+                .disabled(!viewModel.debugger.isPaused)
+
+                Button("Step Over") {
+                    viewModel.debugStepOver()
+                }
+                .keyboardShortcut("'", modifiers: .command)
+                .disabled(!viewModel.debugger.isPaused)
+
+                Button("Step Into") {
+                    viewModel.debugStepInto()
+                }
+                .keyboardShortcut(";", modifiers: .command)
+                .disabled(!viewModel.debugger.isPaused)
+
+                Divider()
+
+                Button("Clear Console") {
+                    viewModel.clearConsole()
+                }
+                .keyboardShortcut("k", modifiers: .command)
+            }
+
+            // Help menu
+            CommandMenu("Help") {
+                Button("Lessons") {
+                    NSWorkspace.shared.open(URL(string: "https://avwohl.github.io/phograph/")!)
+                }
+
+                Button("IDE Guide") {
+                    NSWorkspace.shared.open(URL(string: "https://avwohl.github.io/phograph/guide.html")!)
+                }
+
+                Button("Language Reference") {
+                    NSWorkspace.shared.open(URL(string: "https://avwohl.github.io/phograph/reference.html")!)
+                }
+            }
+
+            // Libraries menu
+            CommandMenu("Libraries") {
+                Button("Manage Libraries...") {
+                    viewModel.showLibraryManager = true
+                }
+                .keyboardShortcut("l", modifiers: [.command, .shift])
+
+                Divider()
+
+                Button("Refresh Library Catalog") {
+                    viewModel.libraryManager.discoverLibraries()
+                }
+            }
+
         }
         #endif
     }

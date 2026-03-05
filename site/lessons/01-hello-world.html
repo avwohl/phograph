@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1: Hello World - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 1: Hello World</h1>
+<p><span class="badge beginner">Beginner</span></p>
+
+<p>
+In this lesson you will launch Phograph, load your first example, and run it.
+By the end you will understand the basic parts of the IDE and how a simple
+dataflow graph works.
+</p>
+
+<h2>The Phograph IDE</h2>
+
+<p>When you open Phograph you see a welcome screen with three choices:</p>
+<ul>
+  <li><strong>New Project</strong> (<kbd>Cmd</kbd>+<kbd>N</kbd>) &mdash; start from scratch</li>
+  <li><strong>Open Project</strong> (<kbd>Cmd</kbd>+<kbd>O</kbd>) &mdash; load a <code>.phograph.json</code> file</li>
+  <li><strong>Browse Examples</strong> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>) &mdash; open a built-in example</li>
+</ul>
+
+<p>The IDE has three panels:</p>
+
+<pre class="diagram">
++------------------+-------------------------------+------------------+
+|                  |                               |                  |
+|   Class Browser  |       Graph Canvas            |    Inspector     |
+|   (sidebar)      |   (your dataflow diagram)     |    (details)     |
+|                  |                               |                  |
++------------------+-------------------------------+------------------+
+|                        Console                                      |
++---------------------------------------------------------------------+
+</pre>
+
+<p>
+The <strong>Class Browser</strong> on the left lists the project&rsquo;s sections,
+methods, and classes. The <strong>Graph Canvas</strong> in the center is where you
+build and view dataflow diagrams. The <strong>Inspector</strong> on the right shows
+properties of the selected node. The <strong>Console</strong> at the bottom shows
+output from your program.
+</p>
+
+<h2>Loading Hello World</h2>
+
+<ol>
+  <li>Press <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> to open the Example Browser.</li>
+  <li>Under <em>Getting Started</em>, click <strong>Hello World</strong>.</li>
+  <li>The graph loads on the canvas.</li>
+</ol>
+
+<p>You should see three nodes connected by wires:</p>
+
+<pre class="diagram">
+  +---------+
+  | Inputs  |         (input bar &mdash; no outputs for this method)
+  +---------+
+
++-----------------+
+| "Hello, World!" |   (constant &mdash; a string value)
++-----------------+
+        |
+        v
+  +-----------+
+  |    log    |       (primitive &mdash; writes to console)
+  +-----------+
+
+  +---------+
+  | Outputs |         (output bar &mdash; no inputs for this method)
+  +---------+
+</pre>
+
+<h3>What each node does</h3>
+
+<p>
+<strong>Constant node</strong> &mdash; produces a fixed value. Here, the string
+<code>"Hello, World!"</code>. It has no inputs (data comes from nowhere) and one
+output pin at the bottom.
+</p>
+<p>
+<strong>log primitive</strong> &mdash; a built-in operation that prints its input to
+the console. It has one input pin at the top and no outputs.
+</p>
+<p>
+<strong>Wire</strong> &mdash; the line connecting the constant&rsquo;s output to
+log&rsquo;s input. Data flows <em>downward</em> through wires.
+</p>
+
+<h2>Running the program</h2>
+
+<p>Press <kbd>Cmd</kbd>+<kbd>R</kbd> (or use the <strong>Run &gt; Run</strong> menu).
+Look at the console at the bottom. You should see:</p>
+
+<pre><code>[log] Hello, World!</code></pre>
+
+<p>The status bar says &ldquo;Done&rdquo;. Congratulations &mdash; you just ran your
+first Phograph program!</p>
+
+<div class="callout tip">
+  <strong>Tip</strong>
+  The input bar and output bar are always present. They represent the method&rsquo;s
+  parameters and return values. This method has none of either, so the bars are
+  empty.
+</div>
+
+<h2>How it works</h2>
+
+<ol>
+  <li>The engine looks at the <code>main</code> method.</li>
+  <li>The constant node fires immediately (it has no inputs to wait for) and places
+      <code>"Hello, World!"</code> on its output wire.</li>
+  <li>The wire carries the string to the <code>log</code> node&rsquo;s input pin.</li>
+  <li><code>log</code> now has all its inputs satisfied (just one), so it fires.
+      It prints the value to the console.</li>
+  <li>No more nodes to execute &mdash; the method is complete.</li>
+</ol>
+
+<p>This is the <strong>dataflow execution model</strong>: each node fires when all
+its input data is available. You don&rsquo;t specify the order &mdash; the data
+dependencies determine it automatically.</p>
+
+<div class="exercise">
+  <h4>Exercise 1.1 &mdash; Change the message</h4>
+  <ol>
+    <li>Click the <code>"Hello, World!"</code> constant node to select it.</li>
+    <li>In the Inspector on the right, change the constant value to your own message.</li>
+    <li>Press <kbd>Cmd</kbd>+<kbd>R</kbd> to run again.</li>
+    <li>Verify your new message appears in the console.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 1.2 &mdash; Add a second log</h4>
+  <ol>
+    <li>Right-click the canvas and choose <strong>I/O &gt; log</strong> to insert a new log node.</li>
+    <li>Right-click again and choose <strong>Constant</strong> to add a constant node. Set its value to <code>"Goodbye!"</code>.</li>
+    <li>Drag from the constant&rsquo;s output pin (bottom circle) to the log&rsquo;s input pin (top circle) to create a wire.</li>
+    <li>Run (<kbd>Cmd</kbd>+<kbd>R</kbd>). Both messages should appear in the console.</li>
+  </ol>
+  <details>
+    <summary>Hint</summary>
+    <p>Since the two log nodes have no data dependency between them, they may
+    execute in either order. Both messages will appear, but the order is not
+    guaranteed. This is a key property of dataflow: independent nodes can
+    run in any order (or even in parallel).</p>
+  </details>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 1.3 &mdash; Clear and explore</h4>
+  <ol>
+    <li>Press <kbd>Cmd</kbd>+<kbd>K</kbd> to clear the console.</li>
+    <li>Toggle the sidebar with <kbd>Cmd</kbd>+<kbd>0</kbd>.</li>
+    <li>Toggle the inspector with <kbd>Cmd</kbd>+<kbd>Option</kbd>+<kbd>0</kbd>.</li>
+    <li>Zoom in with <kbd>Cmd</kbd>+<kbd>=</kbd> and out with <kbd>Cmd</kbd>+<kbd>-</kbd>.</li>
+    <li>Press <kbd>Cmd</kbd>+<kbd>1</kbd> to fit the graph to the window.</li>
+  </ol>
+</div>
+
+<h2>Key Concepts</h2>
+
+<ul>
+  <li><strong>Nodes</strong> are the building blocks. Each node is an operation.</li>
+  <li><strong>Wires</strong> connect outputs to inputs. Data flows downward.</li>
+  <li><strong>Execution is data-driven</strong>: a node fires when all its inputs arrive.</li>
+  <li>The <strong>input bar</strong> and <strong>output bar</strong> define a method&rsquo;s interface.</li>
+  <li>A <strong>constant</strong> produces a fixed value with no inputs.</li>
+  <li>A <strong>primitive</strong> is a built-in operation (<code>log</code>, <code>+</code>, <code>*</code>, etc.).</li>
+</ul>
+
+<nav class="lesson-nav">
+  <span></span>
+  <a href="02-data-and-constants.html">Next: Data and Constants &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

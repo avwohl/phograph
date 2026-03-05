@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 6: Strings and Lists - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 6: Strings and Lists</h1>
+<p><span class="badge intermediate">Intermediate</span></p>
+
+<p>
+This lesson covers the two most common compound data types: strings (text)
+and lists (ordered collections).
+</p>
+
+<h2>String primitives</h2>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>concat</code></td><td>a, b</td><td>string</td><td>Join two strings</td></tr>
+  <tr><td><code>length</code></td><td>string</td><td>integer</td><td>Number of characters</td></tr>
+  <tr><td><code>to-string</code></td><td>any</td><td>string</td><td>Convert to text</td></tr>
+  <tr><td><code>split</code></td><td>string, separator</td><td>list</td><td>Split into parts</td></tr>
+  <tr><td><code>trim</code></td><td>string</td><td>string</td><td>Remove leading/trailing whitespace</td></tr>
+  <tr><td><code>replace</code></td><td>string, old, new</td><td>string</td><td>Replace occurrences</td></tr>
+</table>
+
+<h3>Example: greeting</h3>
+
+<pre class="diagram">
++----------+   +--------+
+| "Hello, " |   | "Ada"  |
++-----o-----+   +---o----+
+       \            /
+        v          v
+      +--------+
+      | concat |         &rarr; "Hello, Ada"
+      +---o----+
+</pre>
+
+<h2>List primitives</h2>
+
+<p>
+A <strong>list</strong> is an ordered collection. Elements can be any type and can
+be mixed. Lists are 1-indexed in Phograph (the first element is at position 1).
+</p>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>get-nth</code></td><td>list, index</td><td>element</td><td>Get element at position (1-indexed)</td></tr>
+  <tr><td><code>append</code></td><td>list, element</td><td>list</td><td>Add element to end</td></tr>
+  <tr><td><code>length</code></td><td>list</td><td>integer</td><td>Number of elements</td></tr>
+  <tr><td><code>sort</code></td><td>list</td><td>list</td><td>Sort in ascending order</td></tr>
+  <tr><td><code>empty?</code></td><td>list</td><td>boolean</td><td>True if list is empty</td></tr>
+</table>
+
+<div class="callout">
+  <strong>1-indexed</strong>
+  Unlike most programming languages (which start at 0), Phograph lists are
+  <strong>1-indexed</strong>, following the original Prograph convention. The first
+  element is at index 1.
+</div>
+
+<h2>Building lists</h2>
+
+<p>
+There is no list-literal node yet. To build a list, start with an empty list
+and <code>append</code> elements:
+</p>
+
+<pre class="diagram">
+   +------+
+   |  ()  |       (empty list constant)
+   +--o---+
+      |      +-----+
+      v      | "a" |
+  +--------+ +--o--+
+  | append |&lt;--+
+  +---o----+
+      |      +-----+
+      v      | "b" |
+  +--------+ +--o--+
+  | append |&lt;--+
+  +---o----+       &rarr; ("a", "b")
+</pre>
+
+<h2>Walkthrough: String Processing example</h2>
+
+<p>Load <strong>String Processing &gt; String Concatenation</strong> from the Example Browser.</p>
+
+<p>
+This example concatenates <code>"Hello, "</code> and <code>"Phograph!"</code>,
+then logs the result. It demonstrates the <code>concat</code> primitive.
+</p>
+
+<div class="exercise">
+  <h4>Exercise 6.1 &mdash; Build a greeting</h4>
+  <ol>
+    <li>Create a method <code>greet</code> (1 input, 1 output) that prepends <code>"Hello, "</code> to the input and appends <code>"!"</code>.</li>
+    <li>Use two <code>concat</code> nodes chained together.</li>
+    <li>Call <code>greet</code> from main with <code>"World"</code>.</li>
+    <li>Result: <code>"Hello, World!"</code>.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 6.2 &mdash; Split and count</h4>
+  <ol>
+    <li>Create a constant <code>"one,two,three,four"</code>.</li>
+    <li>Use <code>split</code> with separator <code>","</code> to get a list of words.</li>
+    <li>Use <code>length</code> on the resulting list.</li>
+    <li>Log the length. Should print <code>4</code>.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 6.3 &mdash; Reverse a list (challenge)</h4>
+  <p>Write a recursive method <code>reverse</code> (1 input, 1 output):</p>
+  <ol>
+    <li><strong>Case 1:</strong> check if the list is empty (<code>empty?</code> with <code>nextCaseOnFailure</code>).
+        If true, return the empty list.</li>
+    <li><strong>Case 2:</strong> get the first element (<code>get-nth</code> with index 1),
+        get the rest of the list (you may need a <code>slice</code> or <code>rest</code> primitive),
+        recursively reverse the rest, and <code>append</code> the first element to the result.</li>
+  </ol>
+  <details>
+    <summary>Hint</summary>
+    <p>If a <code>rest</code> primitive is not available, you can use a recursive
+    approach where you <code>get-nth</code> the last element, <code>append</code>
+    it to a new list, and shrink the input. Alternatively, use the built-in
+    <code>sort</code> as inspiration &mdash; the important thing is to practice
+    recursion with cases.</p>
+  </details>
+</div>
+
+<h2>Key Concepts</h2>
+
+<ul>
+  <li><strong>Strings</strong> are UTF-8 text. Use <code>concat</code>, <code>split</code>, <code>length</code>, etc.</li>
+  <li><strong>Lists</strong> are ordered, mixed-type collections. 1-indexed.</li>
+  <li>Build lists with <code>append</code> starting from an empty list.</li>
+  <li><code>to-string</code> converts any value to its text representation.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="05-control-flow.html">&larr; Prev: Control Flow</a>
+  <a href="07-classes.html">Next: Classes &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

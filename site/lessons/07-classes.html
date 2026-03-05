@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 7: Classes and Objects - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 7: Classes and Objects</h1>
+<p><span class="badge intermediate">Intermediate</span></p>
+
+<p>
+Phograph is object-oriented. You can define <strong>classes</strong> with
+<strong>attributes</strong> (data) and <strong>methods</strong> (behavior).
+Objects are instances of classes.
+</p>
+
+<h2>Defining a class</h2>
+
+<p>
+A class lives inside a section and has:
+</p>
+
+<ul>
+  <li><strong>Attributes</strong> &mdash; named data slots with optional default values.</li>
+  <li><strong>Methods</strong> &mdash; dataflow graphs whose first input is the object itself (<code>self</code>).</li>
+  <li>An optional <strong>parent class</strong> (single inheritance).</li>
+</ul>
+
+<p>In JSON format, a class looks like:</p>
+
+<pre><code>{
+  "name": "Point",
+  "attributes": [
+    { "name": "x", "default": 0 },
+    { "name": "y", "default": 0 }
+  ],
+  "methods": [...]
+}</code></pre>
+
+<h2>Instance generators</h2>
+
+<p>
+An <strong>instance generator</strong> node creates a new object of a class. Its
+label is the class name (prefixed with &ldquo;new&rdquo; in the canvas). It
+produces one output: the new object with default attribute values.
+</p>
+
+<pre class="diagram">
+  +-------------+
+  |  new Point  |    (instance generator)
+  +------o------+
+         |
+    (Point object with x=0, y=0)
+</pre>
+
+<h2>Get and Set nodes</h2>
+
+<p>
+To read or write an object&rsquo;s attributes, use <strong>Get</strong> and
+<strong>Set</strong> nodes.
+</p>
+
+<pre class="diagram">
+          [object]
+              |
+              v
+        +-----------+
+        |  get x    |     &rarr; outputs: (object, x-value)
+        +--o----o---+
+
+          [object]  [value]
+              |       |
+              v       v
+        +-----------+
+        |  set x    |     &rarr; outputs: (modified object)
+        +-----o-----+
+</pre>
+
+<p>
+<strong>Get</strong> has 1 input (the object) and 2 outputs: the object (pass-through)
+and the attribute value. The pass-through lets you chain gets.
+</p>
+
+<p>
+<strong>Set</strong> has 2 inputs (the object and the new value) and 1 output (the
+modified object).
+</p>
+
+<h2>Class methods</h2>
+
+<p>
+A class method&rsquo;s first input is always the object (<code>self</code>). When you
+call a class method via a <strong>method-call node</strong> named
+<code>ClassName/MethodName</code>, the engine passes the object as the first input.
+</p>
+
+<pre class="diagram">
+    [point object]
+          |
+          v
+  +------------------+
+  | Point/distance   |    (calls the "distance" method on Point)
+  +--------o---------+
+           |
+      (result value)
+</pre>
+
+<h2>Walkthrough: Bank Account</h2>
+
+<p>Load <strong>Data Structures &gt; Bank Account</strong> from the Example Browser.</p>
+
+<p>This example defines a <code>BankAccount</code> class with:</p>
+
+<ul>
+  <li>Attributes: <code>owner</code> (string), <code>balance</code> (integer, default 0)</li>
+  <li>Methods: <code>deposit</code> (adds to balance), <code>get-balance</code> (returns balance)</li>
+</ul>
+
+<p>The <code>main</code> method:</p>
+<ol>
+  <li>Creates a new <code>BankAccount</code>.</li>
+  <li>Sets the <code>owner</code> to <code>"Alice"</code>.</li>
+  <li>Calls <code>deposit(100)</code>.</li>
+  <li>Calls <code>get-balance</code> and returns the result.</li>
+</ol>
+
+<h2>Inheritance</h2>
+
+<p>
+A class can extend a parent class. The child inherits all attributes and methods
+from the parent. It can override methods by defining a method with the same name.
+</p>
+
+<pre><code>{
+  "name": "SavingsAccount",
+  "parent": "BankAccount",
+  "attributes": [
+    { "name": "interest_rate", "default": 0.05 }
+  ]
+}</code></pre>
+
+<h2>Data-determined dispatch</h2>
+
+<p>
+If a method-call node&rsquo;s name starts with <code>/</code> (e.g., <code>/speak</code>),
+Phograph looks at the class of the first input to decide which method to call.
+This is <strong>dynamic dispatch</strong> &mdash; the object determines the behavior.
+</p>
+
+<div class="exercise">
+  <h4>Exercise 7.1 &mdash; Point class</h4>
+  <p>Define a <code>Point</code> class with attributes <code>x</code> and <code>y</code>.</p>
+  <ol>
+    <li>Create a method <code>Point/distance-from-origin</code> (1 input, 1 output)
+        that computes <code>sqrt(x^2 + y^2)</code>.</li>
+    <li>Inside: use <code>get x</code> and <code>get y</code> to extract coordinates.</li>
+    <li>Compute <code>x*x + y*y</code> using <code>*</code> and <code>+</code>.</li>
+    <li>If you have a <code>sqrt</code> primitive, use it. Otherwise, just return <code>x*x + y*y</code> for now.</li>
+    <li>In main: create a Point, set x=3 and y=4, call <code>distance-from-origin</code>.</li>
+    <li>Expected result: 25 (or 5 if using sqrt).</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 7.2 &mdash; Counter class</h4>
+  <ol>
+    <li>Define a <code>Counter</code> class with attribute <code>count</code> (default 0).</li>
+    <li>Add method <code>Counter/increment</code> that adds 1 to count and returns the object.</li>
+    <li>Add method <code>Counter/get-count</code> that returns the count value.</li>
+    <li>In main: create a Counter, call increment 3 times (chain the calls), then get-count.</li>
+    <li>Result should be <code>3</code>.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 7.3 &mdash; Init method</h4>
+  <p>
+  If a class has an <code>init</code> method, it is called automatically when an
+  instance is created. The instance generator node can accept inputs which are
+  passed as extra arguments to <code>init</code>.
+  </p>
+  <ol>
+    <li>Add an <code>init</code> method to Point that takes x and y as inputs (after self)
+        and sets both attributes.</li>
+    <li>In main: create a Point with inputs 3 and 4 (wire constants to the instance generator).</li>
+    <li>Get and log x. It should be <code>3</code>.</li>
+  </ol>
+</div>
+
+<h2>Key Concepts</h2>
+
+<ul>
+  <li><strong>Classes</strong> bundle attributes (data) and methods (behavior).</li>
+  <li><strong>Instance generators</strong> create new objects.</li>
+  <li><strong>Get</strong> and <strong>Set</strong> nodes read/write attributes.</li>
+  <li>Class methods receive the object as their first input.</li>
+  <li><strong>Inheritance</strong>: child classes inherit from a parent.</li>
+  <li><strong>Dynamic dispatch</strong>: <code>/methodName</code> calls the method based on the object&rsquo;s class.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="06-strings-and-lists.html">&larr; Prev: Strings and Lists</a>
+  <a href="08-debugging.html">Next: Debugging &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

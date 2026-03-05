@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 8: Debugging - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 8: Debugging</h1>
+<p><span class="badge intermediate">Intermediate</span></p>
+
+<p>
+One of the great advantages of visual dataflow programming is that you can
+<em>watch data flow</em> through your graph. Phograph has a built-in debugger
+that lets you set breakpoints, step through execution, and inspect values on
+every wire.
+</p>
+
+<h2>The Run menu</h2>
+
+<p>All debugging commands are in the <strong>Run</strong> menu:</p>
+
+<table>
+  <tr><th>Command</th><th>Shortcut</th><th>Description</th></tr>
+  <tr><td>Run</td><td><kbd>Cmd</kbd>+<kbd>R</kbd></td><td>Run the current method at full speed</td></tr>
+  <tr><td>Debug</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td><td>Run with debugger attached</td></tr>
+  <tr><td>Stop</td><td><kbd>Cmd</kbd>+<kbd>.</kbd></td><td>Stop execution</td></tr>
+  <tr><td>Continue</td><td><kbd>Cmd</kbd>+<kbd>\</kbd></td><td>Resume from breakpoint</td></tr>
+  <tr><td>Step Over</td><td><kbd>Cmd</kbd>+<kbd>'</kbd></td><td>Execute one node, skip into method calls</td></tr>
+  <tr><td>Step Into</td><td><kbd>Cmd</kbd>+<kbd>;</kbd></td><td>Execute one node, enter method calls</td></tr>
+  <tr><td>Clear Console</td><td><kbd>Cmd</kbd>+<kbd>K</kbd></td><td>Clear the console output</td></tr>
+</table>
+
+<h2>Setting breakpoints</h2>
+
+<p>
+A <strong>breakpoint</strong> pauses execution when the debugger reaches a specific
+node. To toggle a breakpoint:
+</p>
+
+<ol>
+  <li>Right-click a node on the canvas.</li>
+  <li>Choose <strong>Toggle Breakpoint</strong>.</li>
+  <li>A <strong style="color: red;">red dot</strong> appears in the top-left corner of the node.</li>
+</ol>
+
+<p>Right-click the same node again and choose <strong>Remove Breakpoint</strong> to clear it.</p>
+
+<h2>Debugging a program</h2>
+
+<ol>
+  <li>Load the <strong>Basic Arithmetic</strong> example.</li>
+  <li>Set a breakpoint on the <code>*</code> (multiply) node.</li>
+  <li>Press <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> to start debugging.</li>
+  <li>Execution runs until it reaches the <code>*</code> node, then <strong>pauses</strong>.</li>
+</ol>
+
+<p>When paused:</p>
+
+<ul>
+  <li>The <strong>paused node</strong> is highlighted in yellow.</li>
+  <li>A <strong>debug toolbar</strong> appears at the top with Continue, Step Over, Step Into, and Stop buttons.</li>
+  <li>The status bar shows which node you&rsquo;re paused at and the current step number.</li>
+  <li><strong>Wire values</strong> may be shown as labels on the wires (trace overlay).</li>
+</ul>
+
+<h2>Step Over vs Step Into</h2>
+
+<p>
+When paused, you choose how to advance:
+</p>
+
+<ul>
+  <li><strong>Step Over</strong> (<kbd>Cmd</kbd>+<kbd>'</kbd>) &mdash; execute the current node and pause
+      at the next one. If the node is a method call, the entire called method runs to
+      completion without stopping.</li>
+  <li><strong>Step Into</strong> (<kbd>Cmd</kbd>+<kbd>;</kbd>) &mdash; if the node is a method call,
+      enter that method and pause at its first node. For primitives, this behaves like
+      Step Over.</li>
+  <li><strong>Continue</strong> (<kbd>Cmd</kbd>+<kbd>\</kbd>) &mdash; resume execution at full
+      speed until the next breakpoint or completion.</li>
+</ul>
+
+<h3>When to use which</h3>
+
+<ul>
+  <li>Use <strong>Step Over</strong> when you trust a method works and just want its result.</li>
+  <li>Use <strong>Step Into</strong> when you want to see what happens inside a method call.</li>
+  <li>Use <strong>Continue</strong> when you want to skip ahead to the next breakpoint.</li>
+</ul>
+
+<h2>The console during debugging</h2>
+
+<p>
+The console shows <code>log</code> and <code>inspect</code> output as nodes execute.
+When a debug session completes, the final status appears.
+</p>
+
+<div class="exercise">
+  <h4>Exercise 8.1 &mdash; Step through Basic Arithmetic</h4>
+  <ol>
+    <li>Load the <strong>Basic Arithmetic</strong> example.</li>
+    <li>Set a breakpoint on the <code>+</code> node.</li>
+    <li>Press <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> to debug.</li>
+    <li>When it pauses at <code>+</code>, press <kbd>Cmd</kbd>+<kbd>'</kbd> (Step Over).</li>
+    <li>The <code>+</code> node executes and the debugger pauses at the next node (<code>*</code>).</li>
+    <li>Step Over again. <code>*</code> executes and the result flows to the output bar.</li>
+    <li>The debug session completes.</li>
+    <li>Check the console &mdash; you should see the output <code>14</code>.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 8.2 &mdash; Step Into a method call</h4>
+  <ol>
+    <li>Load the <strong>Fibonacci</strong> example.</li>
+    <li>Set a breakpoint on the <code>fib</code> method-call node in <code>main</code>.</li>
+    <li>Debug (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>).</li>
+    <li>When it pauses at <code>fib</code>, press <kbd>Cmd</kbd>+<kbd>;</kbd> (Step Into).</li>
+    <li>You should now be inside the <code>fib</code> method, paused at its first node.</li>
+    <li>Press <kbd>Cmd</kbd>+<kbd>\</kbd> (Continue) to let it finish.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 8.3 &mdash; Debug your own code</h4>
+  <ol>
+    <li>Open the temperature converter from Exercise 3.1 (or recreate it).</li>
+    <li>Set breakpoints on each arithmetic node.</li>
+    <li>Debug and step through, verifying each intermediate result:</li>
+    <li><code>212 - 32 = 180</code></li>
+    <li><code>180 * 5 = 900</code></li>
+    <li><code>900 / 9 = 100</code></li>
+    <li>This is the power of visual debugging &mdash; you can see every value at every step.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 8.4 &mdash; Find a bug</h4>
+  <p>Build this (intentionally buggy) program:</p>
+  <ol>
+    <li>Method <code>main</code>: constant <code>10</code>, constant <code>3</code>,
+        wire to <code>-</code>, then wire the result to <code>*</code> with itself
+        (fan-out from the <code>-</code> output). Wire to output bar.</li>
+    <li>Intended: <code>(10 - 3)^2 = 49</code>.</li>
+    <li>But suppose you accidentally wired the constants backwards (<code>3 - 10 = -7</code>).
+        The result would be <code>49</code> anyway (because <code>(-7)^2 = 49</code>)!</li>
+    <li>Use the debugger to step through and verify the intermediate value is
+        <code>7</code>, not <code>-7</code>. Fix if needed.</li>
+  </ol>
+  <details>
+    <summary>Lesson</summary>
+    <p>Visual debugging catches sign errors and wiring mistakes that might go
+    unnoticed when only the final result is checked. Always step through new
+    code at least once to verify intermediate values.</p>
+  </details>
+</div>
+
+<h2>Tips for effective debugging</h2>
+
+<ul>
+  <li>Use <code>inspect</code> nodes to permanently log intermediate values even
+      when not debugging.</li>
+  <li>Set breakpoints sparingly &mdash; put them near where you suspect a problem.</li>
+  <li>Use Step Into only when you need to investigate a specific method. Step Over
+      everything else to avoid getting lost.</li>
+  <li>The debugger traces values on wires. Look at wire labels during a pause to
+      verify data is what you expect.</li>
+</ul>
+
+<h2>Key Concepts</h2>
+
+<ul>
+  <li><strong>Debug</strong> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>) runs with the debugger attached.</li>
+  <li><strong>Breakpoints</strong> (right-click &gt; Toggle Breakpoint) pause at a node.</li>
+  <li><strong>Step Over</strong> advances one node without entering method calls.</li>
+  <li><strong>Step Into</strong> enters method calls to debug them.</li>
+  <li><strong>Continue</strong> runs to the next breakpoint.</li>
+  <li>Visual debugging lets you <em>see</em> data flowing through your graph.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="07-classes.html">&larr; Prev: Classes</a>
+  <span></span>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

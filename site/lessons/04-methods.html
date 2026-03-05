@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4: Methods - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 4: Methods</h1>
+<p><span class="badge beginner">Beginner</span></p>
+
+<p>
+Methods are reusable subprograms. A method has a name, a fixed number of
+inputs, and a fixed number of outputs. You define a method once and call
+it from anywhere &mdash; including from inside itself (recursion).
+</p>
+
+<h2>Anatomy of a method</h2>
+
+<p>Every method is a dataflow graph with two special nodes:</p>
+
+<pre class="diagram">
+  +-----------+
+  |  Inputs   |    &larr; parameters arrive here (output pins at bottom)
+  +--o----o---+
+     |    |
+    ... your graph ...
+     |    |
+  +--o----o---+
+  |  Outputs  |    &larr; return values collected here (input pins at top)
+  +-----------+
+</pre>
+
+<ul>
+  <li>The <strong>input bar</strong> has output pins that provide the method&rsquo;s parameters.</li>
+  <li>The <strong>output bar</strong> has input pins that collect the method&rsquo;s return values.</li>
+  <li>Between them: your computation.</li>
+</ul>
+
+<h2>Method calls</h2>
+
+<p>
+A <strong>method-call node</strong> invokes another method. It looks like a regular
+node but in a purple color. Its name is the method being called. The node&rsquo;s
+inputs map to the called method&rsquo;s input bar, and its outputs come from the
+called method&rsquo;s output bar.
+</p>
+
+<pre class="diagram">
+  +----------+
+  |   fib    |    &larr; calls the "fib" method
+  +--o---o---+
+</pre>
+
+<h2>Walkthrough: Fibonacci</h2>
+
+<p>Load the <strong>Fibonacci</strong> example (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> &gt; Math).</p>
+
+<p>
+This project has two methods: <code>fib</code> and <code>main</code>.
+</p>
+
+<p><strong><code>main</code></strong> calls <code>fib(10)</code>:</p>
+
+<pre class="diagram">
+  +---------+
+  | Inputs  |
+  +---------+
+
+  +------+
+  |  10  |
+  +--o---+
+     |
+     v
+  +------+
+  | fib  |     &larr; method call
+  +--o---+
+     |
+     v
+  +---------+
+  | Outputs |   (returns 55)
+  +---------+
+</pre>
+
+<p><strong><code>fib</code></strong> has two cases (more on cases in Lesson 5).
+The key idea: <code>fib</code> calls itself twice (<code>fib(n-1)</code> and
+<code>fib(n-2)</code>) and adds the results. This is recursion.</p>
+
+<div class="callout">
+  <strong>Methods and cases</strong>
+  A method can have multiple <em>cases</em>. The engine tries case 1 first. If
+  case 1 fails (via a control annotation), it tries case 2, and so on. This is
+  how Phograph handles conditional logic &mdash; see Lesson 5.
+</div>
+
+<h2>Input and output counts</h2>
+
+<p>
+When you define a method, you specify how many inputs and outputs it has.
+The input bar gets that many output pins, and the output bar gets that many
+input pins. Every call site must match this arity.
+</p>
+
+<p>Examples:</p>
+
+<pre>
+  Method "square":     1 input, 1 output   (x &rarr; x*x)
+  Method "add":        2 inputs, 1 output  (a, b &rarr; a+b)
+  Method "swap":       2 inputs, 2 outputs (a, b &rarr; b, a)
+  Method "greet":      0 inputs, 0 outputs (side effect only)
+</pre>
+
+<div class="exercise">
+  <h4>Exercise 4.1 &mdash; Write a square method</h4>
+  <ol>
+    <li>Create a new project.</li>
+    <li>Add a method called <code>square</code> with 1 input and 1 output.</li>
+    <li>Inside <code>square</code>: wire the input bar&rsquo;s output to both inputs of a <code>*</code> node (fan-out). Wire the product to the output bar.</li>
+    <li>Add a <code>main</code> method (0 inputs, 1 output).</li>
+    <li>In <code>main</code>: add constant <code>7</code>, wire it to a <code>square</code> method-call node, wire the result to the output bar.</li>
+    <li>Run. The output should be <code>49</code>.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 4.2 &mdash; Compose two methods</h4>
+  <ol>
+    <li>Create a method <code>double</code> (1 input, 1 output) that multiplies its input by 2.</li>
+    <li>In <code>main</code>: call <code>double</code>, then pass the result to <code>square</code>.</li>
+    <li>Start with constant <code>3</code>. The chain is: 3 &rarr; double &rarr; 6 &rarr; square &rarr; 36.</li>
+    <li>Run. Output should be <code>36</code>.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 4.3 &mdash; Two outputs</h4>
+  <ol>
+    <li>Create a method <code>divmod</code> (2 inputs, 2 outputs) that returns
+        the quotient and remainder of a / b.</li>
+    <li>Inside: wire input 0 and input 1 to a <code>/</code> node for the quotient,
+        and to a <code>mod</code> node for the remainder.</li>
+    <li>Wire both results to the two output bar pins.</li>
+    <li>Call <code>divmod(17, 5)</code> from main.</li>
+    <li>Wire each output to a separate <code>log</code>. You should see <code>3</code> and <code>2</code>.</li>
+  </ol>
+</div>
+
+<h2>Key Concepts</h2>
+
+<ul>
+  <li>A <strong>method</strong> is a named, reusable dataflow graph.</li>
+  <li>The <strong>input bar</strong> provides parameters; the <strong>output bar</strong> collects return values.</li>
+  <li><strong>Method-call nodes</strong> invoke other methods.</li>
+  <li>Methods can call themselves (<strong>recursion</strong>).</li>
+  <li>A method can have <strong>multiple cases</strong> (next lesson).</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="03-arithmetic.html">&larr; Prev: Arithmetic</a>
+  <a href="05-control-flow.html">Next: Control Flow &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

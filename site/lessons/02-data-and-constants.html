@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 2: Data and Constants - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 2: Data and Constants</h1>
+<p><span class="badge beginner">Beginner</span></p>
+
+<p>
+Every wire in Phograph carries a <strong>value</strong>. This lesson covers the
+data types you can work with and how to create constant values.
+</p>
+
+<h2>Data types</h2>
+
+<p>Phograph is <strong>dynamically typed</strong> &mdash; you don&rsquo;t declare types
+in advance. The engine figures out types at runtime. Here are the most common types:</p>
+
+<table>
+  <tr><th>Type</th><th>Examples</th><th>Description</th></tr>
+  <tr><td>Integer</td><td><code>0</code>, <code>42</code>, <code>-7</code></td><td>Whole numbers (64-bit signed)</td></tr>
+  <tr><td>Real</td><td><code>3.14</code>, <code>-0.5</code></td><td>Floating-point (64-bit double)</td></tr>
+  <tr><td>String</td><td><code>"hello"</code></td><td>UTF-8 text</td></tr>
+  <tr><td>Boolean</td><td><code>true</code>, <code>false</code></td><td>Logical values</td></tr>
+  <tr><td>List</td><td><code>(1 2 3)</code></td><td>Ordered collection</td></tr>
+  <tr><td>Null</td><td><code>null</code></td><td>Absence of a value</td></tr>
+</table>
+
+<p>There are more (Dict, Data, Date, Object, Error, Enum, External), but these six
+cover most programs. We&rsquo;ll meet the others in later lessons.</p>
+
+<h2>Constant nodes</h2>
+
+<p>
+A <strong>constant node</strong> has no input pins and one output pin. It produces a
+fixed value every time it fires. The value is shown as the node&rsquo;s label.
+</p>
+
+<pre class="diagram">
+  +-------+        +--------+        +----------+
+  |   42  |        | "name" |        |   true   |
+  +---o---+        +---o----+        +----o-----+
+      |                |                  |
+  (integer)        (string)          (boolean)
+</pre>
+
+<p>To add a constant: right-click the canvas and choose <strong>Constant</strong>.
+Then select the node and edit its value in the Inspector.</p>
+
+<div class="callout">
+  <strong>No variables</strong>
+  Phograph has no local variables. Data exists only as values on wires. If you
+  need a value in two places, connect two wires from the same output pin &mdash;
+  fan-out is allowed.
+</div>
+
+<h2>Fan-out: one output, many destinations</h2>
+
+<p>
+An output pin can have multiple wires leaving it. The value is <em>copied</em> to
+each destination. This is called <strong>fan-out</strong>.
+</p>
+
+<pre class="diagram">
+  +-----+
+  |  5  |
+  +--o--+
+    /|\
+   / | \
+  v  v  v
+ [+] [*] [log]
+</pre>
+
+<p>The constant <code>5</code> is delivered to three different nodes simultaneously.</p>
+
+<h2>Fan-in is not allowed</h2>
+
+<p>
+An input pin accepts <em>at most one</em> wire. If you need to combine two values,
+use a primitive like <code>+</code> or <code>concat</code> to merge them first.
+</p>
+
+<h2>The inspect primitive</h2>
+
+<p>
+<code>inspect</code> is like <code>log</code>, but it also <strong>passes through</strong>
+its input as output. This lets you see a value without breaking the data flow.
+</p>
+
+<pre class="diagram">
+  +-----+
+  |  7  |
+  +--o--+
+     |
+     v
++---------+
+| inspect |   &rarr; prints "[inspect] 7" to console
++----o----+
+     |
+     v            &larr; value 7 continues downstream
+  +-----+
+  |  +  |
+  +-----+
+</pre>
+
+<div class="exercise">
+  <h4>Exercise 2.1 &mdash; Multiple constants</h4>
+  <ol>
+    <li>Create a new project (<kbd>Cmd</kbd>+<kbd>N</kbd>).</li>
+    <li>Add a method called <code>main</code> with 0 inputs and 0 outputs.</li>
+    <li>Add three constant nodes with values <code>10</code>, <code>20</code>, and <code>30</code>.</li>
+    <li>Add three <code>log</code> nodes and wire each constant to one log.</li>
+    <li>Run. All three values should print to the console.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 2.2 &mdash; Fan-out</h4>
+  <ol>
+    <li>Add a single constant with value <code>"echo"</code>.</li>
+    <li>Wire it to two separate <code>log</code> nodes (two wires from one output pin).</li>
+    <li>Run. The message should appear twice.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 2.3 &mdash; Inspect a value</h4>
+  <ol>
+    <li>Load the <strong>Basic Arithmetic</strong> example (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>).</li>
+    <li>Insert an <code>inspect</code> node between the <code>+</code> node&rsquo;s output and the <code>*</code> node&rsquo;s input.
+        (Delete the existing wire, then wire <code>+</code> &rarr; <code>inspect</code> &rarr; <code>*</code>.)</li>
+    <li>Run. The console should show <code>[inspect] 7</code> (the intermediate sum) and the final result 14.</li>
+  </ol>
+</div>
+
+<h2>Key Concepts</h2>
+
+<ul>
+  <li>Phograph is <strong>dynamically typed</strong> &mdash; types are checked at runtime.</li>
+  <li>Common types: Integer, Real, String, Boolean, List, Null.</li>
+  <li><strong>Constants</strong> produce fixed values with no inputs.</li>
+  <li><strong>Fan-out</strong> (one output &rarr; many inputs) is allowed.</li>
+  <li><strong>Fan-in</strong> (many outputs &rarr; one input) is not allowed.</li>
+  <li><code>inspect</code> logs a value <em>and</em> passes it through.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="01-hello-world.html">&larr; Prev: Hello World</a>
+  <a href="03-arithmetic.html">Next: Arithmetic &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

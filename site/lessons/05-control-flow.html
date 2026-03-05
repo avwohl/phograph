@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 5: Control Flow and Cases - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 5: Control Flow and Cases</h1>
+<p><span class="badge intermediate">Intermediate</span></p>
+
+<p>
+Traditional languages use <code>if</code>/<code>else</code>, <code>switch</code>,
+and <code>while</code>. Phograph handles conditional logic differently: through
+<strong>multiple cases</strong> and <strong>control annotations</strong>.
+</p>
+
+<h2>Cases: the Phograph if/else</h2>
+
+<p>
+A method can have more than one <strong>case</strong>. Each case is a separate
+dataflow diagram. When the method is called:
+</p>
+
+<ol>
+  <li>Case 1 executes first.</li>
+  <li>If a node in case 1 has a <code>nextCaseOnFailure</code> annotation and it
+      <em>fails</em> (produces <code>false</code>), execution jumps to case 2.</li>
+  <li>Case 2 executes. If it also fails, case 3 is tried, and so on.</li>
+  <li>The outputs of whichever case succeeds become the method&rsquo;s outputs.</li>
+</ol>
+
+<p>
+Think of cases like pattern-matching clauses or <code>if/elif/else</code> branches,
+but each branch is a complete visual graph.
+</p>
+
+<h3>Navigating cases</h3>
+
+<p>
+When a method has multiple cases, a bar at the top of the canvas shows
+&ldquo;Case 1 of 3&rdquo; with arrow buttons. You can also navigate with
+the Class Browser sidebar.
+</p>
+
+<h2>Control annotations</h2>
+
+<p>
+An <strong>annotation</strong> is a badge on a node that tells the engine how to
+handle success or failure. The most important annotation is
+<code>nextCaseOnFailure</code>: if this node outputs <code>false</code>, abandon
+this case and try the next one.
+</p>
+
+<p>Common annotations:</p>
+
+<table>
+  <tr><th>Annotation</th><th>Meaning</th></tr>
+  <tr><td><code>nextCaseOnFailure</code></td><td>If this node fails, try the next case</td></tr>
+  <tr><td><code>continueOnFailure</code></td><td>If this node fails, skip it and keep going</td></tr>
+  <tr><td><code>terminateOnSuccess</code></td><td>If this node succeeds, stop (used for loop termination)</td></tr>
+  <tr><td><code>terminateOnFailure</code></td><td>If this node fails, stop the loop</td></tr>
+</table>
+
+<h2>Walkthrough: Fibonacci base case</h2>
+
+<p>Look at the <strong>Fibonacci</strong> example&rsquo;s <code>fib</code> method, case 1:</p>
+
+<pre class="diagram">
+  +---------+
+  | Inputs  |  (n)
+  +----o----+
+       |
+    +--+--------+
+    |            |
+    v            |
++------+         |
+|  <=  | &lt;- nextCaseOnFailure
++------+         |
+    ^            |
+    |            |
++------+         |
+|   1  |         |
++------+         |
+                 |
+                 v
+           +---------+
+           | Outputs |  (n)
+           +---------+
+</pre>
+
+<p>
+The <code>&lt;=</code> node compares <code>n</code> to <code>1</code>. It has the
+<code>nextCaseOnFailure</code> annotation (shown as a badge on the node).
+</p>
+
+<ul>
+  <li>If <code>n &lt;= 1</code> is <strong>true</strong>: case 1 succeeds, returns <code>n</code> directly.</li>
+  <li>If <code>n &lt;= 1</code> is <strong>false</strong>: case 1 fails, execution jumps to case 2.</li>
+</ul>
+
+<p>Case 2 is the recursive case: it computes <code>fib(n-1) + fib(n-2)</code>.</p>
+
+<h2>How failure works</h2>
+
+<p>
+A node <strong>fails</strong> in Phograph when:
+</p>
+
+<ul>
+  <li>A comparison primitive outputs <code>false</code> and has a control annotation.</li>
+  <li>A primitive explicitly signals failure (like accessing a missing list element).</li>
+</ul>
+
+<p>
+Without an annotation, a <code>false</code> output is just a normal Boolean value.
+The annotation is what gives it control-flow meaning.
+</p>
+
+<div class="callout">
+  <strong>No boolean blindness</strong>
+  In text-based languages, an <code>if</code> statement tests a boolean but discards
+  it. In Phograph, the match node both tests and passes data through. The
+  &ldquo;successful&rdquo; path is the normal data flow; failure diverts to the
+  next case. Data keeps flowing &mdash; no values are lost.
+</div>
+
+<h2>The if primitive</h2>
+
+<p>
+For simple conditionals within a single case, Phograph has an <code>if</code>
+primitive with 3 inputs: <code>condition</code>, <code>then-value</code>,
+<code>else-value</code>. It outputs whichever value corresponds to the condition.
+</p>
+
+<pre class="diagram">
++------+  +-----+  +------+
+| true |  | "A" |  |  "B" |
++--o---+  +--o--+  +--o---+
+    \        |        /
+     v       v       v
+    +----------------+
+    |       if       |     &rarr; outputs "A"
+    +-------o--------+
+</pre>
+
+<div class="exercise">
+  <h4>Exercise 5.1 &mdash; Absolute value</h4>
+  <p>Create a method <code>my-abs</code> (1 input, 1 output) using two cases:</p>
+  <ol>
+    <li><strong>Case 1:</strong> Check if <code>n &gt;= 0</code> with <code>nextCaseOnFailure</code>.
+        If true, return <code>n</code> unchanged.</li>
+    <li><strong>Case 2:</strong> Compute <code>0 - n</code> and return it.</li>
+    <li>Call <code>my-abs(-5)</code> from main. Result should be <code>5</code>.</li>
+    <li>Also try <code>my-abs(3)</code>. Should return <code>3</code>.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 5.2 &mdash; Max of two numbers</h4>
+  <ol>
+    <li>Create a method <code>max2</code> (2 inputs, 1 output).</li>
+    <li><strong>Case 1:</strong> Compare input 0 <code>&gt;=</code> input 1 with <code>nextCaseOnFailure</code>.
+        If true, return input 0.</li>
+    <li><strong>Case 2:</strong> Return input 1 (this is the fallback).</li>
+    <li>Test with <code>max2(3, 7)</code> &rarr; <code>7</code>.</li>
+    <li>Test with <code>max2(10, 4)</code> &rarr; <code>10</code>.</li>
+  </ol>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 5.3 &mdash; Use the if primitive</h4>
+  <ol>
+    <li>Build a single-case method that takes a number and returns <code>"positive"</code>
+        or <code>"negative"</code> using the <code>if</code> primitive.</li>
+    <li>Compare the input to <code>0</code> with <code>&gt;=</code>.</li>
+    <li>Feed the boolean, <code>"positive"</code>, and <code>"negative"</code> into <code>if</code>.</li>
+    <li>Test with several values.</li>
+  </ol>
+</div>
+
+<h2>Key Concepts</h2>
+
+<ul>
+  <li><strong>Cases</strong> are multiple graphs in one method &mdash; like pattern-matching branches.</li>
+  <li><strong>Control annotations</strong> tell the engine how to handle success/failure.</li>
+  <li><code>nextCaseOnFailure</code> is the most common: &ldquo;if this test fails, try the next case.&rdquo;</li>
+  <li>The <code>if</code> primitive handles simple conditionals inline.</li>
+  <li>Recursion + cases = loops and conditional logic without <code>while</code> or <code>for</code>.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="04-methods.html">&larr; Prev: Methods</a>
+  <a href="06-strings-and-lists.html">Next: Strings and Lists &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

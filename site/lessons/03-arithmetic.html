@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3: Arithmetic and Primitives - Learn Phograph</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="top">
+  <a class="logo" href="../">Learn Phograph</a>
+  <a href="../">All Lessons</a>
+  <a href="https://github.com/avwohl/phograph">GitHub</a>
+</nav>
+
+<h1>Lesson 3: Arithmetic and Primitives</h1>
+<p><span class="badge beginner">Beginner</span></p>
+
+<p>
+<strong>Primitives</strong> are built-in operations provided by the Phograph runtime.
+They cover arithmetic, comparison, logic, string manipulation, and more. This
+lesson focuses on the arithmetic and comparison primitives.
+</p>
+
+<h2>Arithmetic primitives</h2>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>+</code></td><td>a, b</td><td>a + b</td><td>Addition</td></tr>
+  <tr><td><code>-</code></td><td>a, b</td><td>a - b</td><td>Subtraction</td></tr>
+  <tr><td><code>*</code></td><td>a, b</td><td>a * b</td><td>Multiplication</td></tr>
+  <tr><td><code>/</code></td><td>a, b</td><td>a / b</td><td>Division</td></tr>
+  <tr><td><code>mod</code></td><td>a, b</td><td>a mod b</td><td>Modulo (remainder)</td></tr>
+  <tr><td><code>abs</code></td><td>a</td><td>|a|</td><td>Absolute value</td></tr>
+  <tr><td><code>round</code></td><td>a</td><td>round(a)</td><td>Round to nearest integer</td></tr>
+</table>
+
+<h2>Walkthrough: Basic Arithmetic</h2>
+
+<p>Load the <strong>Basic Arithmetic</strong> example. It computes <code>(3 + 4) * 2 = 14</code>.</p>
+
+<pre class="diagram">
+  +---------+
+  | Inputs  |
+  +---------+
+
++-----+  +-----+
+|  3  |  |  4  |      (two constants)
++--o--+  +--o--+
+    \      /
+     v    v
+    +-----+
+    |  +  |            (add: 3 + 4 = 7)
+    +--o--+   +-----+
+       |      |  2  |
+       v      +--o--+
+      +-----+   /
+      |  *  |<-+       (multiply: 7 * 2 = 14)
+      +--o--+
+         |
+         v
+    +---------+
+    | Outputs |        (returns 14)
+    +---------+
+</pre>
+
+<h3>Execution order</h3>
+
+<ol>
+  <li>Constants <code>3</code>, <code>4</code>, and <code>2</code> fire immediately.</li>
+  <li><code>+</code> receives both inputs (3 and 4), fires, outputs <code>7</code>.</li>
+  <li><code>*</code> receives <code>7</code> from <code>+</code> and <code>2</code> from the constant, fires, outputs <code>14</code>.</li>
+  <li><code>14</code> flows to the output bar.</li>
+</ol>
+
+<p>
+Notice that the constant <code>2</code> fired at the same time as <code>3</code> and
+<code>4</code>. It didn&rsquo;t need to wait &mdash; it has no inputs. The
+<code>*</code> node waited for <em>both</em> its inputs before firing. This is the
+<strong>data-driven firing rule</strong>.
+</p>
+
+<h2>Comparison primitives</h2>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>=</code></td><td>a, b</td><td>Boolean</td><td>Equal</td></tr>
+  <tr><td><code>!=</code></td><td>a, b</td><td>Boolean</td><td>Not equal</td></tr>
+  <tr><td><code>&lt;</code></td><td>a, b</td><td>Boolean</td><td>Less than</td></tr>
+  <tr><td><code>&gt;</code></td><td>a, b</td><td>Boolean</td><td>Greater than</td></tr>
+  <tr><td><code>&lt;=</code></td><td>a, b</td><td>Boolean</td><td>Less than or equal</td></tr>
+  <tr><td><code>&gt;=</code></td><td>a, b</td><td>Boolean</td><td>Greater than or equal</td></tr>
+</table>
+
+<p>Comparisons output <code>true</code> or <code>false</code>. They are essential for
+control flow, which we&rsquo;ll cover in Lesson 5.</p>
+
+<h2>Logic primitives</h2>
+
+<table>
+  <tr><th>Primitive</th><th>Inputs</th><th>Output</th><th>Description</th></tr>
+  <tr><td><code>and</code></td><td>a, b</td><td>Boolean</td><td>Both must be true</td></tr>
+  <tr><td><code>or</code></td><td>a, b</td><td>Boolean</td><td>Either can be true</td></tr>
+  <tr><td><code>not</code></td><td>a</td><td>Boolean</td><td>Invert</td></tr>
+</table>
+
+<div class="exercise">
+  <h4>Exercise 3.1 &mdash; Temperature converter</h4>
+  <p>Build a method that converts Fahrenheit to Celsius: <code>C = (F - 32) * 5 / 9</code></p>
+  <ol>
+    <li>Create a new project.</li>
+    <li>Add a method <code>main</code> with 0 inputs and 1 output.</li>
+    <li>Add a constant <code>212</code> (boiling point of water in &deg;F).</li>
+    <li>Add a constant <code>32</code>.</li>
+    <li>Wire both to a <code>-</code> primitive: <code>212 - 32 = 180</code>.</li>
+    <li>Add constants <code>5</code> and <code>9</code>. Wire them with <code>*</code> and <code>/</code> to complete the formula.</li>
+    <li>Wire the final result to the output bar.</li>
+    <li>Run. The result should be <code>100</code>.</li>
+  </ol>
+  <details>
+    <summary>Solution diagram</summary>
+<pre class="diagram">
++-----+  +-----+
+| 212 |  |  32 |
++--o--+  +--o--+
+    \      /
+     v    v
+    +-----+        +-----+
+    |  -  |        |  5  |
+    +--o--+        +--o--+
+        \            /
+         v          v
+        +-----+
+        |  *  |     +-----+
+        +--o--+     |  9  |
+            \       +--o--+
+             v       /
+            +-----+
+            |  /  |
+            +--o--+
+               |
+               v
+          +---------+
+          | Outputs |     (100)
+          +---------+
+</pre>
+  </details>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 3.2 &mdash; Area of a circle</h4>
+  <p>Compute the area of a circle with radius 7: <code>A = pi * r * r</code>.</p>
+  <ol>
+    <li>Use constant <code>7</code> for the radius.</li>
+    <li>Use constant <code>3.14159</code> for pi.</li>
+    <li>Use two <code>*</code> nodes to compute <code>r * r</code> then <code>pi * r^2</code>.</li>
+    <li>Wire the result to an <code>inspect</code> node (so it prints and passes through).</li>
+    <li>Run. You should see approximately <code>153.938</code> in the console.</li>
+  </ol>
+  <details>
+    <summary>Hint</summary>
+    <p>Use <strong>fan-out</strong> from the radius constant &mdash; connect two wires from
+    its output to both inputs of the first <code>*</code> node.</p>
+  </details>
+</div>
+
+<div class="exercise">
+  <h4>Exercise 3.3 &mdash; Is it even?</h4>
+  <ol>
+    <li>Add a constant <code>17</code>.</li>
+    <li>Use <code>mod</code> with constant <code>2</code> to get the remainder.</li>
+    <li>Use <code>=</code> with constant <code>0</code> to check if the remainder is zero.</li>
+    <li>Wire the result to <code>log</code>.</li>
+    <li>Run. Console should show <code>[log] false</code> (17 is odd).</li>
+    <li>Change the constant to <code>42</code> and run again &mdash; should be <code>true</code>.</li>
+  </ol>
+</div>
+
+<h2>Key Concepts</h2>
+
+<ul>
+  <li><strong>Primitives</strong> are built-in operations: arithmetic, comparison, logic.</li>
+  <li>Each primitive has a fixed number of inputs and outputs.</li>
+  <li>Nodes fire when <strong>all</strong> inputs are available (data-driven).</li>
+  <li>You can chain primitives: the output of one becomes the input of the next.</li>
+  <li>Use <code>inspect</code> to see intermediate values during development.</li>
+</ul>
+
+<nav class="lesson-nav">
+  <a href="02-data-and-constants.html">&larr; Prev: Data and Constants</a>
+  <a href="04-methods.html">Next: Methods &rarr;</a>
+</nav>
+
+<footer>
+  <a href="../">Learn Phograph</a> &middot; <a href="https://github.com/avwohl/phograph">GitHub</a>
+</footer>
+
+</body>
+</html>

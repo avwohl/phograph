@@ -237,17 +237,33 @@ class GraphModel: ObservableObject {
             rows[d, default: []].append(rn)
         }
 
-        let rowSpacing: CGFloat = 130
-        let colSpacing: CGFloat = 200
+        let rowSpacing: CGFloat = 120
+        let colSpacing: CGFloat = 170
         let startX: CGFloat = 40
         let startY: CGFloat = 40
+        let maxColumns = 4
+        let wrapRowOffset: CGFloat = 60
+
+        // Compute cumulative Y for each depth, accounting for row wrapping
+        let sortedDepths = rows.keys.sorted()
+        var yForDepth: [Int: CGFloat] = [:]
+        var currentY: CGFloat = startY
+        for d in sortedDepths {
+            yForDepth[d] = currentY
+            let count = rows[d]?.count ?? 1
+            let subRows = max(1, Int(ceil(Double(count) / Double(maxColumns))))
+            currentY += rowSpacing + CGFloat(subRows - 1) * wrapRowOffset
+        }
 
         // Create GraphNodeModels with auto-layout positions
         // depth = row (Y), nodes at same depth spread horizontally (X)
+        // Wraps to sub-rows when > maxColumns at same depth
         for (row, nodesInRow) in rows.sorted(by: { $0.key < $1.key }) {
-            for (col, rn) in nodesInRow.enumerated() {
+            for (index, rn) in nodesInRow.enumerated() {
+                let col = index % maxColumns
+                let subRow = index / maxColumns
                 let x = startX + CGFloat(col) * colSpacing
-                let y = startY + CGFloat(row) * rowSpacing
+                let y = (yForDepth[row] ?? startY) + CGFloat(subRow) * wrapRowOffset
 
                 let displayName: String
                 let displayType: String
@@ -299,9 +315,9 @@ class GraphModel: ObservableObject {
                     node.annotation = ann
                 }
                 node.height = node.computeHeight()
-                // Widen for long labels
+                // Widen for long labels, but cap to avoid overly wide nodes
                 let labelWidth = CGFloat(displayName.count) * 9.5 + 40
-                node.width = max(node.width, labelWidth)
+                node.width = min(max(node.width, labelWidth), 200)
 
                 nodeIdToUUID[rn.nodeId] = node.id
                 graph.nodes.append(node)

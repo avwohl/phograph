@@ -951,7 +951,7 @@ struct ExampleCatalog {
                 {
                   "name": "Fibonacci Demo",
                   "libraries": [{"name": "math", "version": "1.0.0"}],
-                  "classes": [
+                  "sections": [
                     {
                       "name": "Main",
                       "methods": [
@@ -988,7 +988,7 @@ struct ExampleCatalog {
                 {
                   "name": "Prime Check",
                   "libraries": [{"name": "math", "version": "1.0.0"}],
-                  "classes": [
+                  "sections": [
                     {
                       "name": "Main",
                       "methods": [
@@ -1025,7 +1025,7 @@ struct ExampleCatalog {
                 {
                   "name": "SHA-256 Demo",
                   "libraries": [{"name": "crypto", "version": "1.0.0"}],
-                  "classes": [
+                  "sections": [
                     {
                       "name": "Main",
                       "methods": [
@@ -1062,7 +1062,7 @@ struct ExampleCatalog {
                 {
                   "name": "UUID Demo",
                   "libraries": [{"name": "crypto", "version": "1.0.0"}],
-                  "classes": [
+                  "sections": [
                     {
                       "name": "Main",
                       "methods": [
@@ -1097,7 +1097,7 @@ struct ExampleCatalog {
                 {
                   "name": "File IO Demo",
                   "libraries": [{"name": "fileio", "version": "1.0.0"}],
-                  "classes": [
+                  "sections": [
                     {
                       "name": "Main",
                       "methods": [
@@ -1138,7 +1138,7 @@ struct ExampleCatalog {
                 {
                   "name": "Locale Info",
                   "libraries": [{"name": "locale", "version": "1.0.0"}],
-                  "classes": [
+                  "sections": [
                     {
                       "name": "Main",
                       "methods": [
@@ -1179,7 +1179,7 @@ struct ExampleCatalog {
                 {
                   "name": "Sine Tone",
                   "libraries": [{"name": "sound", "version": "1.0.0"}],
-                  "classes": [
+                  "sections": [
                     {
                       "name": "Main",
                       "methods": [
@@ -1226,7 +1226,7 @@ struct ExampleCatalog {
                 {
                   "name": "Red Square",
                   "libraries": [{"name": "bitmap", "version": "1.0.0"}],
-                  "classes": [
+                  "sections": [
                     {
                       "name": "Main",
                       "methods": [

@@ -17,6 +17,11 @@ void register_logic_prims() {
         return PrimResult::success(Value::boolean(!in[0].is_truthy()));
     });
 
+    // if-else: cond then else -> result (returns then if cond is truthy, else otherwise)
+    reg.register_prim("if-else", 3, 1, [](const std::vector<Value>& in) -> PrimResult {
+        return PrimResult::success(in[0].is_truthy() ? in[1] : in[2]);
+    });
+
     // Bitwise ops (integers only)
     reg.register_prim("bit-and", 2, 1, [](const std::vector<Value>& in) -> PrimResult {
         return PrimResult::success(Value::integer(in[0].as_integer() & in[1].as_integer()));

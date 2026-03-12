@@ -766,7 +766,7 @@ struct ExampleCatalog {
         examples: [
             ExampleEntry(
                 name: "List Operations",
-                description: "Creates a list, appends elements, sorts it, and retrieves the first item.",
+                description: "Creates lists, appends them, sorts the result, and retrieves the first item.",
                 projectJSON: """
                 {
                   "name": "List Operations",
@@ -782,29 +782,26 @@ struct ExampleCatalog {
                             {
                               "nodes": [
                                 { "id": 1, "type": "input_bar", "num_inputs": 0, "num_outputs": 0 },
-                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 5 } },
-                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 } },
-                                { "id": 4, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 3 } },
-                                { "id": 5, "type": "primitive", "name": "append", "num_inputs": 2, "num_outputs": 1, "input_names": ["list", "elem"], "output_names": ["list"] },
-                                { "id": 6, "type": "primitive", "name": "append", "num_inputs": 2, "num_outputs": 1, "input_names": ["list", "elem"], "output_names": ["list"] },
-                                { "id": 7, "type": "primitive", "name": "sort", "num_inputs": 1, "num_outputs": 1, "input_names": ["list"], "output_names": ["sorted"] },
-                                { "id": 8, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 0 } },
-                                { "id": 9, "type": "primitive", "name": "get-nth", "num_inputs": 2, "num_outputs": 1, "input_names": ["list", "idx"], "output_names": ["elem"] },
-                                { "id": 10, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
-                                { "id": 11, "type": "output_bar", "num_inputs": 0, "num_outputs": 0 }
+                                { "id": 2, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": [5, 1] },
+                                { "id": 3, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": [3, 2, 4] },
+                                { "id": 4, "type": "primitive", "name": "append", "num_inputs": 2, "num_outputs": 1, "input_names": ["list1", "list2"], "output_names": ["list"] },
+                                { "id": 5, "type": "primitive", "name": "sort", "num_inputs": 1, "num_outputs": 1, "input_names": ["list"], "output_names": ["sorted"] },
+                                { "id": 6, "type": "constant", "num_inputs": 0, "num_outputs": 1, "value": { "type": "integer", "value": 1 } },
+                                { "id": 7, "type": "primitive", "name": "get-nth", "num_inputs": 2, "num_outputs": 1, "input_names": ["list", "idx"], "output_names": ["elem"] },
+                                { "id": 8, "type": "primitive", "name": "log", "num_inputs": 1, "num_outputs": 0, "input_names": ["value"] },
+                                { "id": 9, "type": "output_bar", "num_inputs": 1, "num_outputs": 0, "input_names": ["first"] }
                               ],
                               "wires": [
-                                { "source_node": 2, "source_pin": 0, "target_node": 5, "target_pin": 0 },
-                                { "source_node": 3, "source_pin": 0, "target_node": 5, "target_pin": 1 },
-                                { "source_node": 5, "source_pin": 0, "target_node": 6, "target_pin": 0, "name": "(5,1)" },
-                                { "source_node": 4, "source_pin": 0, "target_node": 6, "target_pin": 1 },
-                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "(5,1,3)" },
-                                { "source_node": 7, "source_pin": 0, "target_node": 9, "target_pin": 0, "name": "sorted" },
-                                { "source_node": 8, "source_pin": 0, "target_node": 9, "target_pin": 1 },
-                                { "source_node": 9, "source_pin": 0, "target_node": 10, "target_pin": 0, "name": "first" }
+                                { "source_node": 2, "source_pin": 0, "target_node": 4, "target_pin": 0 },
+                                { "source_node": 3, "source_pin": 0, "target_node": 4, "target_pin": 1 },
+                                { "source_node": 4, "source_pin": 0, "target_node": 5, "target_pin": 0, "name": "[5,1,3,2,4]" },
+                                { "source_node": 5, "source_pin": 0, "target_node": 7, "target_pin": 0, "name": "sorted" },
+                                { "source_node": 6, "source_pin": 0, "target_node": 7, "target_pin": 1 },
+                                { "source_node": 7, "source_pin": 0, "target_node": 8, "target_pin": 0, "name": "first" },
+                                { "source_node": 7, "source_pin": 0, "target_node": 9, "target_pin": 0 }
                               ],
                               "input_bar_id": 1,
-                              "output_bar_id": 11
+                              "output_bar_id": 9
                             }
                           ]
                         }

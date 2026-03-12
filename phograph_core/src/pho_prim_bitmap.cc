@@ -26,16 +26,6 @@ static int allocBitmap(int w, int h) {
     return -1;
 }
 
-static int allocBitmap(PhoBitmap* bmp) {
-    for (int i = 0; i < kMaxBitmaps; i++) {
-        if (!gBitmaps[i]) {
-            gBitmaps[i] = bmp;
-            return i;
-        }
-    }
-    return -1;
-}
-
 static PhoBitmap* getBitmap(int handle) {
     if (handle < 0 || handle >= kMaxBitmaps) return nullptr;
     return gBitmaps[handle];

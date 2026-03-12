@@ -97,4 +97,7 @@ void register_all_prims();
 // Console output capture -- prims call this instead of fprintf(stderr,...)
 void pho_console_write(const std::string& text);
 
+// Display buffer -- canvas-render calls this to push pixels to the IDE display
+void pho_display_blit(const uint8_t* data, int32_t width, int32_t height);
+
 } // namespace pho

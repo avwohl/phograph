@@ -23,6 +23,9 @@ struct IDEWorkspaceView: View {
         .sheet(isPresented: $viewModel.showExportSheet) {
             ExportAppSheet(viewModel: viewModel)
         }
+        .sheet(isPresented: $viewModel.showCanvasOutput) {
+            CanvasOutputView(viewModel: viewModel)
+        }
     }
 
     private var projectView: some View {
@@ -94,9 +97,9 @@ struct IDEWorkspaceView: View {
 
             Spacer()
 
-            Text("https://github.com/avwohl/phograph")
+            Link("https://github.com/avwohl/phograph",
+                 destination: URL(string: "https://github.com/avwohl/phograph")!)
                 .font(.caption)
-                .foregroundColor(.secondary)
                 .padding(.bottom, 16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -146,7 +149,7 @@ struct IDEWorkspaceView: View {
 
         // Detect class-derived node types by prefix/pattern
         if name.hasPrefix("new ") {
-            let className = String(name.dropFirst(4))
+            _ = String(name.dropFirst(4))
             let node = GraphNodeModel(x: 200, y: 200, label: name, nodeType: "instance_generator")
             node.outputPins.append(PinModel(name: "out0", index: 0))
             node.height = node.computeHeight()

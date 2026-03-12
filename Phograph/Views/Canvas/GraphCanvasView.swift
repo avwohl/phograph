@@ -38,10 +38,10 @@ struct GraphCanvasView: View {
                             .position(x: rect.midX, y: rect.midY)
                     }
 
-                    // Case navigation bar (top overlay)
-                    if let method = viewModel.currentMethod, method.caseCount > 1 {
+                    // Method title bar + case navigation (top overlay)
+                    if viewModel.selectedMethodName != nil {
                         VStack {
-                            caseNavigationBar(method: method)
+                            methodTitleBar
                             Spacer()
                         }
                     }
@@ -118,6 +118,45 @@ struct GraphCanvasView: View {
     }
 
     // MARK: - Case Navigation Bar
+
+    private var methodTitleBar: some View {
+        HStack(spacing: 6) {
+            if let ownerClass = viewModel.selectedMethodOwnerClass {
+                Text(ownerClass)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("/")
+                    .font(.caption)
+                    .foregroundColor(.secondary.opacity(0.6))
+            }
+            Text(viewModel.selectedMethodName ?? "")
+                .font(.caption.bold())
+
+            if let method = viewModel.currentMethod, method.caseCount > 1 {
+                Spacer().frame(width: 8)
+                Button(action: { viewModel.prevCase() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.caption2)
+                }
+                .disabled(viewModel.selectedCaseIndex <= 0)
+                Text("Case \(viewModel.selectedCaseIndex + 1) of \(method.caseCount)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Button(action: { viewModel.nextCase() }) {
+                    Image(systemName: "chevron.right")
+                        .font(.caption2)
+                }
+                .disabled(viewModel.selectedCaseIndex >= method.caseCount - 1)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .padding(.top, 8)
+        .padding(.horizontal, 8)
+    }
 
     private func caseNavigationBar(method: MethodModel) -> some View {
         HStack {
@@ -785,7 +824,7 @@ struct GraphCanvasView: View {
 
         func addPrim(_ name: String, inputs: Int, outputs: Int, to parent: NSMenu, libraryName: String? = nil) {
             let item = NSMenuItem(title: name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-            item.representedObject = { [weak viewModel] in
+            item.representedObject = {
                 self.insertPrimitive(name: name, inputs: inputs, outputs: outputs, libraryName: libraryName)
             } as () -> Void
             item.target = CanvasMenuTarget.shared
@@ -836,7 +875,7 @@ struct GraphCanvasView: View {
         menu.addItem(NSMenuItem.separator())
 
         let constItem = NSMenuItem(title: "Constant", action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-        constItem.representedObject = { [weak viewModel] in
+        constItem.representedObject = {
             self.insertConstant()
         } as () -> Void
         constItem.target = CanvasMenuTarget.shared
@@ -877,7 +916,7 @@ struct GraphCanvasView: View {
 
                 // "new ClassName"
                 let newItem = NSMenuItem(title: "new \(classDef.name)", action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                newItem.representedObject = { [weak viewModel] in
+                newItem.representedObject = {
                     self.insertInstanceGenerator(className: classDef.name)
                 } as () -> Void
                 newItem.target = CanvasMenuTarget.shared
@@ -889,7 +928,7 @@ struct GraphCanvasView: View {
                     let getSub = NSMenu()
                     for attr in classDef.attributes {
                         let item = NSMenuItem(title: attr.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                        item.representedObject = { [weak viewModel] in
+                        item.representedObject = {
                             self.insertGetNode(className: classDef.name, attrName: attr.name)
                         } as () -> Void
                         item.target = CanvasMenuTarget.shared
@@ -903,7 +942,7 @@ struct GraphCanvasView: View {
                     let setSub = NSMenu()
                     for attr in classDef.attributes {
                         let item = NSMenuItem(title: attr.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                        item.representedObject = { [weak viewModel] in
+                        item.representedObject = {
                             self.insertSetNode(className: classDef.name, attrName: attr.name)
                         } as () -> Void
                         item.target = CanvasMenuTarget.shared
@@ -916,7 +955,7 @@ struct GraphCanvasView: View {
                 // Class methods
                 for method in classDef.methods {
                     let mItem = NSMenuItem(title: method.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                    mItem.representedObject = { [weak viewModel] in
+                    mItem.representedObject = {
                         self.insertMethodCall(name: method.name, inputs: method.numInputs, outputs: method.numOutputs)
                     } as () -> Void
                     mItem.target = CanvasMenuTarget.shared
@@ -938,7 +977,7 @@ struct GraphCanvasView: View {
             let methodsSub = NSMenu()
             for method in allMethods {
                 let mItem = NSMenuItem(title: method.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                mItem.representedObject = { [weak viewModel] in
+                mItem.representedObject = {
                     self.insertMethodCall(name: method.name, inputs: method.numInputs, outputs: method.numOutputs)
                 } as () -> Void
                 mItem.target = CanvasMenuTarget.shared
@@ -956,8 +995,8 @@ struct GraphCanvasView: View {
                 ? "Remove Breakpoint" : "Toggle Breakpoint"
             let bpItem = NSMenuItem(title: bpTitle, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
             let engineId = node.engineNodeId
-            bpItem.representedObject = { [weak viewModel] in
-                viewModel?.toggleBreakpoint(nodeId: engineId)
+            bpItem.representedObject = {
+                viewModel.toggleBreakpoint(nodeId: engineId)
             } as () -> Void
             bpItem.target = CanvasMenuTarget.shared
             menu.addItem(bpItem)

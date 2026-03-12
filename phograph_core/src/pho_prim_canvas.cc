@@ -40,11 +40,17 @@ void register_canvas_prims() {
         return PrimResult::success(in[0]);
     });
 
-    // canvas-render: canvas -> canvas (renders scene graph to pixel buffer)
-    r.register_prim("canvas-render", 1, 1, [](const std::vector<Value>& in) -> PrimResult {
-        auto* c = unwrap_canvas(in[0]);
-        if (!c) return PrimResult::fail_with(Value::error("canvas-render: expected canvas"));
-        DrawContext::render_canvas(*c);
+    // canvas-render: canvas scene -> canvas (sets root from scene, renders to pixel buffer, blits to display)
+    r.register_prim("canvas-render", 2, 1, [](const std::vector<Value>& in) -> PrimResult {
+        auto* ext = unwrap_canvas_ext(in[0]);
+        if (!ext) return PrimResult::fail_with(Value::error("canvas-render: expected canvas"));
+        // Set root from scene input if provided
+        if (auto* shape_ext = unwrap_shape_ext(in[1])) {
+            ext->canvas->root = shape_ext->shape;
+        }
+        DrawContext::render_canvas(*ext->canvas);
+        // Copy rendered pixels to IDE display buffer
+        pho_display_blit(ext->canvas->buffer(), ext->canvas->width(), ext->canvas->height());
         return PrimResult::success(in[0]);
     });
 

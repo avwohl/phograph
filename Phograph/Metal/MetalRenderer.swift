@@ -38,15 +38,15 @@ class MetalRenderer: NSObject, MTKViewDelegate {
 
     private func buildPipeline(mtkView: MTKView) {
         guard let library = device.makeDefaultLibrary() else {
-            assertionFailure("MetalRenderer: Failed to create default Metal library — shader source missing from bundle")
+            NSLog("MetalRenderer: Failed to create default Metal library — shader source missing from bundle")
             return
         }
         guard let vertexFunc = library.makeFunction(name: "fullscreenQuadVertex") else {
-            assertionFailure("MetalRenderer: Missing vertex shader 'fullscreenQuadVertex'")
+            NSLog("MetalRenderer: Missing vertex shader 'fullscreenQuadVertex'")
             return
         }
         guard let fragmentFunc = library.makeFunction(name: "fullscreenQuadFragment") else {
-            assertionFailure("MetalRenderer: Missing fragment shader 'fullscreenQuadFragment'")
+            NSLog("MetalRenderer: Missing fragment shader 'fullscreenQuadFragment'")
             return
         }
 
@@ -65,7 +65,7 @@ class MetalRenderer: NSObject, MTKViewDelegate {
         do {
             pipelineState = try device.makeRenderPipelineState(descriptor: desc)
         } catch {
-            assertionFailure("MetalRenderer: Failed to create pipeline state: \(error)")
+            NSLog("MetalRenderer: Failed to create pipeline state: \(error)")
         }
     }
 

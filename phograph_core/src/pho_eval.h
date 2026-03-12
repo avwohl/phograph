@@ -46,7 +46,8 @@ public:
 
     // Evaluate a single case
     EvalResult eval_case(Project& project, const Case& c,
-                         const std::vector<Value>& inputs);
+                         const std::vector<Value>& inputs,
+                         const std::string& class_name = "");
 
     // Max evaluation steps (to prevent infinite loops)
     uint32_t max_steps = 100000;

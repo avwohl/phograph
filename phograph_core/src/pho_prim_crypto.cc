@@ -95,7 +95,10 @@ void register_crypto_prims() {
         if (!in[0].is_string()) return PrimResult::fail_with(Value::error("md5: expected string"));
 #ifdef __APPLE__
         uint8_t digest[CC_MD5_DIGEST_LENGTH];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         CC_MD5(in[0].as_string()->c_str(), (CC_LONG)in[0].as_string()->length(), digest);
+#pragma clang diagnostic pop
         return PrimResult::success(Value::string(to_hex(digest, CC_MD5_DIGEST_LENGTH)));
 #else
         return PrimResult::fail_with(Value::error("md5: not available on this platform"));
@@ -159,7 +162,7 @@ void register_crypto_prims() {
 #ifdef __APPLE__
         uint64_t range = (uint64_t)(hi - lo) + 1;
         uint64_t rnd;
-        SecRandomCopyBytes(kSecRandomDefault, sizeof(rnd), &rnd);
+        (void)SecRandomCopyBytes(kSecRandomDefault, sizeof(rnd), &rnd);
         return PrimResult::success(Value::integer(lo + (int64_t)(rnd % range)));
 #else
         std::random_device rd;
@@ -173,7 +176,7 @@ void register_crypto_prims() {
     r.register_prim("uuid", 0, 1, [](const std::vector<Value>&) -> PrimResult {
         uint8_t bytes[16];
 #ifdef __APPLE__
-        SecRandomCopyBytes(kSecRandomDefault, 16, bytes);
+        (void)SecRandomCopyBytes(kSecRandomDefault, 16, bytes);
 #else
         std::random_device rd;
         for (auto& b : bytes) b = (uint8_t)(rd() & 0xFF);

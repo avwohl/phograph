@@ -212,7 +212,9 @@ struct PhographApp: App {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
         let alert = NSAlert()
         alert.messageText = "Phograph"
-        alert.informativeText = """
+
+        let repoURL = "https://github.com/avwohl/phograph"
+        let text = """
             Version \(version)
 
             A modern implementation of the Prograph
@@ -222,8 +224,28 @@ struct PhographApp: App {
             Copyright \u{00A9} 2025-2026 Aaron Wohl.
             All rights reserved.
 
-            https://github.com/avwohl/phograph
+            \(repoURL)
             """
+        let attrStr = NSMutableAttributedString(string: text, attributes: [
+            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
+        ])
+        if let urlRange = text.range(of: repoURL) {
+            let nsRange = NSRange(urlRange, in: text)
+            attrStr.addAttributes([
+                .link: URL(string: repoURL)!,
+                .cursor: NSCursor.pointingHand,
+            ], range: nsRange)
+        }
+
+        let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 300, height: 160))
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.drawsBackground = false
+        textView.textStorage?.setAttributedString(attrStr)
+        textView.textContainerInset = NSSize(width: 0, height: 0)
+        alert.accessoryView = textView
+        alert.informativeText = ""
+
         alert.alertStyle = .informational
         alert.icon = NSApp.applicationIconImage
         alert.runModal()

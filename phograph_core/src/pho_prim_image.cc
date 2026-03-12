@@ -5,7 +5,6 @@
 #ifdef __APPLE__
 #include <CoreGraphics/CoreGraphics.h>
 #include <ImageIO/ImageIO.h>
-#include <CoreServices/CoreServices.h>
 
 // Image handle: wraps a CGImageRef stored as External value
 // We use PhoObject with class "Image" and attrs for width, height, and a raw pointer
@@ -35,13 +34,6 @@ static PhoImage* getImage(int handle) {
     if (handle < 0 || handle >= kMaxImages) return nullptr;
     if (!gImages[handle].cgImage) return nullptr;
     return &gImages[handle];
-}
-
-static void freeImage(int handle) {
-    if (handle >= 0 && handle < kMaxImages && gImages[handle].cgImage) {
-        CGImageRelease(gImages[handle].cgImage);
-        gImages[handle].cgImage = nullptr;
-    }
 }
 
 // Create CGImage from RGBA pixel data
@@ -106,7 +98,7 @@ void register_image_prims() {
         CFStringRef path = CFStringCreateWithCString(nullptr, in[1].as_string()->c_str(), kCFStringEncodingUTF8);
         CFURLRef url = CFURLCreateWithFileSystemPath(nullptr, path, kCFURLPOSIXPathStyle, false);
         CFRelease(path);
-        CGImageDestinationRef dest = CGImageDestinationCreateWithURL(url, kUTTypeJPEG, 1, nullptr);
+        CGImageDestinationRef dest = CGImageDestinationCreateWithURL(url, CFSTR("public.jpeg"), 1, nullptr);
         CFRelease(url);
         if (!dest) return PrimResult::fail_with(Value::error("image-save-jpeg: could not create destination"));
 
@@ -134,7 +126,7 @@ void register_image_prims() {
         CFStringRef path = CFStringCreateWithCString(nullptr, in[1].as_string()->c_str(), kCFStringEncodingUTF8);
         CFURLRef url = CFURLCreateWithFileSystemPath(nullptr, path, kCFURLPOSIXPathStyle, false);
         CFRelease(path);
-        CGImageDestinationRef dest = CGImageDestinationCreateWithURL(url, kUTTypePNG, 1, nullptr);
+        CGImageDestinationRef dest = CGImageDestinationCreateWithURL(url, CFSTR("public.png"), 1, nullptr);
         CFRelease(url);
         if (!dest) return PrimResult::fail_with(Value::error("image-save-png: could not create destination"));
         CGImageDestinationAddImage(dest, img->cgImage, nullptr);
@@ -333,7 +325,7 @@ void register_image_prims() {
         if (!img) return PrimResult::fail_with(Value::error("image-encode-jpeg: invalid handle"));
 
         CFMutableDataRef cfData = CFDataCreateMutable(nullptr, 0);
-        CGImageDestinationRef dest = CGImageDestinationCreateWithData(cfData, kUTTypeJPEG, 1, nullptr);
+        CGImageDestinationRef dest = CGImageDestinationCreateWithData(cfData, CFSTR("public.jpeg"), 1, nullptr);
         float quality = (float)(in[1].as_number() / 100.0);
         CFNumberRef qualNum = CFNumberCreate(nullptr, kCFNumberFloatType, &quality);
         CFStringRef keys[] = { kCGImageDestinationLossyCompressionQuality };

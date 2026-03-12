@@ -23,6 +23,7 @@ class IDEViewModel: ObservableObject {
     @Published var showExampleBrowser: Bool = false
     @Published var showLibraryManager: Bool = false
     @Published var showExportSheet: Bool = false
+    @Published var showCanvasOutput: Bool = false
     @Published var showFrontPanel: Bool = false
     @Published var frontPanelClassName: String = ""
     @Published var missingLibraries: [LibraryReference] = []
@@ -115,6 +116,7 @@ class IDEViewModel: ObservableObject {
         } catch {
             consoleOutput += "Error parsing project: \(error.localizedDescription)\n"
             statusMessage = "Parse failed"
+            showConsole = true
         }
         model.filePath = url
         self.project = model
@@ -125,6 +127,7 @@ class IDEViewModel: ObservableObject {
         } catch {
             consoleOutput += "Error loading project: \(error.localizedDescription)\n"
             statusMessage = "Load failed"
+            showConsole = true
             return
         }
 
@@ -208,6 +211,12 @@ class IDEViewModel: ObservableObject {
                     consoleOutput += console
                 }
 
+                // Show error message if present
+                if let errorMsg = json["error"] as? String, !errorMsg.isEmpty {
+                    consoleOutput += "Error in \(name): \(errorMsg)\n"
+                    showConsole = true
+                }
+
                 // Show outputs
                 if let outputs = json["outputs"] as? [Any], !outputs.isEmpty {
                     let outputStrs = outputs.map { val -> String in
@@ -220,14 +229,21 @@ class IDEViewModel: ObservableObject {
                 }
 
                 statusMessage = status == "success" ? "Done" : "Done (\(status))"
+
+                // Check if canvas output was produced
+                if bridge.bufferWidth > 0 && bridge.bufferHeight > 0 {
+                    showCanvasOutput = true
+                }
             } catch {
                 consoleOutput += "> \(name): result parse error - \(error.localizedDescription)\n"
                 consoleOutput += "> \(name): raw output: \(resultStr)\n"
                 statusMessage = "Done (parse error)"
+                showConsole = true
             }
         } catch {
             consoleOutput += "> \(name): error - \(error.localizedDescription)\n"
             statusMessage = "Error"
+            showConsole = true
         }
         isRunning = false
     }
@@ -403,11 +419,103 @@ class IDEViewModel: ObservableObject {
                 consoleOutput += console
             }
 
+            // Show error message if present
+            if let errorMsg = json["error"] as? String, !errorMsg.isEmpty {
+                consoleOutput += "Error: \(errorMsg)\n"
+                showConsole = true
+            }
+
             statusMessage = "Debug completed (\(status))"
 
         default:
             consoleOutput += "Debug: unknown event '\(event)'\n"
         }
+    }
+
+    // MARK: - Class/Method Creation
+
+    /// Find the class that owns the currently selected method, if any
+    var selectedMethodOwnerClass: String? {
+        guard let name = selectedMethodName else { return nil }
+        for section in project?.sections ?? [] {
+            for classDef in section.classes {
+                if classDef.methods.contains(where: { $0.name == name }) {
+                    return classDef.name
+                }
+            }
+        }
+        return nil
+    }
+
+    @discardableResult
+    func addClass(in section: SectionModel) -> ClassModel {
+        var baseName = "NewClass"
+        var counter = 1
+        let existingNames = Set(section.classes.map { $0.name })
+        while existingNames.contains(baseName) {
+            counter += 1
+            baseName = "NewClass\(counter)"
+        }
+        let newClass = ClassModel(name: baseName)
+        section.classes.append(newClass)
+        project?.isDirty = true
+        graphRevision += 1
+        return newClass
+    }
+
+    func renameClass(_ classDef: ClassModel, to newName: String) {
+        classDef.name = newName
+        project?.isDirty = true
+        graphRevision += 1
+    }
+
+    func addMethod(to classDef: ClassModel) {
+        var baseName = "newMethod"
+        var counter = 1
+        let existingNames = Set(classDef.methods.map { $0.name })
+        while existingNames.contains(baseName) {
+            counter += 1
+            baseName = "newMethod\(counter)"
+        }
+        let method = MethodModel(name: baseName, numInputs: 1, numOutputs: 1)
+        method.caseCount = 1
+        method.casesRaw = [[:]]
+        classDef.methods.append(method)
+        project?.isDirty = true
+        graphRevision += 1
+        selectMethod(name: baseName, caseIndex: 0)
+    }
+
+    func addAttribute(to classDef: ClassModel) {
+        var baseName = "newAttr"
+        var counter = 1
+        let existingNames = Set(classDef.attributes.map { $0.name })
+        while existingNames.contains(baseName) {
+            counter += 1
+            baseName = "newAttr\(counter)"
+        }
+        let attr = ClassAttributeModel(name: baseName, defaultValue: "")
+        classDef.attributes.append(attr)
+        classDef.isExpanded = true
+        project?.isDirty = true
+        graphRevision += 1
+    }
+
+    func addTopLevelMethod(in section: SectionModel) {
+        var baseName = "newMethod"
+        var counter = 1
+        let existingNames = Set(section.methods.map { $0.name })
+        while existingNames.contains(baseName) {
+            counter += 1
+            baseName = "newMethod\(counter)"
+        }
+        let method = MethodModel(name: baseName, numInputs: 0, numOutputs: 0)
+        method.caseCount = 1
+        method.casesRaw = [[:]]
+        section.methods.append(method)
+        project?.isDirty = true
+        graphRevision += 1
+        selectMethod(name: baseName, caseIndex: 0)
     }
 
     // MARK: - Zoom

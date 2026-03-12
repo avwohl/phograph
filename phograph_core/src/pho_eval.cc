@@ -34,7 +34,7 @@ EvalResult Evaluator::eval_method(Project& project, const Method& method,
         }
         if (!guards_pass) continue;
 
-        auto result = eval_case(project, c, inputs);
+        auto result = eval_case(project, c, inputs, method.class_name);
         if (result.status == EvalStatus::Failure) continue;
         return result;
     }
@@ -51,7 +51,8 @@ EvalResult Evaluator::call_method(Project& project, const std::string& method_na
 }
 
 EvalResult Evaluator::eval_case(Project& project, const Case& c,
-                                 const std::vector<Value>& inputs) {
+                                 const std::vector<Value>& inputs,
+                                 const std::string& class_name) {
     // Set thread-local for HOF callbacks
     tl_project = &project;
     tl_evaluator = this;
@@ -66,10 +67,7 @@ EvalResult Evaluator::eval_case(Project& project, const Case& c,
     }
 
     // Phase 18: initialize shift registers
-    for (auto& sr : c.shift_registers) {
-        // Shift registers are initialized before first iteration
-        // (handled in loop evaluation)
-    }
+    (void)c.shift_registers; // initialized before first iteration (handled in loop evaluation)
 
     // Place inputs on input bar's outputs
     const Node* input_bar = c.find_node(c.input_bar_id);
@@ -89,6 +87,36 @@ EvalResult Evaluator::eval_case(Project& project, const Case& c,
             auto& target_slots = slots[w->target.node_id];
             target_slots.inputs[w->target.index] = slots[input_bar->id].outputs[w->source.index];
             target_slots.inputs_filled++;
+        }
+    }
+
+    // Implicit self: in class methods, GET nodes with unwired pin 0 auto-receive self
+    if (!class_name.empty() && input_bar) {
+        auto& bar_outputs = slots[input_bar->id].outputs;
+        if (!bar_outputs.empty()) {
+            for (auto& node : c.nodes) {
+                if (node.type != NodeType::Get) continue;
+                if (node.id == c.input_bar_id || node.id == c.output_bar_id) continue;
+
+                auto& ns = slots[node.id];
+                if (ns.inputs_filled > 0) continue; // pin 0 already wired
+
+                // Verify no data wire targets pin 0
+                bool has_wire_to_pin0 = false;
+                for (auto& w : c.wires) {
+                    if (!w.is_execution &&
+                        w.target.node_id == node.id &&
+                        w.target.index == 0) {
+                        has_wire_to_pin0 = true;
+                        break;
+                    }
+                }
+
+                if (!has_wire_to_pin0) {
+                    ns.inputs[0] = bar_outputs[0];
+                    ns.inputs_filled++;
+                }
+            }
         }
     }
 

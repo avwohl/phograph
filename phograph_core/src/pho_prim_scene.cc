@@ -46,10 +46,16 @@ void register_scene_prims() {
         return PrimResult::success(wrap_shape(std::move(s)));
     });
 
-    // shape-group: -> shape
-    r.register_prim("shape-group", 0, 1, [](const std::vector<Value>&) -> PrimResult {
+    // shape-group: a b -> shape (creates group with children)
+    r.register_prim("shape-group", 2, 1, [](const std::vector<Value>& in) -> PrimResult {
         auto s = make_ref<Shape>();
         s->type = ShapeType::Group;
+        // Add each non-null input as a child
+        for (auto& v : in) {
+            if (auto* child = unwrap_shape_ext(v)) {
+                s->add_child(child->shape);
+            }
+        }
         return PrimResult::success(wrap_shape(std::move(s)));
     });
 

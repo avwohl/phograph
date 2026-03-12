@@ -232,7 +232,7 @@ enum GraphExporter {
                 // Tile viewport in graph coordinates
                 let tileX = bounds.minX + CGFloat(col) * tileStepX
                 let tileY = bounds.minY + CGFloat(row) * tileStepY
-                let tileW = singlePage ? bounds.width : printableW
+                _ = singlePage ? bounds.width : printableW
                 let tileH = singlePage ? bounds.height : (printableH - footerH)
 
                 // Clip to printable area

@@ -6,16 +6,6 @@ namespace pho {
 
 // --- Name mangling ---
 
-static std::string replace_chars(const std::string& s, const std::string& from, const std::string& to) {
-    std::string result = s;
-    size_t pos = 0;
-    while ((pos = result.find(from, pos)) != std::string::npos) {
-        result.replace(pos, from.size(), to);
-        pos += to.size();
-    }
-    return result;
-}
-
 static bool is_identifier_char(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
            (c >= '0' && c <= '9') || c == '_';

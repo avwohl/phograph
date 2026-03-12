@@ -16,9 +16,23 @@
 // Thread-local pointer for console capture
 static thread_local std::string* tl_console = nullptr;
 
+// Thread-local pointers for display buffer (canvas-render → Metal view)
+static thread_local std::vector<uint8_t>* tl_display = nullptr;
+static thread_local int32_t* tl_display_w = nullptr;
+static thread_local int32_t* tl_display_h = nullptr;
+
 namespace pho {
 void pho_console_write(const std::string& text) {
     if (tl_console) tl_console->append(text);
+}
+
+void pho_display_blit(const uint8_t* data, int32_t width, int32_t height) {
+    if (!tl_display || !data || width <= 0 || height <= 0) return;
+    size_t size = static_cast<size_t>(width) * height * 4;
+    tl_display->resize(size);
+    memcpy(tl_display->data(), data, size);
+    *tl_display_w = width;
+    *tl_display_h = height;
 }
 }
 
@@ -95,13 +109,19 @@ const char* pho_engine_call_method(PhoEngineRef engine, const char* method_name,
         }
     }
 
-    // Capture console output during evaluation
+    // Capture console output and display buffer during evaluation
     engine->console_buffer.clear();
     tl_console = &engine->console_buffer;
+    tl_display = &engine->pixel_buffer;
+    tl_display_w = &engine->buffer_width;
+    tl_display_h = &engine->buffer_height;
 
     auto result = engine->evaluator.call_method(engine->project, method_name, inputs);
 
     tl_console = nullptr;
+    tl_display = nullptr;
+    tl_display_w = nullptr;
+    tl_display_h = nullptr;
 
     // Encode result as JSON
     std::string out = "{\"status\":";
@@ -109,6 +129,30 @@ const char* pho_engine_call_method(PhoEngineRef engine, const char* method_name,
         case pho::EvalStatus::Success: out += "\"success\""; break;
         case pho::EvalStatus::Failure: out += "\"failure\""; break;
         case pho::EvalStatus::Error: out += "\"error\""; break;
+    }
+
+    // Include error message when status is error or failure
+    if (result.status != pho::EvalStatus::Success) {
+        std::string msg;
+        if (result.status == pho::EvalStatus::Error && !result.err_val.is_null()) {
+            msg = result.err_val.to_display_string();
+        } else if (result.status == pho::EvalStatus::Failure) {
+            msg = "method failed (all cases exhausted)";
+        }
+        if (!msg.empty()) {
+            out += ",\"error\":\"";
+            for (char ch : msg) {
+                switch (ch) {
+                    case '"': out += "\\\""; break;
+                    case '\\': out += "\\\\"; break;
+                    case '\n': out += "\\n"; break;
+                    case '\r': out += "\\r"; break;
+                    case '\t': out += "\\t"; break;
+                    default: out += ch; break;
+                }
+            }
+            out += "\"";
+        }
     }
 
     out += ",\"outputs\":[";
@@ -262,10 +306,16 @@ void pho_engine_debug_run(PhoEngineRef engine, const char* method_name) {
     engine->debug_thread = std::thread([engine, mname]() {
         engine->console_buffer.clear();
         tl_console = &engine->console_buffer;
+        tl_display = &engine->pixel_buffer;
+        tl_display_w = &engine->buffer_width;
+        tl_display_h = &engine->buffer_height;
 
         auto result = engine->evaluator.call_method(engine->project, mname, {});
 
         tl_console = nullptr;
+        tl_display = nullptr;
+        tl_display_w = nullptr;
+        tl_display_h = nullptr;
         engine->evaluator.set_debugger(nullptr);
 
         // Fire completed event
@@ -276,7 +326,31 @@ void pho_engine_debug_run(PhoEngineRef engine, const char* method_name) {
                 case pho::EvalStatus::Failure: json += "failure"; break;
                 case pho::EvalStatus::Error: json += "error"; break;
             }
-            json += "\"}";
+            json += "\"";
+            // Include error message
+            if (result.status != pho::EvalStatus::Success) {
+                std::string msg;
+                if (result.status == pho::EvalStatus::Error && !result.err_val.is_null()) {
+                    msg = result.err_val.to_display_string();
+                } else if (result.status == pho::EvalStatus::Failure) {
+                    msg = "method failed (all cases exhausted)";
+                }
+                if (!msg.empty()) {
+                    json += ",\"error\":\"";
+                    for (char ch : msg) {
+                        switch (ch) {
+                            case '"': json += "\\\""; break;
+                            case '\\': json += "\\\\"; break;
+                            case '\n': json += "\\n"; break;
+                            case '\r': json += "\\r"; break;
+                            case '\t': json += "\\t"; break;
+                            default: json += ch; break;
+                        }
+                    }
+                    json += "\"";
+                }
+            }
+            json += "}";
             engine->debug_cb(engine->debug_ctx, json.c_str());
         }
     });

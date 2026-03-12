@@ -57,7 +57,7 @@ class AppExporter: ObservableObject {
     private func swiftFuncName(_ phoName: String) -> String {
         var result = ""
         var nextUpper = false
-        for (i, c) in phoName.enumerated() {
+        for (_, c) in phoName.enumerated() {
             if c == "-" || c == "?" || c == "!" || c == "/" || c == " " {
                 nextUpper = true
             } else if c.isLetter || c.isNumber || c == "_" {

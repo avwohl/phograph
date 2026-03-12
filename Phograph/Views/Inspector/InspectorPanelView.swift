@@ -23,7 +23,7 @@ struct InspectorPanelView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color(.systemBackground))
     }
 
     private var noSelectionView: some View {

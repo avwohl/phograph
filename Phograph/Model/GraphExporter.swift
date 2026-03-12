@@ -1,8 +1,6 @@
 import Foundation
-#if os(macOS)
 import CoreGraphics
-import AppKit
-#endif
+import UIKit
 
 /// Exports a GraphModel as SVG or PDF vector graphics.
 enum GraphExporter {
@@ -190,8 +188,6 @@ enum GraphExporter {
 
     // MARK: - PDF Export
 
-    #if os(macOS)
-
     /// Standard paper size in points (72 pt = 1 inch)
     struct PaperSize {
         let width: CGFloat
@@ -251,8 +247,8 @@ enum GraphExporter {
 
                 // Footer
                 let footerAttrs: [NSAttributedString.Key: Any] = [
-                    .font: NSFont.systemFont(ofSize: 9),
-                    .foregroundColor: NSColor.gray
+                    .font: UIFont.systemFont(ofSize: 9),
+                    .foregroundColor: UIColor.gray
                 ]
 
                 if totalPages > 1 {
@@ -345,8 +341,8 @@ enum GraphExporter {
                     p3: CGPoint(x: ex, y: ey)
                 )
                 let nameAttrs: [NSAttributedString.Key: Any] = [
-                    .font: NSFont.systemFont(ofSize: 10),
-                    .foregroundColor: NSColor.darkGray
+                    .font: UIFont.systemFont(ofSize: 10),
+                    .foregroundColor: UIColor.darkGray
                 ]
                 let nameStr = wire.name as NSString
                 let nameSize = nameStr.size(withAttributes: nameAttrs)
@@ -357,7 +353,7 @@ enum GraphExporter {
                     width: nameSize.width + 6,
                     height: nameSize.height + 2
                 )
-                ctx.setFillColor(CGColor.white)
+                ctx.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
                 ctx.fill(pillRect)
                 ctx.setStrokeColor(CGColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 1))
                 ctx.setLineWidth(0.5)
@@ -389,8 +385,8 @@ enum GraphExporter {
 
             // Label
             let attrs: [NSAttributedString.Key: Any] = [
-                .font: NSFont.boldSystemFont(ofSize: 13),
-                .foregroundColor: NSColor.white
+                .font: UIFont.boldSystemFont(ofSize: 13),
+                .foregroundColor: UIColor.white
             ]
             let label = node.label as NSString
             let labelSize = label.size(withAttributes: attrs)
@@ -412,5 +408,4 @@ enum GraphExporter {
             }
         }
     }
-    #endif
 }

@@ -1,5 +1,5 @@
 import SwiftUI
-import AppKit
+import UIKit
 
 /// Graph editor canvas with zoom/pan/selection and node+wire rendering.
 struct GraphCanvasView: View {
@@ -7,8 +7,8 @@ struct GraphCanvasView: View {
     @StateObject private var editor = GraphEditorViewModel()
     @State private var canvasSize: CGSize = .zero
 
-    /// Tracks the NSView backing this canvas for coordinate conversion
-    @State private var canvasNSView: NSView?
+    /// Tracks the UIView backing this canvas for coordinate conversion
+    @State private var canvasUIView: UIView?
 
     /// Resizable console height
     @State private var consoleHeight: CGFloat = 80
@@ -71,13 +71,12 @@ struct GraphCanvasView: View {
                     consolePanel
                 }
             }
-            .background(CanvasNSViewFinder(nsView: $canvasNSView))
+            .background(CanvasUIViewFinder(uiView: $canvasUIView))
             .gesture(panGesture)
+            .contextMenu { contextMenuContent }
             .onAppear {
                 canvasSize = geo.size
                 editor.graph = viewModel.currentGraph
-                installRightClickMonitor()
-                installKeyMonitor()
                 DispatchQueue.main.async {
                     canvasSize = geo.size
                     centerGraph(in: geo.size)
@@ -85,8 +84,6 @@ struct GraphCanvasView: View {
                 }
             }
             .onDisappear {
-                removeRightClickMonitor()
-                removeKeyMonitor()
             }
             .onChange(of: viewModel.currentGraph?.methodName) { _ in
                 editor.graph = viewModel.currentGraph
@@ -216,13 +213,12 @@ struct GraphCanvasView: View {
                             consoleHeight = max(40, min(300, consoleHeight - value.translation.height))
                         }
                 )
+                #if targetEnvironment(macCatalyst)
                 .onHover { hovering in
-                    if hovering {
-                        NSCursor.resizeUpDown.push()
-                    } else {
-                        NSCursor.pop()
-                    }
+                    // Cursor changes not available in Catalyst
+                    _ = hovering
                 }
+                #endif
 
             // Console header
             HStack {
@@ -762,247 +758,97 @@ struct GraphCanvasView: View {
         panStart = editor.panOffset
     }
 
-    // MARK: - Key event monitor
+    // MARK: - Context menu (SwiftUI)
 
-    @State private var keyMonitor: Any?
-
-    private func installKeyMonitor() {
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            // Delete / Backspace
-            if event.keyCode == 51 || event.keyCode == 117 {
-                if event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty {
-                    viewModel.deleteSelected()
-                    return nil
-                }
+    @ViewBuilder
+    private var contextMenuContent: some View {
+        Menu("Arithmetic") {
+            ForEach(["+", "-", "*", "/", "mod", "abs", "round"], id: \.self) { name in
+                Button(name) { insertPrimitive(name: name, inputs: 2, outputs: 1) }
             }
-            // Cmd+A — Select All
-            if event.charactersIgnoringModifiers == "a" && event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.shift) {
-                viewModel.selectAll()
-                return nil
+        }
+        Menu("Compare") {
+            ForEach(["=", "<", ">", "<=", ">=", "!="], id: \.self) { name in
+                Button(name) { insertPrimitive(name: name, inputs: 2, outputs: 1) }
             }
-            // Cmd+D — Duplicate
-            if event.charactersIgnoringModifiers == "d" && event.modifierFlags.contains(.command) {
-                viewModel.duplicateSelected()
-                return nil
+        }
+        Menu("Logic") {
+            Button("and") { insertPrimitive(name: "and", inputs: 2, outputs: 1) }
+            Button("or") { insertPrimitive(name: "or", inputs: 2, outputs: 1) }
+            Button("not") { insertPrimitive(name: "not", inputs: 1, outputs: 1) }
+            Button("if") { insertPrimitive(name: "if", inputs: 3, outputs: 1) }
+        }
+        Menu("String") {
+            ForEach(["concat", "length", "to-string", "split", "trim", "replace"], id: \.self) { name in
+                Button(name) { insertPrimitive(name: name, inputs: 2, outputs: 1) }
             }
-            return event
         }
-    }
-
-    private func removeKeyMonitor() {
-        if let monitor = keyMonitor {
-            NSEvent.removeMonitor(monitor)
-            keyMonitor = nil
+        Menu("List") {
+            ForEach(["get-nth", "append", "sort", "empty?", "length", "map", "filter"], id: \.self) { name in
+                Button(name) { insertPrimitive(name: name, inputs: 2, outputs: 1) }
+            }
         }
-    }
-
-    // MARK: - Right-click event monitor
-
-    @State private var rightClickMonitor: Any?
-
-    private func installRightClickMonitor() {
-        rightClickMonitor = NSEvent.addLocalMonitorForEvents(matching: .rightMouseDown) { [self] event in
-            guard let nsView = canvasNSView else { return event }
-            let locationInView = nsView.convert(event.locationInWindow, from: nil)
-            guard nsView.bounds.contains(locationInView) else { return event }
-            showContextMenu(at: locationInView, in: nsView)
-            return nil
-        }
-    }
-
-    private func removeRightClickMonitor() {
-        if let monitor = rightClickMonitor {
-            NSEvent.removeMonitor(monitor)
-            rightClickMonitor = nil
-        }
-    }
-
-    // MARK: - Right-click context menu (native NSMenu)
-
-    private func showContextMenu(at location: NSPoint, in view: NSView) {
-        let menu = NSMenu(title: "Insert Node")
-
-        func addPrim(_ name: String, inputs: Int, outputs: Int, to parent: NSMenu, libraryName: String? = nil) {
-            let item = NSMenuItem(title: name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-            item.representedObject = {
-                self.insertPrimitive(name: name, inputs: inputs, outputs: outputs, libraryName: libraryName)
-            } as () -> Void
-            item.target = CanvasMenuTarget.shared
-            parent.addItem(item)
+        Menu("Dict") {
+            Button("dict-create") { insertPrimitive(name: "dict-create", inputs: 0, outputs: 1) }
+            Button("dict-get") { insertPrimitive(name: "dict-get", inputs: 2, outputs: 1) }
+            Button("dict-set") { insertPrimitive(name: "dict-set", inputs: 3, outputs: 1) }
         }
 
-        let arith = NSMenuItem(title: "Arithmetic", action: nil, keyEquivalent: "")
-        let arithSub = NSMenu()
-        for name in ["+", "-", "*", "/", "mod", "abs", "round"] { addPrim(name, inputs: 2, outputs: 1, to: arithSub) }
-        arith.submenu = arithSub
-        menu.addItem(arith)
+        Divider()
 
-        let cmp = NSMenuItem(title: "Compare", action: nil, keyEquivalent: "")
-        let cmpSub = NSMenu()
-        for name in ["=", "<", ">", "<=", ">=", "!="] { addPrim(name, inputs: 2, outputs: 1, to: cmpSub) }
-        cmp.submenu = cmpSub
-        menu.addItem(cmp)
+        Button("Constant") { insertConstant() }
 
-        let logic = NSMenuItem(title: "Logic", action: nil, keyEquivalent: "")
-        let logicSub = NSMenu()
-        addPrim("and", inputs: 2, outputs: 1, to: logicSub)
-        addPrim("or", inputs: 2, outputs: 1, to: logicSub)
-        addPrim("not", inputs: 1, outputs: 1, to: logicSub)
-        addPrim("if", inputs: 3, outputs: 1, to: logicSub)
-        logic.submenu = logicSub
-        menu.addItem(logic)
-
-        let str = NSMenuItem(title: "String", action: nil, keyEquivalent: "")
-        let strSub = NSMenu()
-        for name in ["concat", "length", "to-string", "split", "trim", "replace"] { addPrim(name, inputs: 2, outputs: 1, to: strSub) }
-        str.submenu = strSub
-        menu.addItem(str)
-
-        let list = NSMenuItem(title: "List", action: nil, keyEquivalent: "")
-        let listSub = NSMenu()
-        for name in ["get-nth", "append", "sort", "empty?", "length", "map", "filter"] { addPrim(name, inputs: 2, outputs: 1, to: listSub) }
-        list.submenu = listSub
-        menu.addItem(list)
-
-        let dict = NSMenuItem(title: "Dict", action: nil, keyEquivalent: "")
-        let dictSub = NSMenu()
-        addPrim("dict-create", inputs: 0, outputs: 1, to: dictSub)
-        addPrim("dict-get", inputs: 2, outputs: 1, to: dictSub)
-        addPrim("dict-set", inputs: 3, outputs: 1, to: dictSub)
-        dict.submenu = dictSub
-        menu.addItem(dict)
-
-        menu.addItem(NSMenuItem.separator())
-
-        let constItem = NSMenuItem(title: "Constant", action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-        constItem.representedObject = {
-            self.insertConstant()
-        } as () -> Void
-        constItem.target = CanvasMenuTarget.shared
-        menu.addItem(constItem)
-
-        let io = NSMenuItem(title: "I/O", action: nil, keyEquivalent: "")
-        let ioSub = NSMenu()
-        addPrim("log", inputs: 1, outputs: 1, to: ioSub)
-        addPrim("inspect", inputs: 1, outputs: 1, to: ioSub)
-        io.submenu = ioSub
-        menu.addItem(io)
+        Menu("I/O") {
+            Button("log") { insertPrimitive(name: "log", inputs: 1, outputs: 1) }
+            Button("inspect") { insertPrimitive(name: "inspect", inputs: 1, outputs: 1) }
+        }
 
         // Library submenus
-        let libs = viewModel.libraryManager.libraries
-        if !libs.isEmpty {
-            menu.addItem(NSMenuItem.separator())
-            for lib in libs {
-                let libItem = NSMenuItem(title: lib.manifest.name, action: nil, keyEquivalent: "")
-                let libSub = NSMenu()
-                for prim in lib.manifest.primitives {
-                    addPrim(prim.name, inputs: prim.num_inputs, outputs: prim.num_outputs, to: libSub, libraryName: lib.manifest.name)
+        ForEach(viewModel.libraryManager.libraries, id: \.manifest.name) { lib in
+            Menu(lib.manifest.name) {
+                ForEach(lib.manifest.primitives, id: \.name) { prim in
+                    Button(prim.name) { insertPrimitive(name: prim.name, inputs: prim.num_inputs, outputs: prim.num_outputs, libraryName: lib.manifest.name) }
                 }
-                libItem.submenu = libSub
-                menu.addItem(libItem)
             }
         }
 
         // Classes submenu
         let allClasses = viewModel.project?.sections.flatMap(\.classes) ?? []
         if !allClasses.isEmpty {
-            menu.addItem(NSMenuItem.separator())
-            let classesItem = NSMenuItem(title: "Classes", action: nil, keyEquivalent: "")
-            let classesSub = NSMenu()
-
-            for classDef in allClasses {
-                let classItem = NSMenuItem(title: classDef.name, action: nil, keyEquivalent: "")
-                let classSub = NSMenu()
-
-                // "new ClassName"
-                let newItem = NSMenuItem(title: "new \(classDef.name)", action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                newItem.representedObject = {
-                    self.insertInstanceGenerator(className: classDef.name)
-                } as () -> Void
-                newItem.target = CanvasMenuTarget.shared
-                classSub.addItem(newItem)
-
-                // Get submenu
-                if !classDef.attributes.isEmpty {
-                    let getItem = NSMenuItem(title: "Get", action: nil, keyEquivalent: "")
-                    let getSub = NSMenu()
-                    for attr in classDef.attributes {
-                        let item = NSMenuItem(title: attr.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                        item.representedObject = {
-                            self.insertGetNode(className: classDef.name, attrName: attr.name)
-                        } as () -> Void
-                        item.target = CanvasMenuTarget.shared
-                        getSub.addItem(item)
+            Divider()
+            Menu("Classes") {
+                ForEach(allClasses, id: \.id) { classDef in
+                    Menu(classDef.name) {
+                        Button("new \(classDef.name)") { insertInstanceGenerator(className: classDef.name) }
+                        if !classDef.attributes.isEmpty {
+                            Menu("Get") {
+                                ForEach(classDef.attributes, id: \.name) { attr in
+                                    Button(attr.name) { insertGetNode(className: classDef.name, attrName: attr.name) }
+                                }
+                            }
+                            Menu("Set") {
+                                ForEach(classDef.attributes, id: \.name) { attr in
+                                    Button(attr.name) { insertSetNode(className: classDef.name, attrName: attr.name) }
+                                }
+                            }
+                        }
+                        ForEach(classDef.methods, id: \.name) { method in
+                            Button(method.name) { insertMethodCall(name: method.name, inputs: method.numInputs, outputs: method.numOutputs) }
+                        }
                     }
-                    getItem.submenu = getSub
-                    classSub.addItem(getItem)
-
-                    // Set submenu
-                    let setItem = NSMenuItem(title: "Set", action: nil, keyEquivalent: "")
-                    let setSub = NSMenu()
-                    for attr in classDef.attributes {
-                        let item = NSMenuItem(title: attr.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                        item.representedObject = {
-                            self.insertSetNode(className: classDef.name, attrName: attr.name)
-                        } as () -> Void
-                        item.target = CanvasMenuTarget.shared
-                        setSub.addItem(item)
-                    }
-                    setItem.submenu = setSub
-                    classSub.addItem(setItem)
                 }
-
-                // Class methods
-                for method in classDef.methods {
-                    let mItem = NSMenuItem(title: method.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                    mItem.representedObject = {
-                        self.insertMethodCall(name: method.name, inputs: method.numInputs, outputs: method.numOutputs)
-                    } as () -> Void
-                    mItem.target = CanvasMenuTarget.shared
-                    classSub.addItem(mItem)
-                }
-
-                classItem.submenu = classSub
-                classesSub.addItem(classItem)
             }
-
-            classesItem.submenu = classesSub
-            menu.addItem(classesItem)
         }
 
-        // Methods submenu (universal methods across all sections)
+        // Methods submenu
         let allMethods = viewModel.project?.sections.flatMap(\.methods) ?? []
         if !allMethods.isEmpty {
-            let methodsItem = NSMenuItem(title: "Methods", action: nil, keyEquivalent: "")
-            let methodsSub = NSMenu()
-            for method in allMethods {
-                let mItem = NSMenuItem(title: method.name, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-                mItem.representedObject = {
-                    self.insertMethodCall(name: method.name, inputs: method.numInputs, outputs: method.numOutputs)
-                } as () -> Void
-                mItem.target = CanvasMenuTarget.shared
-                methodsSub.addItem(mItem)
+            Menu("Methods") {
+                ForEach(allMethods, id: \.name) { method in
+                    Button(method.name) { insertMethodCall(name: method.name, inputs: method.numInputs, outputs: method.numOutputs) }
+                }
             }
-            methodsItem.submenu = methodsSub
-            menu.addItem(methodsItem)
         }
-
-        // Breakpoint toggle (if clicking on a node)
-        let graphPt = editor.screenToGraph(CGPoint(x: location.x, y: view.bounds.height - location.y))
-        if let node = viewModel.currentGraph?.nodeAt(point: graphPt), node.engineNodeId != 0 {
-            menu.addItem(NSMenuItem.separator())
-            let bpTitle = viewModel.debugger.breakpointNodeIds.contains(String(node.engineNodeId))
-                ? "Remove Breakpoint" : "Toggle Breakpoint"
-            let bpItem = NSMenuItem(title: bpTitle, action: #selector(CanvasMenuTarget.menuAction(_:)), keyEquivalent: "")
-            let engineId = node.engineNodeId
-            bpItem.representedObject = {
-                viewModel.toggleBreakpoint(nodeId: engineId)
-            } as () -> Void
-            bpItem.target = CanvasMenuTarget.shared
-            menu.addItem(bpItem)
-        }
-
-        menu.popUp(positioning: nil, at: location, in: view)
     }
 
     private var insertionPoint: CGPoint {
@@ -1093,28 +939,18 @@ struct GraphCanvasView: View {
     }
 }
 
-// MARK: - Native NSMenu support for right-click
+// MARK: - UIView finder for coordinate conversion
 
-class CanvasMenuTarget: NSObject {
-    static let shared = CanvasMenuTarget()
+struct CanvasUIViewFinder: UIViewRepresentable {
+    @Binding var uiView: UIView?
 
-    @objc func menuAction(_ sender: NSMenuItem) {
-        if let action = sender.representedObject as? () -> Void {
-            action()
-        }
-    }
-}
-
-struct CanvasNSViewFinder: NSViewRepresentable {
-    @Binding var nsView: NSView?
-
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        DispatchQueue.main.async { self.nsView = view }
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        DispatchQueue.main.async { self.uiView = view }
         return view
     }
 
-    func updateNSView(_ nsView: NSView, context: Context) {
-        DispatchQueue.main.async { self.nsView = nsView }
+    func updateUIView(_ uiView: UIView, context: Context) {
+        DispatchQueue.main.async { self.uiView = uiView }
     }
 }

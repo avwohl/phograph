@@ -1,19 +1,52 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 @main
 struct PhographApp: App {
     @StateObject private var viewModel = IDEViewModel()
+    @State private var showAbout = false
+    @State private var showFileImporter = false
 
     var body: some Scene {
         WindowGroup {
             IDEWorkspaceView(viewModel: viewModel)
+                .fileImporter(
+                    isPresented: $showFileImporter,
+                    allowedContentTypes: [.json],
+                    allowsMultipleSelection: false
+                ) { result in
+                    if case .success(let urls) = result, let url = urls.first {
+                        guard url.startAccessingSecurityScopedResource() else { return }
+                        defer { url.stopAccessingSecurityScopedResource() }
+                        do {
+                            let json = try String(contentsOf: url)
+                            viewModel.loadProject(json: json, from: url)
+                        } catch {
+                            viewModel.consoleOutput += "Failed to read \(url.lastPathComponent): \(error.localizedDescription)\n"
+                            viewModel.statusMessage = "Open failed"
+                        }
+                    }
+                }
+                .alert("About Phograph", isPresented: $showAbout) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
+                    Text("""
+                    Version \(version)
+
+                    A modern implementation of the Prograph
+                    visual dataflow programming language.
+
+                    Author: Aaron Wohl
+                    Copyright \u{00A9} 2025-2026 Aaron Wohl.
+                    All rights reserved.
+                    """)
+                }
         }
-        #if os(macOS)
-        .defaultSize(width: 1200, height: 800)
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Phograph") {
-                    showAbout()
+                    showAbout = true
                 }
             }
             CommandGroup(replacing: .newItem) {
@@ -23,7 +56,7 @@ struct PhographApp: App {
                 .keyboardShortcut("n", modifiers: .command)
 
                 Button("Open Project...") {
-                    openProject()
+                    showFileImporter = true
                 }
                 .keyboardShortcut("o", modifiers: .command)
 
@@ -41,7 +74,7 @@ struct PhographApp: App {
                 .disabled(viewModel.project == nil)
 
                 Button("Save Project As...") {
-                    saveProjectAs()
+                    viewModel.showSavePanel = true
                 }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
                 .disabled(viewModel.project == nil)
@@ -49,13 +82,13 @@ struct PhographApp: App {
                 Divider()
 
                 Button("Export as PDF...") {
-                    viewModel.exportPDF()
+                    viewModel.showPDFExport = true
                 }
                 .keyboardShortcut("p", modifiers: [.command, .shift])
                 .disabled(viewModel.currentGraph == nil)
 
                 Button("Export as SVG...") {
-                    viewModel.exportSVG()
+                    viewModel.showSVGExport = true
                 }
                 .disabled(viewModel.currentGraph == nil)
 
@@ -177,15 +210,15 @@ struct PhographApp: App {
             // Help menu
             CommandMenu("Help") {
                 Button("Lessons") {
-                    NSWorkspace.shared.open(URL(string: "https://avwohl.github.io/phograph/")!)
+                    openURL("https://avwohl.github.io/phograph/")
                 }
 
                 Button("IDE Guide") {
-                    NSWorkspace.shared.open(URL(string: "https://avwohl.github.io/phograph/guide.html")!)
+                    openURL("https://avwohl.github.io/phograph/guide.html")
                 }
 
                 Button("Language Reference") {
-                    NSWorkspace.shared.open(URL(string: "https://avwohl.github.io/phograph/reference.html")!)
+                    openURL("https://avwohl.github.io/phograph/reference.html")
                 }
             }
 
@@ -202,69 +235,12 @@ struct PhographApp: App {
                     viewModel.libraryManager.discoverLibraries()
                 }
             }
-
         }
-        #endif
     }
 
-    #if os(macOS)
-    private func showAbout() {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
-        let alert = NSAlert()
-        alert.messageText = "Phograph"
-
-        let repoURL = "https://github.com/avwohl/phograph"
-        let text = """
-            Version \(version)
-
-            A modern implementation of the Prograph
-            visual dataflow programming language.
-
-            Author: Aaron Wohl
-            Copyright \u{00A9} 2025-2026 Aaron Wohl.
-            All rights reserved.
-
-            \(repoURL)
-            """
-        let attrStr = NSMutableAttributedString(string: text, attributes: [
-            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
-        ])
-        if let urlRange = text.range(of: repoURL) {
-            let nsRange = NSRange(urlRange, in: text)
-            attrStr.addAttributes([
-                .link: URL(string: repoURL)!,
-                .cursor: NSCursor.pointingHand,
-            ], range: nsRange)
-        }
-
-        let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 300, height: 160))
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.drawsBackground = false
-        textView.textStorage?.setAttributedString(attrStr)
-        textView.textContainerInset = NSSize(width: 0, height: 0)
-        alert.accessoryView = textView
-        alert.informativeText = ""
-
-        alert.alertStyle = .informational
-        alert.icon = NSApp.applicationIconImage
-        alert.runModal()
-    }
-
-    private func openProject() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.json]
-        panel.allowsMultipleSelection = false
-        panel.begin { response in
-            guard response == .OK, let url = panel.url else { return }
-            do {
-                let json = try String(contentsOf: url)
-                viewModel.loadProject(json: json, from: url)
-            } catch {
-                viewModel.consoleOutput += "Failed to read \(url.lastPathComponent): \(error.localizedDescription)\n"
-                viewModel.statusMessage = "Open failed"
-            }
-        }
+    private func openURL(_ urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        UIApplication.shared.open(url)
     }
 
     private func saveProject() {
@@ -272,18 +248,7 @@ struct PhographApp: App {
         if let url = project.filePath {
             viewModel.saveProject(to: url)
         } else {
-            saveProjectAs()
+            viewModel.showSavePanel = true
         }
     }
-
-    private func saveProjectAs() {
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [.json]
-        panel.nameFieldStringValue = (viewModel.project?.name ?? "Untitled") + ".phograph.json"
-        panel.begin { response in
-            guard response == .OK, let url = panel.url else { return }
-            viewModel.saveProject(to: url)
-        }
-    }
-    #endif
 }

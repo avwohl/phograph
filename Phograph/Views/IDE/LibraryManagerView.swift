@@ -132,20 +132,26 @@ struct LibraryManagerView: View {
                 }
 
                 if let author = lib.manifest.author {
-                    LabeledContent("Author") {
+                    HStack {
+                        Text("Author").foregroundColor(.secondary)
+                        Spacer()
                         Text(author)
                     }
                     .font(.caption)
                 }
 
                 if let minVer = lib.manifest.min_engine_version {
-                    LabeledContent("Min Engine Version") {
+                    HStack {
+                        Text("Min Engine Version").foregroundColor(.secondary)
+                        Spacer()
                         Text(minVer)
                     }
                     .font(.caption)
                 }
 
-                LabeledContent("Has dylib") {
+                HStack {
+                    Text("Has dylib").foregroundColor(.secondary)
+                    Spacer()
                     Text(lib.hasDylib ? "Yes" : "No (metadata only)")
                 }
                 .font(.caption)

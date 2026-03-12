@@ -1,9 +1,7 @@
 import Foundation
 import Combine
-#if os(macOS)
 import UniformTypeIdentifiers
-import AppKit
-#endif
+import UIKit
 
 /// Orchestrates the IDE: project loading, engine calls, state coordination.
 class IDEViewModel: ObservableObject {
@@ -24,9 +22,13 @@ class IDEViewModel: ObservableObject {
     @Published var showLibraryManager: Bool = false
     @Published var showExportSheet: Bool = false
     @Published var showCanvasOutput: Bool = false
+    @Published var canvasOutputImage: UIImage?
     @Published var showFrontPanel: Bool = false
     @Published var frontPanelClassName: String = ""
     @Published var missingLibraries: [LibraryReference] = []
+    @Published var showSavePanel: Bool = false
+    @Published var showPDFExport: Bool = false
+    @Published var showSVGExport: Bool = false
 
     /// Debugger
     @Published var debugger = DebuggerViewModel()
@@ -46,7 +48,7 @@ class IDEViewModel: ObservableObject {
 
     let bridge = PhographBridge()
     let libraryManager = LibraryManager()
-    private var projectJSON: String?
+    var projectJSON: String?
     private var graphCancellable: AnyCancellable?
 
     init() {
@@ -230,8 +232,9 @@ class IDEViewModel: ObservableObject {
 
                 statusMessage = status == "success" ? "Done" : "Done (\(status))"
 
-                // Check if canvas output was produced
+                // Check if canvas output was produced — capture image now before buffer is invalidated
                 if bridge.bufferWidth > 0 && bridge.bufferHeight > 0 {
+                    canvasOutputImage = captureCanvasImage()
                     showCanvasOutput = true
                 }
             } catch {
@@ -254,6 +257,42 @@ class IDEViewModel: ObservableObject {
             return
         }
         runMethod(name: name)
+    }
+
+    /// Capture the current pixel buffer as a UIImage (BGRA → RGBA conversion).
+    private func captureCanvasImage() -> UIImage? {
+        var w: Int32 = 0
+        var h: Int32 = 0
+        guard let ptr = bridge.pixelBufferWidth(&w, height: &h),
+              w > 0, h > 0 else { return nil }
+
+        let width = Int(w)
+        let height = Int(h)
+        let bytesPerRow = width * 4
+        let totalBytes = bytesPerRow * height
+
+        guard let ctx = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ), let dest = ctx.data else { return nil }
+
+        let destPtr = dest.bindMemory(to: UInt8.self, capacity: totalBytes)
+        let src = UnsafeRawPointer(ptr).bindMemory(to: UInt8.self, capacity: totalBytes)
+        for i in 0..<(width * height) {
+            let si = i * 4
+            destPtr[si + 0] = src[si + 2]  // R ← B
+            destPtr[si + 1] = src[si + 1]  // G
+            destPtr[si + 2] = src[si + 0]  // B ← R
+            destPtr[si + 3] = src[si + 3]  // A
+        }
+
+        guard let cgImage = ctx.makeImage() else { return nil }
+        return UIImage(cgImage: cgImage)
     }
 
     // MARK: - Edit Actions
@@ -526,42 +565,28 @@ class IDEViewModel: ObservableObject {
 
     // MARK: - Export
 
-    #if os(macOS)
-    func exportPDF() {
+    func exportPDF(to url: URL) {
         guard let graph = currentGraph else { return }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [UTType.pdf]
-        panel.nameFieldStringValue = (selectedMethodName ?? "graph") + ".pdf"
-        panel.begin { response in
-            guard response == .OK, let url = panel.url else { return }
-            do {
-                try GraphExporter.exportPDF(graph: graph, to: url)
-                self.statusMessage = "Exported PDF"
-            } catch {
-                self.consoleOutput += "PDF export error: \(error.localizedDescription)\n"
-                self.statusMessage = "Export failed"
-            }
+        do {
+            try GraphExporter.exportPDF(graph: graph, to: url)
+            statusMessage = "Exported PDF"
+        } catch {
+            consoleOutput += "PDF export error: \(error.localizedDescription)\n"
+            statusMessage = "Export failed"
         }
     }
 
-    func exportSVG() {
+    func exportSVG(to url: URL) {
         guard let graph = currentGraph else { return }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [UTType.svg]
-        panel.nameFieldStringValue = (selectedMethodName ?? "graph") + ".svg"
-        panel.begin { response in
-            guard response == .OK, let url = panel.url else { return }
-            let svgString = GraphExporter.exportSVG(graph: graph)
-            do {
-                try svgString.write(to: url, atomically: true, encoding: .utf8)
-                self.statusMessage = "Exported SVG"
-            } catch {
-                self.consoleOutput += "SVG export error: \(error.localizedDescription)\n"
-                self.statusMessage = "Export failed"
-            }
+        let svgString = GraphExporter.exportSVG(graph: graph)
+        do {
+            try svgString.write(to: url, atomically: true, encoding: .utf8)
+            statusMessage = "Exported SVG"
+        } catch {
+            consoleOutput += "SVG export error: \(error.localizedDescription)\n"
+            statusMessage = "Export failed"
         }
     }
-    #endif
 
     // MARK: - Case Navigation
 

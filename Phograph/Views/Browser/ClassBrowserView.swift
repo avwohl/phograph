@@ -118,7 +118,7 @@ struct ClassBrowserView: View {
                         commitRename(classDef)
                     })
                     .textFieldStyle(.plain)
-                    .onExitCommand { renamingClassId = nil }
+                    .onSubmit { commitRename(classDef) }
                 } else {
                     Text(classDef.name)
                     if let parent = classDef.parentName {

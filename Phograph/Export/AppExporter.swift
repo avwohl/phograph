@@ -2,9 +2,7 @@
 // Orchestrates exporting a Phograph program as a standalone macOS/iOS app.
 
 import Foundation
-#if os(macOS)
-import AppKit
-#endif
+import UIKit
 
 class AppExporter: ObservableObject {
 
@@ -272,16 +270,18 @@ class AppExporter: ObservableObject {
     }
 
     private func runProcess(_ path: String, args: [String], at workingDir: URL) async -> ProcessResult {
+        #if targetEnvironment(macCatalyst) || os(iOS)
+        // Process is unavailable in Catalyst/iOS — project files are generated but build must be done manually
+        return ProcessResult(output: "Process execution not available on this platform. Run xcodegen and xcodebuild manually.", exitCode: -1)
+        #else
         await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 let process = Process()
                 let pipe = Pipe()
 
-                // Resolve tool path
                 if path.hasPrefix("/") {
                     process.executableURL = URL(fileURLWithPath: path)
                 } else {
-                    // Use /usr/bin/env to find the tool in PATH
                     process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
                     process.arguments = [path] + args
                 }
@@ -293,7 +293,6 @@ class AppExporter: ObservableObject {
                 process.standardOutput = pipe
                 process.standardError = pipe
 
-                // Inherit PATH from user environment
                 var env = ProcessInfo.processInfo.environment
                 if let homebrew = ["/opt/homebrew/bin", "/usr/local/bin"].first(where: { FileManager.default.fileExists(atPath: $0) }) {
                     env["PATH"] = "\(homebrew):\(env["PATH"] ?? "/usr/bin:/bin")"
@@ -311,6 +310,7 @@ class AppExporter: ObservableObject {
                 }
             }
         }
+        #endif
     }
 }
 

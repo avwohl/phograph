@@ -28,9 +28,6 @@ struct FuzzyFinderPopup: View {
                 TextField("Search nodes...", text: $query)
                     .textFieldStyle(.plain)
                     .focused($isFocused)
-                    #if os(macOS)
-                    .onExitCommand { isPresented = false }
-                    #endif
             }
             .padding(10)
             .background(Color(white: 0.2))

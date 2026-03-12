@@ -3,7 +3,6 @@
 
 import SwiftUI
 
-#if os(macOS)
 struct ExportAppSheet: View {
     @ObservedObject var viewModel: IDEViewModel
     @StateObject private var exporter: AppExporter
@@ -18,6 +17,7 @@ struct ExportAppSheet: View {
     @State private var outputDirectory: URL?
     @State private var isExporting: Bool = false
     @State private var showBuildLog: Bool = false
+    @State private var showDirectoryPicker: Bool = false
 
     init(viewModel: IDEViewModel) {
         self.viewModel = viewModel
@@ -48,9 +48,7 @@ struct ExportAppSheet: View {
                 Section("App Configuration") {
                     TextField("App Name", text: $appName)
                     TextField("Bundle Identifier", text: $bundleID)
-                        .help("e.g. com.yourname.appname")
                     TextField("Team ID", text: $teamID)
-                        .help("Your Apple Developer Team ID")
                 }
 
                 Section("Platform") {
@@ -74,12 +72,11 @@ struct ExportAppSheet: View {
                             .truncationMode(.middle)
                         Spacer()
                         Button("Choose...") {
-                            chooseOutputDirectory()
+                            showDirectoryPicker = true
                         }
                     }
                 }
             }
-            .formStyle(.grouped)
 
             // Build log
             if showBuildLog {
@@ -98,7 +95,7 @@ struct ExportAppSheet: View {
                             .textSelection(.enabled)
                     }
                     .frame(height: 150)
-                    .background(Color(nsColor: .textBackgroundColor))
+                    .background(Color(.secondarySystemBackground))
                     .cornerRadius(4)
                 }
             }
@@ -120,9 +117,9 @@ struct ExportAppSheet: View {
                 Spacer()
 
                 if showBuildLog && exporter.phase == .done {
-                    Button("Open in Finder") {
+                    Button("Reveal in Files") {
                         if let dir = outputDirectory {
-                            NSWorkspace.shared.open(dir)
+                            UIApplication.shared.open(dir)
                         }
                     }
                 }
@@ -136,23 +133,19 @@ struct ExportAppSheet: View {
         }
         .padding(20)
         .frame(width: 500, height: showBuildLog ? 650 : 450)
+        .fileImporter(
+            isPresented: $showDirectoryPicker,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            if case .success(let urls) = result, let url = urls.first {
+                outputDirectory = url
+            }
+        }
     }
 
     private var canBuild: Bool {
         !appName.isEmpty && !bundleID.isEmpty && outputDirectory != nil && (buildMacOS || buildIOS)
-    }
-
-    private func chooseOutputDirectory() {
-        let panel = NSOpenPanel()
-        panel.canChooseDirectories = true
-        panel.canChooseFiles = false
-        panel.canCreateDirectories = true
-        panel.prompt = "Choose Output Directory"
-        panel.begin { response in
-            if response == .OK, let url = panel.url {
-                outputDirectory = url
-            }
-        }
     }
 
     private func startExport() {
@@ -190,4 +183,3 @@ struct ExportAppSheet: View {
         }
     }
 }
-#endif

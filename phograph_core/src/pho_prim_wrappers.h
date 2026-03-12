@@ -81,6 +81,20 @@ inline Color color_from_value(const Value& v) {
             return Color(r, g, b, a);
         }
     }
+    if (v.is_string()) {
+        auto name = v.as_string()->str();
+        if (name == "black")   return colors::black;
+        if (name == "white")   return colors::white;
+        if (name == "red")     return colors::red;
+        if (name == "green")   return colors::green;
+        if (name == "blue")    return colors::blue;
+        if (name == "yellow")  return colors::yellow;
+        if (name == "cyan")    return colors::cyan;
+        if (name == "magenta") return colors::magenta;
+        if (name == "orange")  return colors::orange;
+        if (name == "gray" || name == "grey") return colors::gray;
+        if (name == "clear")   return colors::clear;
+    }
     return colors::clear;
 }
 

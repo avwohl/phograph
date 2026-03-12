@@ -1,19 +1,24 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Root IDE view with three-panel layout: browser | canvas | inspector.
 /// Shows a welcome screen when no project is loaded.
 struct IDEWorkspaceView: View {
     @ObservedObject var viewModel: IDEViewModel
+    @State private var showFileImporter = false
 
     var body: some View {
-        Group {
-            if viewModel.project != nil {
-                projectView
-            } else {
-                welcomeView
+        NavigationStack {
+            Group {
+                if viewModel.project != nil {
+                    projectView
+                } else {
+                    welcomeView
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             viewModel.libraryManager.discoverLibraries()
         }
@@ -26,13 +31,40 @@ struct IDEWorkspaceView: View {
         .sheet(isPresented: $viewModel.showCanvasOutput) {
             CanvasOutputView(viewModel: viewModel)
         }
+        .fileImporter(
+            isPresented: $showFileImporter,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            if case .success(let urls) = result, let url = urls.first {
+                guard url.startAccessingSecurityScopedResource() else { return }
+                defer { url.stopAccessingSecurityScopedResource() }
+                do {
+                    let json = try String(contentsOf: url)
+                    viewModel.loadProject(json: json, from: url)
+                } catch {
+                    viewModel.consoleOutput += "Failed to read \(url.lastPathComponent): \(error.localizedDescription)\n"
+                    viewModel.statusMessage = "Open failed"
+                }
+            }
+        }
+        .fileExporter(
+            isPresented: $viewModel.showSavePanel,
+            document: ProjectDocument(json: viewModel.projectJSON ?? ""),
+            contentType: .json,
+            defaultFilename: (viewModel.project?.name ?? "Untitled") + ".phograph.json"
+        ) { result in
+            if case .success(let url) = result {
+                viewModel.saveProject(to: url)
+            }
+        }
     }
 
     private var projectView: some View {
         VStack(spacing: 0) {
             if viewModel.isDebugging {
                 DebuggerControlsView(viewModel: viewModel.debugger, ideViewModel: viewModel)
-                    .background(Color(nsColor: .controlBackgroundColor))
+                    .background(Color(.secondarySystemBackground))
                 Divider()
             }
 
@@ -54,7 +86,7 @@ struct IDEWorkspaceView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color(.systemBackground))
         .toolbar {
             ToolbarView(viewModel: viewModel)
         }
@@ -103,7 +135,7 @@ struct IDEWorkspaceView: View {
                 .padding(.bottom, 16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color(.systemBackground))
         .sheet(isPresented: $viewModel.showExampleBrowser) {
             ExampleBrowserView(viewModel: viewModel)
         }
@@ -124,25 +156,9 @@ struct IDEWorkspaceView: View {
         .buttonStyle(.bordered)
     }
 
-    #if os(macOS)
     private func openProject() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.json]
-        panel.allowsMultipleSelection = false
-        panel.begin { response in
-            guard response == .OK, let url = panel.url else { return }
-            do {
-                let json = try String(contentsOf: url)
-                viewModel.loadProject(json: json, from: url)
-            } catch {
-                viewModel.consoleOutput += "Failed to read \(url.lastPathComponent): \(error.localizedDescription)\n"
-                viewModel.statusMessage = "Open failed"
-            }
-        }
+        showFileImporter = true
     }
-    #else
-    private func openProject() {}
-    #endif
 
     private func addNodeFromFuzzyFinder(name: String) {
         guard let graph = viewModel.currentGraph else { return }
@@ -232,5 +248,30 @@ struct IDEWorkspaceView: View {
         node.width = max(node.width, labelWidth)
         graph.addNode(node)
         viewModel.showFuzzyFinder = false
+    }
+}
+
+/// Minimal FileDocument wrapper for JSON project save/export.
+struct ProjectDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.json] }
+    var json: String
+
+    init(json: String) {
+        self.json = json
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents,
+              let str = String(data: data, encoding: .utf8) else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        json = str
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        guard let data = json.data(using: .utf8) else {
+            throw CocoaError(.fileWriteUnknown)
+        }
+        return FileWrapper(regularFileWithContents: data)
     }
 }

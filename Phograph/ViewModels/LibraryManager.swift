@@ -136,8 +136,11 @@ class LibraryManager: ObservableObject {
         defer { try? fm.removeItem(at: tempDir) }
 
         let filename = url.lastPathComponent.lowercased()
+        #if targetEnvironment(macCatalyst) || os(iOS)
+        // Process is unavailable in Catalyst/iOS — install from local directory instead
+        throw LibraryError.downloadFailed("Archive extraction not supported on this platform. Install from a local directory instead.")
+        #else
         if filename.hasSuffix(".tar.gz") || filename.hasSuffix(".tgz") {
-            // Extract tar.gz
             let tarPath = tempDir.appendingPathComponent("archive.tar.gz")
             try fm.moveItem(at: localURL, to: tarPath)
             let process = Process()
@@ -149,7 +152,6 @@ class LibraryManager: ObservableObject {
                 throw LibraryError.downloadFailed("Failed to extract archive")
             }
         } else if filename.hasSuffix(".zip") {
-            // Extract zip via ditto
             let zipPath = tempDir.appendingPathComponent("archive.zip")
             try fm.moveItem(at: localURL, to: zipPath)
             let process = Process()
@@ -161,9 +163,9 @@ class LibraryManager: ObservableObject {
                 throw LibraryError.downloadFailed("Failed to extract zip")
             }
         } else {
-            // Treat as a single file (unlikely) — just move
             try fm.moveItem(at: localURL, to: tempDir.appendingPathComponent(url.lastPathComponent))
         }
+        #endif
 
         // Find the library directory (contains library.json)
         let libDir = try findLibraryDir(in: tempDir)

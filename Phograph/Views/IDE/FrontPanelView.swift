@@ -28,7 +28,7 @@ struct FrontPanelView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color(.secondarySystemBackground))
 
             Divider()
 

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Phograph** is an open source visual dataflow programming environment for macOS.
+**Phograph** is an open source visual dataflow programming environment for macOS and iOS.
 
 ## Data Collection
 
@@ -8,7 +8,7 @@ This app does **not** collect, store, or transmit any personal data.
 
 ## Network Usage
 
-This app does not make any network connections. All project files are stored and processed locally.
+This app connects to the internet solely to download plugin libraries when you use **Libraries > Install from URL**. No data is sent; the only network activity is fetching the library archive from the URL you provide. All project files are stored and processed locally.
 
 ## Local Storage
 

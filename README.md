@@ -220,7 +220,7 @@ Contributions are welcome.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE)
+GPLv3 License - see [LICENSE](LICENSE)
 
 ## Privacy
 

@@ -1,0 +1,89 @@
+{
+  "name": "Prime Check",
+  "libraries": [
+    {
+      "name": "math",
+      "version": "1.0.0"
+    }
+  ],
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "/main",
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "value": 97,
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "n"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "primitive",
+                  "name": "is-prime",
+                  "library": "math",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "n"
+                  ],
+                  "output_names": [
+                    "prime?"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 0,
+                  "name": "97"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "prime?"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 5
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,326 @@
+{
+  "name": "Counter",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "Counter",
+          "attributes": [
+            {
+              "name": "count",
+              "default": 0
+            }
+          ],
+          "methods": [
+            {
+              "name": "increment",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "count",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "count"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "integer",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "id": 4,
+                      "type": "primitive",
+                      "name": "+",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "sum"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "set",
+                      "name": "count",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 6,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "self"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "count"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 2,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 1,
+                      "name": "count+1"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "self"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 6
+                }
+              ]
+            },
+            {
+              "name": "get-count",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "count",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "count"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "count"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 3
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "output_names": [
+            "result"
+          ],
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "Counter",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "counter"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "method_call",
+                  "name": "Counter/increment",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "method_call",
+                  "name": "Counter/increment",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "method_call",
+                  "name": "Counter/increment",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "method_call",
+                  "name": "Counter/get-count",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "count"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "+1"
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "+2"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "+3"
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "3"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 7
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

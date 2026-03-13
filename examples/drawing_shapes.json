@@ -1,0 +1,370 @@
+{
+  "name": "Drawing Shapes",
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 0,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "primitive",
+                  "name": "shape-rect",
+                  "num_inputs": 4,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "x",
+                    "y",
+                    "w",
+                    "h"
+                  ],
+                  "output_names": [
+                    "shape"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 50
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 50
+                  }
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 100
+                  }
+                },
+                {
+                  "id": 6,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 80
+                  }
+                },
+                {
+                  "id": 7,
+                  "type": "primitive",
+                  "name": "shape-set-fill",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "shape",
+                    "color"
+                  ],
+                  "output_names": [
+                    "shape"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "red"
+                  }
+                },
+                {
+                  "id": 9,
+                  "type": "primitive",
+                  "name": "shape-oval",
+                  "num_inputs": 4,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "x",
+                    "y",
+                    "w",
+                    "h"
+                  ],
+                  "output_names": [
+                    "shape"
+                  ]
+                },
+                {
+                  "id": 10,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 200
+                  }
+                },
+                {
+                  "id": 11,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 100
+                  }
+                },
+                {
+                  "id": 12,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 120
+                  }
+                },
+                {
+                  "id": 13,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 80
+                  }
+                },
+                {
+                  "id": 14,
+                  "type": "primitive",
+                  "name": "shape-set-fill",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "shape",
+                    "color"
+                  ],
+                  "output_names": [
+                    "shape"
+                  ]
+                },
+                {
+                  "id": 15,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "blue"
+                  }
+                },
+                {
+                  "id": 16,
+                  "type": "primitive",
+                  "name": "shape-group",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "group"
+                  ]
+                },
+                {
+                  "id": 17,
+                  "type": "primitive",
+                  "name": "create-canvas",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "w",
+                    "h"
+                  ],
+                  "output_names": [
+                    "canvas"
+                  ]
+                },
+                {
+                  "id": 18,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 400
+                  }
+                },
+                {
+                  "id": 19,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 300
+                  }
+                },
+                {
+                  "id": 20,
+                  "type": "primitive",
+                  "name": "canvas-render",
+                  "num_inputs": 2,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "canvas",
+                    "scene"
+                  ]
+                },
+                {
+                  "id": 21,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 2,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 2,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 2,
+                  "target_pin": 2
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 2,
+                  "target_pin": 3
+                },
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "rect"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 10,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 11,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 12,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 2
+                },
+                {
+                  "source_node": 13,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 3
+                },
+                {
+                  "source_node": 9,
+                  "source_pin": 0,
+                  "target_node": 14,
+                  "target_pin": 0,
+                  "name": "oval"
+                },
+                {
+                  "source_node": 15,
+                  "source_pin": 0,
+                  "target_node": 14,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 16,
+                  "target_pin": 0,
+                  "name": "red rect"
+                },
+                {
+                  "source_node": 14,
+                  "source_pin": 0,
+                  "target_node": 16,
+                  "target_pin": 1,
+                  "name": "blue oval"
+                },
+                {
+                  "source_node": 18,
+                  "source_pin": 0,
+                  "target_node": 17,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 19,
+                  "source_pin": 0,
+                  "target_node": 17,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 17,
+                  "source_pin": 0,
+                  "target_node": 20,
+                  "target_pin": 0,
+                  "name": "canvas"
+                },
+                {
+                  "source_node": 16,
+                  "source_pin": 0,
+                  "target_node": 20,
+                  "target_pin": 1,
+                  "name": "scene"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 21
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+{
+  "categories": [
+    {
+      "name": "Getting Started",
+      "icon": "star",
+      "examples": [
+        {
+          "name": "Hello World",
+          "description": "Logs \\\"Hello, World!\\\" to the console using the log primitive.",
+          "file": "hello_world.json"
+        },
+        {
+          "name": "Basic Arithmetic",
+          "description": "Computes (3 + 4) * 2 = 14 using add and multiply primitives.",
+          "file": "basic_arithmetic.json"
+        }
+      ]
+    },
+    {
+      "name": "Math",
+      "icon": "function",
+      "examples": [
+        {
+          "name": "Fibonacci",
+          "description": "Computes the 10th Fibonacci number using a recursive method with two cases (base and recursive).",
+          "file": "fibonacci.json"
+        },
+        {
+          "name": "Factorial",
+          "description": "Computes 5! = 120 using a recursive method with base case (n <= 1) and recursive case.",
+          "file": "factorial.json"
+        },
+        {
+          "name": "Quadratic Formula",
+          "description": "Solves ax^2 + bx + c = 0 for a=1, b=-3, c=2, producing roots x=2 and x=1.",
+          "file": "quadratic_formula.json"
+        },
+        {
+          "name": "Temperature Converter",
+          "description": "Temperature class converts Celsius to Fahrenheit using OOP methods. Result: \\\"212°F\\\".",
+          "file": "temperature_converter.json"
+        }
+      ]
+    },
+    {
+      "name": "Graphics",
+      "icon": "paintbrush",
+      "examples": [
+        {
+          "name": "Drawing Shapes",
+          "description": "Creates a red rectangle and a blue oval on a 400x300 canvas.",
+          "file": "drawing_shapes.json"
+        },
+        {
+          "name": "Bouncing Ball",
+          "description": "Ball class with position, velocity, and render method. Creates a ball and renders one frame on canvas.",
+          "file": "bouncing_ball.json"
+        }
+      ]
+    },
+    {
+      "name": "String Processing",
+      "icon": "textformat",
+      "examples": [
+        {
+          "name": "String Reverse",
+          "description": "Reverses the string \\\"Hello\\\" and logs the result.",
+          "file": "string_reverse.json"
+        },
+        {
+          "name": "Word Count",
+          "description": "Counts the words in a sentence by splitting on spaces and taking the list length.",
+          "file": "word_count.json"
+        }
+      ]
+    },
+    {
+      "name": "Data Structures",
+      "icon": "list.bullet.rectangle",
+      "examples": [
+        {
+          "name": "List Operations",
+          "description": "Creates lists, appends them, sorts the result, and retrieves the first item.",
+          "file": "list_operations.json"
+        },
+        {
+          "name": "Dictionary Phonebook",
+          "description": "Contact class with display method. Creates contacts, displays each with name and phone number.",
+          "file": "dictionary_phonebook.json"
+        },
+        {
+          "name": "Todo List",
+          "description": "TodoItem class with toggle and display methods. Creates items, toggles one, displays all.",
+          "file": "todo_list.json"
+        }
+      ]
+    },
+    {
+      "name": "Object-Oriented",
+      "icon": "hexagon.fill",
+      "examples": [
+        {
+          "name": "Counter",
+          "description": "Creates a Counter object, increments it three times, and reads the count. Result: 3.",
+          "file": "counter.json"
+        },
+        {
+          "name": "Bank Account",
+          "description": "Creates a BankAccount, sets the owner, deposits twice, and reads the balance. Result: 150.",
+          "file": "bank_account.json"
+        },
+        {
+          "name": "Shapes (Inheritance)",
+          "description": "Shape and Circle classes with inheritance. Dynamic dispatch calls Circle's describe override. Result: \\\"circle r=5\\\".",
+          "file": "shapes__inheritance_.json"
+        },
+        {
+          "name": "Point (Init)",
+          "description": "Point class with init constructor and distance-squared method. Result: 25.",
+          "file": "point__init_.json"
+        }
+      ]
+    },
+    {
+      "name": "Game",
+      "icon": "gamecontroller",
+      "examples": [
+        {
+          "name": "Pong",
+          "description": "Playable pong with a bouncing ball. Left paddle follows the pointer; right paddle tracks the ball. Uses a game loop to animate continuously.",
+          "file": "pong.json"
+        },
+        {
+          "name": "Breakout",
+          "description": "Playable breakout with a bouncing ball and pointer-controlled paddle. Ball bounces off walls and the paddle area. Uses a game loop for continuous animation.",
+          "file": "breakout.json"
+        },
+        {
+          "name": "Snake",
+          "description": "Animated snake that moves continuously across the screen with a food target. The green snake head bounces off walls while the red food stays fixed. Uses a game loop.",
+          "file": "snake.json"
+        },
+        {
+          "name": "Asteroid Dodge",
+          "description": "Dodge falling rocks by moving the ship with the pointer. The rock falls from the top and wraps back when it reaches the bottom. Uses a game loop for animation.",
+          "file": "asteroid_dodge.json"
+        }
+      ]
+    },
+    {
+      "name": "Form & Validation",
+      "icon": "checkmark.shield",
+      "examples": [
+        {
+          "name": "Email Validator",
+          "description": "Checks if a string contains '@' to perform basic email validation.",
+          "file": "email_validator.json"
+        },
+        {
+          "name": "Password Strength",
+          "description": "Checks password length and logs whether it meets the minimum requirement of 8 characters.",
+          "file": "password_strength.json"
+        },
+        {
+          "name": "Shopping Cart",
+          "description": "Product and Cart classes. Adds products to a cart and reads the total. Result: 35.",
+          "file": "shopping_cart.json"
+        },
+        {
+          "name": "Validator",
+          "description": "Validator class chains validation checks on a value. Result: false (too short).",
+          "file": "validator.json"
+        }
+      ]
+    },
+    {
+      "name": "Network & Data",
+      "icon": "network",
+      "examples": [
+        {
+          "name": "HTTP GET",
+          "description": "Stub: HTTP networking primitives are not yet available. Logs a placeholder message.",
+          "file": "http_get.json"
+        },
+        {
+          "name": "JSON Parse",
+          "description": "Stub: JSON parsing primitives are not yet available. Logs a placeholder message.",
+          "file": "json_parse.json"
+        }
+      ]
+    },
+    {
+      "name": "Libraries",
+      "icon": "shippingbox",
+      "examples": [
+        {
+          "name": "Math: Fibonacci",
+          "description": "Compute the 10th Fibonacci number using the math library.",
+          "file": "math__fibonacci.json"
+        },
+        {
+          "name": "Math: Prime Check",
+          "description": "Check if a number is prime using the math library.",
+          "file": "math__prime_check.json"
+        },
+        {
+          "name": "Crypto: SHA-256 Hash",
+          "description": "Compute the SHA-256 hash of a string using the crypto library.",
+          "file": "crypto__sha_256_hash.json"
+        },
+        {
+          "name": "Crypto: UUID Generator",
+          "description": "Generate a random UUID using the crypto library.",
+          "file": "crypto__uuid_generator.json"
+        },
+        {
+          "name": "FileIO: Write and Read",
+          "description": "Write a text file to /tmp then read it back using the fileio library.",
+          "file": "fileio__write_and_read.json"
+        },
+        {
+          "name": "Locale: System Info",
+          "description": "Display the current locale language, country, and timezone.",
+          "file": "locale__system_info.json"
+        },
+        {
+          "name": "Sound: Play Sine Tone",
+          "description": "Generate and play a 440Hz sine tone for 1 second using the sound library.",
+          "file": "sound__play_sine_tone.json"
+        },
+        {
+          "name": "Bitmap: Red Square",
+          "description": "Create a 100x100 bitmap, fill it red, and draw a white rectangle using the bitmap library.",
+          "file": "bitmap__red_square.json"
+        }
+      ]
+    }
+  ]
+}

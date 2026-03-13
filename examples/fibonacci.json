@@ -1,0 +1,336 @@
+{
+  "name": "Fibonacci",
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "fib",
+          "num_inputs": 1,
+          "num_outputs": 1,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "n"
+                  ]
+                },
+                {
+                  "id": 2,
+                  "type": "primitive",
+                  "name": "<=",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "annotation": "nextCaseOnFailure",
+                  "input_names": [
+                    "n",
+                    "limit"
+                  ],
+                  "output_names": [
+                    "ok?"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 1
+                  },
+                  "output_names": [
+                    "limit"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 1,
+                  "source_pin": 0,
+                  "target_node": 2,
+                  "target_pin": 0,
+                  "name": "n"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 2,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 1,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "n"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 4
+            },
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "n"
+                  ]
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 1
+                  }
+                },
+                {
+                  "id": 3,
+                  "type": "primitive",
+                  "name": "-",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "diff"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 2
+                  }
+                },
+                {
+                  "id": 5,
+                  "type": "primitive",
+                  "name": "-",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "diff"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "method_call",
+                  "name": "fib",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "n"
+                  ],
+                  "output_names": [
+                    "result"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "method_call",
+                  "name": "fib",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "n"
+                  ],
+                  "output_names": [
+                    "result"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "primitive",
+                  "name": "+",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "sum"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 1,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 0,
+                  "name": "n"
+                },
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 1,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "n"
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "n-1"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "n-2"
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "fib(n-1)"
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 1,
+                  "name": "fib(n-2)"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0,
+                  "name": "result"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 9
+            }
+          ]
+        },
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 10
+                  },
+                  "output_names": [
+                    "n"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "method_call",
+                  "name": "fib",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "n"
+                  ],
+                  "output_names": [
+                    "result"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 0,
+                  "name": "n"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "fib(10)"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

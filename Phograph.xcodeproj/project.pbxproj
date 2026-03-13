@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,7 @@
 		1B5D8F12E55EE75348143571 /* pho_prim_sound.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3FEB401FDE0890377BE8DD24 /* pho_prim_sound.cc */; };
 		1C3D96601C66DFB9609CC8B2 /* pho_prim_bitmap.cc in Sources */ = {isa = PBXBuildFile; fileRef = F68E80E63511A5668B5DC4E9 /* pho_prim_bitmap.cc */; };
 		1FD72047ED276A5348CA1695 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D253EF63213D4F5C854260F8 /* AudioToolbox.framework */; };
+		1FE050955C91844D2EAAE2E5 /* pho_prim_methodref.cc in Sources */ = {isa = PBXBuildFile; fileRef = ACC6B4E40B7C7E9EFF03DE03 /* pho_prim_methodref.cc */; };
 		232018008461A8DA4922CC42 /* AppTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE126ABC7A51FF024C7E93D /* AppTemplates.swift */; };
 		23242A65648CBEB6C9B17D8B /* pho_prim_midi.cc in Sources */ = {isa = PBXBuildFile; fileRef = D8F2271554AE17BE475B8EC3 /* pho_prim_midi.cc */; };
 		26F715E7232CCFD3D72740FB /* pho_prim_input.cc in Sources */ = {isa = PBXBuildFile; fileRef = 701E4E7FB3952BA220D6C779 /* pho_prim_input.cc */; };
@@ -34,6 +35,7 @@
 		6B0DE6CF6F0F031C6F19B906 /* pho_draw.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69F29F6DE5E2975C0543CA37 /* pho_draw.cc */; };
 		6B45FADC48978EF74FC6B57F /* pho_prim_anim.cc in Sources */ = {isa = PBXBuildFile; fileRef = 65E90C9FF9B2927DFDB227C6 /* pho_prim_anim.cc */; };
 		7174C7231DF0920D6B9FB4EF /* pho_prim_image.cc in Sources */ = {isa = PBXBuildFile; fileRef = 515C80815BD5134617ADE267 /* pho_prim_image.cc */; };
+		758100C83DD0D13BEF5C7734 /* CanvasOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56EBC3E2C1A7F42F8BF8CBD4 /* CanvasOutputView.swift */; };
 		75FEF62F9E43330D3FB9CB97 /* pho_prim_canvas.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57403738A3318DFF2E519EE2 /* pho_prim_canvas.cc */; };
 		79CA4BCD203B6F225D176F83 /* pho_prim_type.cc in Sources */ = {isa = PBXBuildFile; fileRef = DEDD4B17208383C872AAC9DE /* pho_prim_type.cc */; };
 		79F1515968476DB80D8B9FD7 /* ClassBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77830459694BCAF37123AD6 /* ClassBrowserView.swift */; };
@@ -44,6 +46,7 @@
 		847883AAD5F88522EA25F32C /* ExampleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C79A4E3C515257FEC6E3259 /* ExampleCatalog.swift */; };
 		8997F80ED8481072503798A7 /* pho_prim.cc in Sources */ = {isa = PBXBuildFile; fileRef = 840BBDA39067CF34271709FD /* pho_prim.cc */; };
 		8A53CC300B9AC4D27207FDB8 /* pho_thread.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2398B5E8422D003EA71D484B /* pho_thread.cc */; };
+		8A814641C000783B9BD0BCBB /* FrontPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EBB6E51F836872DB2A047D6 /* FrontPanelView.swift */; };
 		8AB89304D984ED1810FB8DC3 /* PhographSceneRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86056B0D92FF68E2DF7AF4C /* PhographSceneRuntime.swift */; };
 		8CA5E909A8F812CA974F6EC8 /* pho_value.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5921BAFF4D0EA32A19423869 /* pho_value.cc */; };
 		8EDB75C4C140710EC2FCC356 /* PhographApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C174D3AEE64848299E5BCDE /* PhographApp.swift */; };
@@ -51,6 +54,7 @@
 		8FFD877CD52ABCD300EDF943 /* pho_debug.cc in Sources */ = {isa = PBXBuildFile; fileRef = 65C85F08CA77176A5FA9AB45 /* pho_debug.cc */; };
 		96C3121E38602EBD2BA7C520 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A8E107BE4E0AF4D74157D73 /* CoreMIDI.framework */; };
 		9C2129DEC8DD31919315C4E7 /* TraceOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7769B3A96B086FFDDC51271D /* TraceOverlayView.swift */; };
+		9E9E3D7D257A0331FDBBA816 /* pho_prim_date.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7042B45D562FF23B715E02DD /* pho_prim_date.cc */; };
 		9EB40F5E3CA5A133F8AC3E52 /* pho_prim_math.cc in Sources */ = {isa = PBXBuildFile; fileRef = 716E791274C7816A1B2C7BE8 /* pho_prim_math.cc */; };
 		A58747C4225163D5BB3DBFFE /* MIDIPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 21A6BB6F29F91492D4907EAD /* MIDIPlugin.cpp */; };
 		A6A757EB417F0B4DB8420E28 /* pho_prim_error.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2E0EA23C0877169E918EE279 /* pho_prim_error.cc */; };
@@ -72,13 +76,10 @@
 		D7B95B05D00068367359DBF0 /* pho_eval.cc in Sources */ = {isa = PBXBuildFile; fileRef = EC0D3842E5869AB8E7B3372D /* pho_eval.cc */; };
 		DABD06000B1CED9AE7106227 /* pho_prim_string.cc in Sources */ = {isa = PBXBuildFile; fileRef = 92E0D1790F391A3CBBAB8030 /* pho_prim_string.cc */; };
 		DD41637F7CBD27BFC22D5F45 /* pho_prim_net.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6FF8F9022B82B5216D2BE773 /* pho_prim_net.cc */; };
-		DE0A1B2C3D4E5F6A7B8C9D01 /* pho_prim_date.cc in Sources */ = {isa = PBXBuildFile; fileRef = DE0A1B2C3D4E5F6A7B8C9D02 /* pho_prim_date.cc */; };
-		DE0A1B2C3D4E5F6A7B8C9D03 /* pho_prim_methodref.cc in Sources */ = {isa = PBXBuildFile; fileRef = DE0A1B2C3D4E5F6A7B8C9D04 /* pho_prim_methodref.cc */; };
 		E07473846353ED4647262C8D /* GraphCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D3C7145D803517BA3C5A4A /* GraphCanvasView.swift */; };
 		E1607F7741FBA7D47E25D640 /* pho_prim_channel.cc in Sources */ = {isa = PBXBuildFile; fileRef = 664CA750F27D61771D2A6898 /* pho_prim_channel.cc */; };
 		E2F87DBDCE52205FFBE323A0 /* pho_prim_list.cc in Sources */ = {isa = PBXBuildFile; fileRef = 327C11ABE73A1F44955D56BC /* pho_prim_list.cc */; };
 		E386C090CC9A7CE741DB5CE5 /* PhographCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB72D30CAE7D718FBE676D61 /* PhographCanvasView.swift */; };
-		E386C091CC9A7CE741DB5CE6 /* CanvasOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB72D30DAE7D718FBE676D62 /* CanvasOutputView.swift */; };
 		E6A02B605F7E4154BB257E05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9DFEA6AD89EDA84947FF916E /* Assets.xcassets */; };
 		E90C9315CEFF5C979F5F9E0E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 391BD8263B270B9C34E5B16C /* CoreGraphics.framework */; };
 		ECDC400FD2940663FC6738AE /* LibraryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985C19BF8D2068D21B7B6055 /* LibraryManager.swift */; };
@@ -128,10 +129,12 @@
 		4747E319E463688FE7172612 /* GraphExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphExporter.swift; sourceTree = "<group>"; };
 		491A8CD0B0065175D6BD72C6 /* Phograph-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Phograph-Bridging-Header.h"; sourceTree = "<group>"; };
 		4DC9C35BA36329123C3F8D6A /* pho_prim_io.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_io.cc; sourceTree = "<group>"; };
+		4EBB6E51F836872DB2A047D6 /* FrontPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontPanelView.swift; sourceTree = "<group>"; };
 		4FEA53A47D278CC6922002D5 /* SoundPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SoundPlugin.h; sourceTree = "<group>"; };
 		515C80815BD5134617ADE267 /* pho_prim_image.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_image.cc; sourceTree = "<group>"; };
 		520B767AF95577087AE754B9 /* PhographBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PhographBridge.mm; sourceTree = "<group>"; };
 		5555ECC8C3D2E9ADAC123FEE /* pho_prim_logic.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_logic.cc; sourceTree = "<group>"; };
+		56EBC3E2C1A7F42F8BF8CBD4 /* CanvasOutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasOutputView.swift; sourceTree = "<group>"; };
 		57403738A3318DFF2E519EE2 /* pho_prim_canvas.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_canvas.cc; sourceTree = "<group>"; };
 		5921BAFF4D0EA32A19423869 /* pho_value.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_value.cc; sourceTree = "<group>"; };
 		60942FAFE50962C53EE610C0 /* pho_prim_fileio.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_fileio.cc; sourceTree = "<group>"; };
@@ -144,6 +147,7 @@
 		6C174D3AEE64848299E5BCDE /* PhographApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhographApp.swift; sourceTree = "<group>"; };
 		6FF8F9022B82B5216D2BE773 /* pho_prim_net.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_net.cc; sourceTree = "<group>"; };
 		701E4E7FB3952BA220D6C779 /* pho_prim_input.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_input.cc; sourceTree = "<group>"; };
+		7042B45D562FF23B715E02DD /* pho_prim_date.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_date.cc; sourceTree = "<group>"; };
 		7131313DA0EF9F85705CC070 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		716E791274C7816A1B2C7BE8 /* pho_prim_math.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_math.cc; sourceTree = "<group>"; };
 		72FDD89D54B48B58C831E3EC /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -167,6 +171,7 @@
 		AAE126ABC7A51FF024C7E93D /* AppTemplates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTemplates.swift; sourceTree = "<group>"; };
 		AAF840BAD8645F8B9DC3E83C /* pho_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_platform.h; sourceTree = "<group>"; };
 		AC069BB3AF8DDE44DBD7DB3A /* ProjectModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectModel.swift; sourceTree = "<group>"; };
+		ACC6B4E40B7C7E9EFF03DE03 /* pho_prim_methodref.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_methodref.cc; sourceTree = "<group>"; };
 		AF7E8476E014DCEE1A6D9A33 /* pho_platform_apple.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = pho_platform_apple.mm; sourceTree = "<group>"; };
 		B0ADC1AEF3B99C3F7F960566 /* pho_codegen.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_codegen.cc; sourceTree = "<group>"; };
 		B58FF33C2DC6E3940249B7AA /* pho_value.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pho_value.h; sourceTree = "<group>"; };
@@ -183,9 +188,6 @@
 		D8B53F80DA8966B133C1C849 /* AppExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExporter.swift; sourceTree = "<group>"; };
 		D8F2271554AE17BE475B8EC3 /* pho_prim_midi.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_midi.cc; sourceTree = "<group>"; };
 		DB72D30CAE7D718FBE676D61 /* PhographCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhographCanvasView.swift; sourceTree = "<group>"; };
-		DB72D30DAE7D718FBE676D62 /* CanvasOutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasOutputView.swift; sourceTree = "<group>"; };
-		DE0A1B2C3D4E5F6A7B8C9D02 /* pho_prim_date.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_date.cc; sourceTree = "<group>"; };
-		DE0A1B2C3D4E5F6A7B8C9D04 /* pho_prim_methodref.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_methodref.cc; sourceTree = "<group>"; };
 		DEDD4B17208383C872AAC9DE /* pho_prim_type.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_prim_type.cc; sourceTree = "<group>"; };
 		EA86EAFD6622CDFA143D60A9 /* GraphEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphEditorViewModel.swift; sourceTree = "<group>"; };
 		EC0D3842E5869AB8E7B3372D /* pho_eval.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pho_eval.cc; sourceTree = "<group>"; };
@@ -254,8 +256,8 @@
 		33D0DA8A02DE402587F9C1F2 /* Canvas */ = {
 			isa = PBXGroup;
 			children = (
+				56EBC3E2C1A7F42F8BF8CBD4 /* CanvasOutputView.swift */,
 				C0D3C7145D803517BA3C5A4A /* GraphCanvasView.swift */,
-				DB72D30DAE7D718FBE676D62 /* CanvasOutputView.swift */,
 				DB72D30CAE7D718FBE676D61 /* PhographCanvasView.swift */,
 			);
 			path = Canvas;
@@ -266,6 +268,7 @@
 			children = (
 				329F70B25D61746AAA201CB7 /* ExampleBrowserView.swift */,
 				13438095FC237594802CFFE1 /* ExportAppSheet.swift */,
+				4EBB6E51F836872DB2A047D6 /* FrontPanelView.swift */,
 				447F92C566566BA1E5104661 /* FuzzyFinderPopup.swift */,
 				90E4C90A198AB065ECDD57A7 /* IDEWorkspaceView.swift */,
 				6BC6A0FD9EA961784FDB66CE /* LibraryManagerView.swift */,
@@ -379,8 +382,8 @@
 				664CA750F27D61771D2A6898 /* pho_prim_channel.cc */,
 				A707EBA1B043462C0643B175 /* pho_prim_compare.cc */,
 				797ED897EE088C4CD685FA7D /* pho_prim_crypto.cc */,
-				DE0A1B2C3D4E5F6A7B8C9D02 /* pho_prim_date.cc */,
 				D52BCD2F370FC7ED1914D579 /* pho_prim_data.cc */,
+				7042B45D562FF23B715E02DD /* pho_prim_date.cc */,
 				010F3E4AB40711C80DDDA9BE /* pho_prim_dict.cc */,
 				CB645910513AB2F99294E549 /* pho_prim_draw.cc */,
 				3051005097E7F9AB1FEED61A /* pho_prim_effect.cc */,
@@ -394,7 +397,7 @@
 				394DC90DDB00A442787CE8DE /* pho_prim_locale.cc */,
 				5555ECC8C3D2E9ADAC123FEE /* pho_prim_logic.cc */,
 				716E791274C7816A1B2C7BE8 /* pho_prim_math.cc */,
-				DE0A1B2C3D4E5F6A7B8C9D04 /* pho_prim_methodref.cc */,
+				ACC6B4E40B7C7E9EFF03DE03 /* pho_prim_methodref.cc */,
 				D8F2271554AE17BE475B8EC3 /* pho_prim_midi.cc */,
 				6FF8F9022B82B5216D2BE773 /* pho_prim_net.cc */,
 				F26A83D0E05BCC3AD9239013 /* pho_prim_scene.cc */,
@@ -488,6 +491,7 @@
 				8F20EAF00783A1C749E25F01 /* Sources */,
 				82BEFCA2E6A84F2E54EBB036 /* Copy Bundled Libraries */,
 				4E3168F11B31ED774086B787 /* Copy Runtime for Export */,
+				9D091E508CFFBAD7A57F99FF /* Copy Example Programs */,
 				818DA1ADA5D61ED57ABF9E62 /* Resources */,
 				B712F0725CE912C6B01FC371 /* Frameworks */,
 			);
@@ -509,7 +513,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 1430;
 			};
 			buildConfigurationList = 8353883E747B0F1B04029495 /* Build configuration list for PBXProject "Phograph" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -521,6 +525,7 @@
 			);
 			mainGroup = 06A4C76BC886B277A456503A;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -543,7 +548,6 @@
 /* Begin PBXShellScriptBuildPhase section */
 		4E3168F11B31ED774086B787 /* Copy Runtime for Export */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -562,7 +566,6 @@
 		};
 		82BEFCA2E6A84F2E54EBB036 /* Copy Bundled Libraries */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -577,7 +580,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries\"\ncp -R \"$SRCROOT/libraries/\" \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries/\"\n";
+			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries\"\ncp -R \"$SRCROOT/libraries/\" \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/libraries/\"\n";
+		};
+		9D091E508CFFBAD7A57F99FF /* Copy Example Programs */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Example Programs";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/examples\"\ncp \"$SRCROOT/examples/\"*.json \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/examples/\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -589,6 +610,7 @@
 				53CB7C1E14D1156299AC5344 /* AppExporter.swift in Sources */,
 				232018008461A8DA4922CC42 /* AppTemplates.swift in Sources */,
 				F1FF5056A892916CA57832CD /* CallStackView.swift in Sources */,
+				758100C83DD0D13BEF5C7734 /* CanvasOutputView.swift in Sources */,
 				79F1515968476DB80D8B9FD7 /* ClassBrowserView.swift in Sources */,
 				1865DE5B93671B6C42ABFE4F /* ContentView.swift in Sources */,
 				7B6DB96CC330101150F9E872 /* DebuggerControlsView.swift in Sources */,
@@ -596,6 +618,7 @@
 				D5792B53B26C3ECDF055ADCC /* ExampleBrowserView.swift in Sources */,
 				847883AAD5F88522EA25F32C /* ExampleCatalog.swift in Sources */,
 				40BC5AA5817709E14A92B1D8 /* ExportAppSheet.swift in Sources */,
+				8A814641C000783B9BD0BCBB /* FrontPanelView.swift in Sources */,
 				F87749AFE52AE28C12D28158 /* FuzzyFinderPopup.swift in Sources */,
 				E07473846353ED4647262C8D /* GraphCanvasView.swift in Sources */,
 				17D1075A7FA2846B696D3D82 /* GraphEditorViewModel.swift in Sources */,
@@ -611,7 +634,6 @@
 				EEE22245A088E0B53D83C86D /* MetalRenderer.swift in Sources */,
 				8EDB75C4C140710EC2FCC356 /* PhographApp.swift in Sources */,
 				FA0F01EB3113CC4332FE1C85 /* PhographBridge.mm in Sources */,
-				E386C091CC9A7CE741DB5CE6 /* CanvasOutputView.swift in Sources */,
 				E386C090CC9A7CE741DB5CE5 /* PhographCanvasView.swift in Sources */,
 				43467022BAD99308602C1188 /* PhographRuntime.swift in Sources */,
 				8AB89304D984ED1810FB8DC3 /* PhographSceneRuntime.swift in Sources */,
@@ -635,6 +657,7 @@
 				3B56E28510E8B5CFFA90E112 /* pho_prim_compare.cc in Sources */,
 				F283F1524EAC80BE30E7D6E6 /* pho_prim_crypto.cc in Sources */,
 				C1F0829D1768C6EF3D0BB4C0 /* pho_prim_data.cc in Sources */,
+				9E9E3D7D257A0331FDBBA816 /* pho_prim_date.cc in Sources */,
 				A7499F8834953332FEE25F3A /* pho_prim_dict.cc in Sources */,
 				B9FBE913140A37BFC927EB37 /* pho_prim_draw.cc in Sources */,
 				BE7B7F3403B0E0BB435128B2 /* pho_prim_effect.cc in Sources */,
@@ -648,10 +671,9 @@
 				7F25D26A0743B1CC78049FE3 /* pho_prim_locale.cc in Sources */,
 				43D820B485A5F9643B9F32F3 /* pho_prim_logic.cc in Sources */,
 				9EB40F5E3CA5A133F8AC3E52 /* pho_prim_math.cc in Sources */,
-				DE0A1B2C3D4E5F6A7B8C9D03 /* pho_prim_methodref.cc in Sources */,
+				1FE050955C91844D2EAAE2E5 /* pho_prim_methodref.cc in Sources */,
 				23242A65648CBEB6C9B17D8B /* pho_prim_midi.cc in Sources */,
 				DD41637F7CBD27BFC22D5F45 /* pho_prim_net.cc in Sources */,
-				DE0A1B2C3D4E5F6A7B8C9D01 /* pho_prim_date.cc in Sources */,
 				2F623A674A568C0CF732996C /* pho_prim_scene.cc in Sources */,
 				7CCE963803033F967DB1B8CD /* pho_prim_socket.cc in Sources */,
 				1B5D8F12E55EE75348143571 /* pho_prim_sound.cc in Sources */,
@@ -700,11 +722,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -719,13 +739,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
@@ -766,11 +785,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -779,12 +796,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
@@ -797,35 +813,23 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = Phograph/Phograph.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CURRENT_PROJECT_VERSION = 5;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 644N5FNKG2;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
-				ENABLE_USER_SELECTED_FILES = readwrite;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/phograph_core/src",
 					"$(SRCROOT)/phograph_core/src/plugins",
 				);
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/Frameworks",
+					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.awohl.phograph;
+				PRODUCT_BUNDLE_IDENTIFIER = com.phograph.app;
 				PRODUCT_NAME = Phograph;
-				SUPPORTS_MACCATALYST = YES;
+				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "Phograph/Bridge/Phograph-Bridging-Header.h";
-				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Release;
 		};
@@ -835,35 +839,23 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = Phograph/Phograph.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CURRENT_PROJECT_VERSION = 5;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 644N5FNKG2;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
-				ENABLE_USER_SELECTED_FILES = readwrite;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/phograph_core/src",
 					"$(SRCROOT)/phograph_core/src/plugins",
 				);
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/Frameworks",
+					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.awohl.phograph;
+				PRODUCT_BUNDLE_IDENTIFIER = com.phograph.app;
 				PRODUCT_NAME = Phograph;
-				SUPPORTS_MACCATALYST = YES;
+				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "Phograph/Bridge/Phograph-Bridging-Header.h";
-				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Debug;
 		};

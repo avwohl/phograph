@@ -1,0 +1,391 @@
+{
+  "name": "Point (Init)",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "Point",
+          "attributes": [
+            {
+              "name": "x",
+              "default": 0
+            },
+            {
+              "name": "y",
+              "default": 0
+            }
+          ],
+          "methods": [
+            {
+              "name": "init",
+              "num_inputs": 3,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 3,
+                      "output_names": [
+                        "self",
+                        "x",
+                        "y"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "set",
+                      "name": "x",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "set",
+                      "name": "y",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "self"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 1,
+                      "source_pin": 0,
+                      "target_node": 2,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 1,
+                      "source_pin": 1,
+                      "target_node": 2,
+                      "target_pin": 1,
+                      "name": "x"
+                    },
+                    {
+                      "source_node": 2,
+                      "source_pin": 0,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 1,
+                      "source_pin": 2,
+                      "target_node": 3,
+                      "target_pin": 1,
+                      "name": "y"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "self"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 4
+                }
+              ]
+            },
+            {
+              "name": "distance-squared",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "x",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "x"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "get",
+                      "name": "y",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "y"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "primitive",
+                      "name": "*",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "product"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "primitive",
+                      "name": "*",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "product"
+                      ]
+                    },
+                    {
+                      "id": 6,
+                      "type": "primitive",
+                      "name": "+",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "sum"
+                      ]
+                    },
+                    {
+                      "id": 7,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "x"
+                    },
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 1,
+                      "name": "x"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 1,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "y"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 1,
+                      "target_node": 5,
+                      "target_pin": 1,
+                      "name": "y"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "x²"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 1,
+                      "name": "y²"
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 0,
+                      "name": "x²+y²"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 7
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "output_names": [
+            "result"
+          ],
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 3
+                  },
+                  "output_names": [
+                    "x"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 4
+                  },
+                  "output_names": [
+                    "y"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "instance_generator",
+                  "name": "Point",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "x",
+                    "y"
+                  ],
+                  "output_names": [
+                    "point"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "method_call",
+                  "name": "Point/distance-squared",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "d²"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "3"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1,
+                  "name": "4"
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "point"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "25"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 6
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

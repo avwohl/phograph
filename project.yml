@@ -28,6 +28,10 @@ targets:
           cp "$SRCROOT/Phograph/Runtime/PhographRuntime.swift" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/"
           cp "$SRCROOT/Phograph/Runtime/PhographSceneRuntime.swift" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/"
         name: Copy Runtime for Export
+      - script: |
+          mkdir -p "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/examples"
+          cp "$SRCROOT/examples/"*.json "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/examples/"
+        name: Copy Example Programs
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.phograph.app

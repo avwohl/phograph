@@ -1,0 +1,178 @@
+{
+  "name": "Email Validator",
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 0,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "user@example.com"
+                  },
+                  "output_names": [
+                    "email"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "@"
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "primitive",
+                  "name": "concat",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "joined"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "primitive",
+                  "name": "length",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "str"
+                  ],
+                  "output_names": [
+                    "len"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "primitive",
+                  "name": ">",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "result"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 5
+                  }
+                },
+                {
+                  "id": 9,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 10,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "email"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "joined"
+                },
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "email"
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "len"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0,
+                  "name": "valid?"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 10
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

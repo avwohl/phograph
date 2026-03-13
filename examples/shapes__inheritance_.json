@@ -1,0 +1,361 @@
+{
+  "name": "Shapes (Inheritance)",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "Shape",
+          "attributes": [
+            {
+              "name": "name",
+              "default": "shape"
+            }
+          ],
+          "methods": [
+            {
+              "name": "describe",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "name",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "name"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "string",
+                        "value": " is a shape"
+                      }
+                    },
+                    {
+                      "id": 4,
+                      "type": "primitive",
+                      "name": "concat",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "joined"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "name"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "desc"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Circle",
+          "parent": "Shape",
+          "attributes": [
+            {
+              "name": "radius",
+              "default": 1
+            }
+          ],
+          "methods": [
+            {
+              "name": "describe",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "radius",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "radius"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "string",
+                        "value": "circle r="
+                      }
+                    },
+                    {
+                      "id": 4,
+                      "type": "primitive",
+                      "name": "concat",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "joined"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 0
+                    },
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 1,
+                      "name": "radius"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "desc"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 5
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "output_names": [
+            "result"
+          ],
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "Circle",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "circle"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "wheel"
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "set",
+                  "name": "name",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 5
+                  }
+                },
+                {
+                  "id": 6,
+                  "type": "set",
+                  "name": "radius",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "method_call",
+                  "name": "/describe",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "desc"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "named"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "r=5"
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "desc"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 8
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

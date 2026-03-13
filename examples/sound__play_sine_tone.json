@@ -1,0 +1,181 @@
+{
+  "name": "Sine Tone",
+  "libraries": [
+    {
+      "name": "sound",
+      "version": "1.0.0"
+    }
+  ],
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "/main",
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "value": 44100,
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "rate"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "value": false,
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "stereo"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "primitive",
+                  "name": "sound-init",
+                  "library": "sound",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "rate",
+                    "stereo"
+                  ],
+                  "output_names": [
+                    "ctx"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "value": 440.0,
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "freq"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "constant",
+                  "value": 1.0,
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "dur"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "primitive",
+                  "name": "tone-sine",
+                  "library": "sound",
+                  "num_inputs": 3,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "freq",
+                    "dur",
+                    "rate"
+                  ],
+                  "output_names": [
+                    "buf"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "primitive",
+                  "name": "sound-play",
+                  "library": "sound",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "buf"
+                  ],
+                  "output_names": [
+                    "ok"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 10,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 2,
+                  "name": "rate"
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "audio"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0,
+                  "name": "ok"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 10
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

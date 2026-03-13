@@ -1,0 +1,508 @@
+{
+  "name": "Bouncing Ball",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "Ball",
+          "attributes": [
+            {
+              "name": "x",
+              "default": 100
+            },
+            {
+              "name": "y",
+              "default": 100
+            },
+            {
+              "name": "dx",
+              "default": 3
+            },
+            {
+              "name": "dy",
+              "default": 2
+            },
+            {
+              "name": "color",
+              "default": "green"
+            }
+          ],
+          "methods": [
+            {
+              "name": "move",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "x",
+                      "num_inputs": 1,
+                      "num_outputs": 2
+                    },
+                    {
+                      "id": 3,
+                      "type": "get",
+                      "name": "dx",
+                      "num_inputs": 1,
+                      "num_outputs": 2
+                    },
+                    {
+                      "id": 4,
+                      "type": "primitive",
+                      "name": "+",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "sum"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "set",
+                      "name": "x",
+                      "num_inputs": 2,
+                      "num_outputs": 1
+                    },
+                    {
+                      "id": 6,
+                      "type": "get",
+                      "name": "y",
+                      "num_inputs": 1,
+                      "num_outputs": 2
+                    },
+                    {
+                      "id": 7,
+                      "type": "get",
+                      "name": "dy",
+                      "num_inputs": 1,
+                      "num_outputs": 2
+                    },
+                    {
+                      "id": 8,
+                      "type": "primitive",
+                      "name": "+",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "sum"
+                      ]
+                    },
+                    {
+                      "id": 9,
+                      "type": "set",
+                      "name": "y",
+                      "num_inputs": 2,
+                      "num_outputs": 1
+                    },
+                    {
+                      "id": 10,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "self"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "x"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 1,
+                      "name": "dx"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 1,
+                      "name": "x+dx"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 1,
+                      "target_node": 8,
+                      "target_pin": 0,
+                      "name": "y"
+                    },
+                    {
+                      "source_node": 7,
+                      "source_pin": 1,
+                      "target_node": 8,
+                      "target_pin": 1,
+                      "name": "dy"
+                    },
+                    {
+                      "source_node": 7,
+                      "source_pin": 0,
+                      "target_node": 9,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 8,
+                      "source_pin": 0,
+                      "target_node": 9,
+                      "target_pin": 1,
+                      "name": "y+dy"
+                    },
+                    {
+                      "source_node": 9,
+                      "source_pin": 0,
+                      "target_node": 10,
+                      "target_pin": 0,
+                      "name": "self"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 10
+                }
+              ]
+            },
+            {
+              "name": "render",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "x",
+                      "num_inputs": 1,
+                      "num_outputs": 2
+                    },
+                    {
+                      "id": 3,
+                      "type": "get",
+                      "name": "y",
+                      "num_inputs": 1,
+                      "num_outputs": 2
+                    },
+                    {
+                      "id": 4,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "integer",
+                        "value": 30
+                      }
+                    },
+                    {
+                      "id": 5,
+                      "type": "primitive",
+                      "name": "shape-oval",
+                      "num_inputs": 4,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "x",
+                        "y",
+                        "w",
+                        "h"
+                      ],
+                      "output_names": [
+                        "shape"
+                      ]
+                    },
+                    {
+                      "id": 6,
+                      "type": "get",
+                      "name": "color",
+                      "num_inputs": 1,
+                      "num_outputs": 2
+                    },
+                    {
+                      "id": 7,
+                      "type": "primitive",
+                      "name": "shape-set-fill",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "shape",
+                        "color"
+                      ],
+                      "output_names": [
+                        "shape"
+                      ]
+                    },
+                    {
+                      "id": 8,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "shape"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "x"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 1,
+                      "target_node": 5,
+                      "target_pin": 1,
+                      "name": "y"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 2
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 3
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 1,
+                      "target_node": 7,
+                      "target_pin": 1,
+                      "name": "color"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 0,
+                      "name": "ball"
+                    },
+                    {
+                      "source_node": 7,
+                      "source_pin": 0,
+                      "target_node": 8,
+                      "target_pin": 0,
+                      "name": "shape"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 8
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 0,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "Ball",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "ball"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "method_call",
+                  "name": "Ball/move",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "method_call",
+                  "name": "Ball/render",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "shape"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "primitive",
+                  "name": "create-canvas",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "w",
+                    "h"
+                  ],
+                  "output_names": [
+                    "canvas"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 400
+                  }
+                },
+                {
+                  "id": 7,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 300
+                  }
+                },
+                {
+                  "id": 8,
+                  "type": "primitive",
+                  "name": "canvas-render",
+                  "num_inputs": 2,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "canvas",
+                    "scene"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 0,
+                  "name": "new ball"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "moved"
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "canvas"
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 1,
+                  "name": "ball shape"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 9
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "name": "Quadratic Formula",
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 1
+                  },
+                  "output_names": [
+                    "a"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": -3
+                  },
+                  "output_names": [
+                    "b"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 2
+                  },
+                  "output_names": [
+                    "c"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "primitive",
+                  "name": "*",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "product"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "primitive",
+                  "name": "*",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "product"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 4
+                  }
+                },
+                {
+                  "id": 8,
+                  "type": "primitive",
+                  "name": "*",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "product"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "primitive",
+                  "name": "-",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "diff"
+                  ]
+                },
+                {
+                  "id": 10,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 11,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "4a"
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 1,
+                  "name": "c"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0,
+                  "name": "b²"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 1,
+                  "name": "4ac"
+                },
+                {
+                  "source_node": 9,
+                  "source_pin": 0,
+                  "target_node": 10,
+                  "target_pin": 0,
+                  "name": "b²-4ac"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 11
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,56 +1,31 @@
 #!/usr/bin/env python3
-"""Extract example JSONs from ExampleCatalog.swift and write them as files,
-then compile and run the C++ test harness against each."""
+"""Load example JSONs from the examples/ directory and run the C++ test harness against each."""
 
-import re
 import os
 import json
 import subprocess
 import sys
 
-CATALOG_PATH = "Phograph/Model/ExampleCatalog.swift"
+EXAMPLES_DIR = "examples"
 TEST_DIR = "test_output"
 HARNESS = "test_output/test_harness"
 
-def extract_examples():
-    """Extract example names and JSON from ExampleCatalog.swift"""
-    with open(CATALOG_PATH) as f:
-        content = f.read()
+def load_examples():
+    """Load example names and file paths from catalog.json."""
+    catalog_path = os.path.join(EXAMPLES_DIR, "catalog.json")
+    with open(catalog_path) as f:
+        catalog = json.load(f)
 
     examples = []
-    # Find all ExampleEntry blocks
-    pattern = r'ExampleEntry\(\s*name:\s*"([^"]+)".*?projectJSON:\s*"""(.*?)"""'
-    for m in re.finditer(pattern, content, re.DOTALL):
-        name = m.group(1)
-        json_str = m.group(2).strip()
-        # Remove leading whitespace from each line (Swift multiline string indentation)
-        lines = json_str.split('\n')
-        # Find minimum indentation
-        min_indent = float('inf')
-        for line in lines:
-            stripped = line.lstrip()
-            if stripped:
-                min_indent = min(min_indent, len(line) - len(stripped))
-        if min_indent == float('inf'):
-            min_indent = 0
-        cleaned = '\n'.join(line[min_indent:] if len(line) >= min_indent else line for line in lines)
-        examples.append((name, cleaned))
-
+    for cat in catalog["categories"]:
+        for entry in cat["examples"]:
+            path = os.path.join(EXAMPLES_DIR, entry["file"])
+            examples.append((entry["name"], path))
     return examples
-
-def write_example_files(examples):
-    os.makedirs(TEST_DIR, exist_ok=True)
-    paths = []
-    for name, json_str in examples:
-        fname = re.sub(r'[^a-zA-Z0-9]', '_', name).lower() + ".json"
-        path = os.path.join(TEST_DIR, fname)
-        with open(path, 'w') as f:
-            f.write(json_str)
-        paths.append((name, path))
-    return paths
 
 def compile_harness():
     """Compile the C++ test harness."""
+    os.makedirs(TEST_DIR, exist_ok=True)
     src_dir = "phograph_core/src"
     # Collect all .cc files except the Apple platform file and bridge
     cc_files = []
@@ -90,13 +65,13 @@ def compile_harness():
     print("Compiled OK")
     return True
 
-def run_examples(paths):
+def run_examples(examples):
     """Run each example through the harness."""
     passed = 0
     failed = 0
     errors = []
 
-    for name, path in paths:
+    for name, path in examples:
         result = subprocess.run(
             [HARNESS, path],
             capture_output=True, text=True,
@@ -122,17 +97,15 @@ def run_examples(paths):
     return errors
 
 def main():
-    print("Extracting examples from ExampleCatalog.swift...")
-    examples = extract_examples()
+    print("Loading examples from examples/catalog.json...")
+    examples = load_examples()
     print(f"Found {len(examples)} examples")
-
-    paths = write_example_files(examples)
 
     if not compile_harness():
         sys.exit(1)
 
-    print(f"\nRunning {len(paths)} examples:\n")
-    errors = run_examples(paths)
+    print(f"\nRunning {len(examples)} examples:\n")
+    errors = run_examples(examples)
 
     if errors:
         print("\nFailed examples detail:")

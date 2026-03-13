@@ -1,0 +1,142 @@
+{
+  "name": "Basic Arithmetic",
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "output_names": [
+            "result"
+          ],
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 3
+                  },
+                  "output_names": [
+                    "a"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 4
+                  },
+                  "output_names": [
+                    "b"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "primitive",
+                  "name": "+",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "sum"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 2
+                  },
+                  "output_names": [
+                    "k"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "primitive",
+                  "name": "*",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "a",
+                    "b"
+                  ],
+                  "output_names": [
+                    "product"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "sum"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "result"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 7
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

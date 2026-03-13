@@ -1,0 +1,125 @@
+{
+  "name": "Locale Info",
+  "libraries": [
+    {
+      "name": "locale",
+      "version": "1.0.0"
+    }
+  ],
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "/main",
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "primitive",
+                  "name": "locale-language",
+                  "library": "locale",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "lang"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "primitive",
+                  "name": "locale-country",
+                  "library": "locale",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "country"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "primitive",
+                  "name": "locale-timezone",
+                  "library": "locale",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "tz"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "lang"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "country"
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "tz"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 8
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

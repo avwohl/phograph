@@ -1,0 +1,599 @@
+{
+  "name": "Validator",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "Validator",
+          "attributes": [
+            {
+              "name": "value",
+              "default": ""
+            },
+            {
+              "name": "valid",
+              "default": true
+            }
+          ],
+          "methods": [
+            {
+              "name": "check-not-empty",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "value",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "value"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "primitive",
+                      "name": "length",
+                      "num_inputs": 1,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "str"
+                      ],
+                      "output_names": [
+                        "len"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "integer",
+                        "value": 0
+                      }
+                    },
+                    {
+                      "id": 5,
+                      "type": "primitive",
+                      "name": ">",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "result"
+                      ]
+                    },
+                    {
+                      "id": 6,
+                      "type": "get",
+                      "name": "valid",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "valid"
+                      ]
+                    },
+                    {
+                      "id": 7,
+                      "type": "primitive",
+                      "name": "and",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "result"
+                      ]
+                    },
+                    {
+                      "id": 8,
+                      "type": "set",
+                      "name": "valid",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 9,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "self"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "value"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "len"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 1,
+                      "target_node": 7,
+                      "target_pin": 0,
+                      "name": "valid"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 1,
+                      "name": "not-empty?"
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 8,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 7,
+                      "source_pin": 0,
+                      "target_node": 8,
+                      "target_pin": 1,
+                      "name": "valid"
+                    },
+                    {
+                      "source_node": 8,
+                      "source_pin": 0,
+                      "target_node": 9,
+                      "target_pin": 0,
+                      "name": "self"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 9
+                }
+              ]
+            },
+            {
+              "name": "check-min-length",
+              "num_inputs": 2,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 2,
+                      "output_names": [
+                        "self",
+                        "min"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "value",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "value"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "primitive",
+                      "name": "length",
+                      "num_inputs": 1,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "str"
+                      ],
+                      "output_names": [
+                        "len"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "primitive",
+                      "name": ">=",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "result"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "get",
+                      "name": "valid",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "valid"
+                      ]
+                    },
+                    {
+                      "id": 6,
+                      "type": "primitive",
+                      "name": "and",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "result"
+                      ]
+                    },
+                    {
+                      "id": 7,
+                      "type": "set",
+                      "name": "valid",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 8,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "self"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "value"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "len"
+                    },
+                    {
+                      "source_node": 1,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 1,
+                      "name": "min"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 1,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "valid"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 1,
+                      "name": "long enough?"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 1,
+                      "name": "valid"
+                    },
+                    {
+                      "source_node": 7,
+                      "source_pin": 0,
+                      "target_node": 8,
+                      "target_pin": 0,
+                      "name": "self"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 8
+                }
+              ]
+            },
+            {
+              "name": "is-valid",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "valid",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "valid"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "valid?"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 3
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "output_names": [
+            "result"
+          ],
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "Validator",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "v"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "hi"
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "set",
+                  "name": "value",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "method_call",
+                  "name": "Validator/check-not-empty",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 5
+                  }
+                },
+                {
+                  "id": 7,
+                  "type": "method_call",
+                  "name": "Validator/check-min-length",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "min"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "method_call",
+                  "name": "Validator/is-valid",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "valid?"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "v(hi)"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "checked"
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "checked"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0,
+                  "name": "false"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 9
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

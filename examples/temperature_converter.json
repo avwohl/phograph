@@ -1,0 +1,564 @@
+{
+  "name": "Temperature Converter",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "Temperature",
+          "attributes": [
+            {
+              "name": "value",
+              "default": 0
+            },
+            {
+              "name": "unit",
+              "default": "C"
+            }
+          ],
+          "methods": [
+            {
+              "name": "to-fahrenheit",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "value",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "value"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "integer",
+                        "value": 9
+                      }
+                    },
+                    {
+                      "id": 4,
+                      "type": "primitive",
+                      "name": "*",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "product"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "integer",
+                        "value": 5
+                      }
+                    },
+                    {
+                      "id": 6,
+                      "type": "primitive",
+                      "name": "/",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "quotient"
+                      ]
+                    },
+                    {
+                      "id": 7,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "integer",
+                        "value": 32
+                      }
+                    },
+                    {
+                      "id": 8,
+                      "type": "primitive",
+                      "name": "+",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "sum"
+                      ]
+                    },
+                    {
+                      "id": 9,
+                      "type": "instance_generator",
+                      "name": "Temperature",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "temp"
+                      ]
+                    },
+                    {
+                      "id": 10,
+                      "type": "set",
+                      "name": "value",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 11,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "string",
+                        "value": "F"
+                      }
+                    },
+                    {
+                      "id": 12,
+                      "type": "set",
+                      "name": "unit",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 13,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "value"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "v*9"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 8,
+                      "target_pin": 0,
+                      "name": "v*9/5"
+                    },
+                    {
+                      "source_node": 7,
+                      "source_pin": 0,
+                      "target_node": 8,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 9,
+                      "source_pin": 0,
+                      "target_node": 10,
+                      "target_pin": 0,
+                      "name": "new"
+                    },
+                    {
+                      "source_node": 8,
+                      "source_pin": 0,
+                      "target_node": 10,
+                      "target_pin": 1,
+                      "name": "°F"
+                    },
+                    {
+                      "source_node": 10,
+                      "source_pin": 0,
+                      "target_node": 12,
+                      "target_pin": 0,
+                      "name": "temp"
+                    },
+                    {
+                      "source_node": 11,
+                      "source_pin": 0,
+                      "target_node": 12,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 12,
+                      "source_pin": 0,
+                      "target_node": 13,
+                      "target_pin": 0,
+                      "name": "result"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 13
+                }
+              ]
+            },
+            {
+              "name": "display",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "value",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "value"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "get",
+                      "name": "unit",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "unit"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "string",
+                        "value": "°"
+                      }
+                    },
+                    {
+                      "id": 5,
+                      "type": "primitive",
+                      "name": "concat",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "joined"
+                      ]
+                    },
+                    {
+                      "id": 6,
+                      "type": "primitive",
+                      "name": "concat",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "joined"
+                      ]
+                    },
+                    {
+                      "id": 7,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "value"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "val°"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 1,
+                      "target_node": 6,
+                      "target_pin": 1,
+                      "name": "unit"
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 0,
+                      "name": "display"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 7
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "output_names": [
+            "result"
+          ],
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "Temperature",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "temp"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 100
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "set",
+                  "name": "value",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "C"
+                  }
+                },
+                {
+                  "id": 6,
+                  "type": "set",
+                  "name": "unit",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "method_call",
+                  "name": "Temperature/to-fahrenheit",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "method_call",
+                  "name": "Temperature/display",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "text"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "100"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "100°C"
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "212°F"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0,
+                  "name": "display"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 9
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,373 @@
+{
+  "name": "Bank Account",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "BankAccount",
+          "attributes": [
+            {
+              "name": "owner",
+              "default": ""
+            },
+            {
+              "name": "balance",
+              "default": 0
+            }
+          ],
+          "methods": [
+            {
+              "name": "deposit",
+              "num_inputs": 2,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 2,
+                      "output_names": [
+                        "self",
+                        "amount"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "balance",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "balance"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "primitive",
+                      "name": "+",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "sum"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "set",
+                      "name": "balance",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "self"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "balance"
+                    },
+                    {
+                      "source_node": 1,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 1,
+                      "name": "amount"
+                    },
+                    {
+                      "source_node": 2,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 1,
+                      "name": "new balance"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "self"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 5
+                }
+              ]
+            },
+            {
+              "name": "get-balance",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "balance",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "balance"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "balance"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 3
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "output_names": [
+            "result"
+          ],
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "BankAccount",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "account"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Alice"
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "set",
+                  "name": "owner",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 100
+                  }
+                },
+                {
+                  "id": 6,
+                  "type": "method_call",
+                  "name": "BankAccount/deposit",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "amount"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 50
+                  }
+                },
+                {
+                  "id": 8,
+                  "type": "method_call",
+                  "name": "BankAccount/deposit",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "amount"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "method_call",
+                  "name": "BankAccount/get-balance",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "balance"
+                  ]
+                },
+                {
+                  "id": 10,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "Alice's"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "+100"
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0,
+                  "name": "+50"
+                },
+                {
+                  "source_node": 9,
+                  "source_pin": 0,
+                  "target_node": 10,
+                  "target_pin": 0,
+                  "name": "150"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 10
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "name": "String Reverse",
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Hello"
+                  },
+                  "output_names": [
+                    "str"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "primitive",
+                  "name": "length",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "str"
+                  ],
+                  "output_names": [
+                    "len"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 0,
+                  "name": "str"
+                },
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "str"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "len"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 6
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

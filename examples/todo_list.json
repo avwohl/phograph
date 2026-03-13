@@ -1,0 +1,578 @@
+{
+  "name": "Todo List",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "TodoItem",
+          "attributes": [
+            {
+              "name": "text",
+              "default": ""
+            },
+            {
+              "name": "done",
+              "default": false
+            }
+          ],
+          "methods": [
+            {
+              "name": "toggle",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "done",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "done"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "primitive",
+                      "name": "not",
+                      "num_inputs": 1,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a"
+                      ],
+                      "output_names": [
+                        "result"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "set",
+                      "name": "done",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "self"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "done"
+                    },
+                    {
+                      "source_node": 2,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 0,
+                      "target_node": 4,
+                      "target_pin": 1,
+                      "name": "!done"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "self"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 5
+                }
+              ]
+            },
+            {
+              "name": "display",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "done",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "done"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "get",
+                      "name": "text",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "text"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "string",
+                        "value": "[x] "
+                      }
+                    },
+                    {
+                      "id": 5,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "string",
+                        "value": "[ ] "
+                      }
+                    },
+                    {
+                      "id": 6,
+                      "type": "primitive",
+                      "name": "if-else",
+                      "num_inputs": 3,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "cond",
+                        "then",
+                        "else"
+                      ],
+                      "output_names": [
+                        "result"
+                      ]
+                    },
+                    {
+                      "id": 7,
+                      "type": "primitive",
+                      "name": "concat",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "joined"
+                      ]
+                    },
+                    {
+                      "id": 8,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "done?"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 2
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 0,
+                      "name": "prefix"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 1,
+                      "target_node": 7,
+                      "target_pin": 1,
+                      "name": "text"
+                    },
+                    {
+                      "source_node": 7,
+                      "source_pin": 0,
+                      "target_node": 8,
+                      "target_pin": 0,
+                      "name": "display"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 8
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 0,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "TodoItem",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "item"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Buy milk"
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "set",
+                  "name": "text",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "method_call",
+                  "name": "TodoItem/toggle",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "method_call",
+                  "name": "TodoItem/display",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "text"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "instance_generator",
+                  "name": "TodoItem",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "item"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Walk dog"
+                  }
+                },
+                {
+                  "id": 10,
+                  "type": "set",
+                  "name": "text",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 11,
+                  "type": "method_call",
+                  "name": "TodoItem/display",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "text"
+                  ]
+                },
+                {
+                  "id": 12,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 13,
+                  "type": "instance_generator",
+                  "name": "TodoItem",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "item"
+                  ]
+                },
+                {
+                  "id": 14,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Code"
+                  }
+                },
+                {
+                  "id": 15,
+                  "type": "set",
+                  "name": "text",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 16,
+                  "type": "method_call",
+                  "name": "TodoItem/display",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "text"
+                  ]
+                },
+                {
+                  "id": 17,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 18,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "item"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "toggled"
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "[x] Buy milk"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 10,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 9,
+                  "source_pin": 0,
+                  "target_node": 10,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 10,
+                  "source_pin": 0,
+                  "target_node": 11,
+                  "target_pin": 0,
+                  "name": "item"
+                },
+                {
+                  "source_node": 11,
+                  "source_pin": 0,
+                  "target_node": 12,
+                  "target_pin": 0,
+                  "name": "[ ] Walk dog"
+                },
+                {
+                  "source_node": 13,
+                  "source_pin": 0,
+                  "target_node": 15,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 14,
+                  "source_pin": 0,
+                  "target_node": 15,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 15,
+                  "source_pin": 0,
+                  "target_node": 16,
+                  "target_pin": 0,
+                  "name": "item"
+                },
+                {
+                  "source_node": 16,
+                  "source_pin": 0,
+                  "target_node": 17,
+                  "target_pin": 0,
+                  "name": "[ ] Code"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 18
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

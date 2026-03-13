@@ -1,0 +1,128 @@
+{
+  "name": "File IO Demo",
+  "libraries": [
+    {
+      "name": "fileio",
+      "version": "1.0.0"
+    }
+  ],
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "/main",
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "value": "/tmp/phograph_test.txt",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "path"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "value": "Hello from Phograph!",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "text"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "primitive",
+                  "name": "file-write-text",
+                  "library": "fileio",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "path",
+                    "text"
+                  ],
+                  "output_names": [
+                    "ok"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "primitive",
+                  "name": "file-read-text",
+                  "library": "fileio",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "path"
+                  ],
+                  "output_names": [
+                    "text"
+                  ]
+                },
+                {
+                  "id": 6,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "path"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1,
+                  "name": "text"
+                },
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 5,
+                  "target_pin": 0,
+                  "name": "path"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "contents"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 7
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

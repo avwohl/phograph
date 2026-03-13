@@ -1,0 +1,607 @@
+{
+  "name": "Shopping Cart",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "Product",
+          "attributes": [
+            {
+              "name": "name",
+              "default": ""
+            },
+            {
+              "name": "price",
+              "default": 0
+            }
+          ],
+          "methods": []
+        },
+        {
+          "name": "Cart",
+          "attributes": [
+            {
+              "name": "total",
+              "default": 0
+            },
+            {
+              "name": "count",
+              "default": 0
+            }
+          ],
+          "methods": [
+            {
+              "name": "add-item",
+              "num_inputs": 2,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 2,
+                      "output_names": [
+                        "self",
+                        "product"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "total",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "total"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "get",
+                      "name": "price",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "product"
+                      ],
+                      "output_names": [
+                        "product",
+                        "price"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "primitive",
+                      "name": "+",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "sum"
+                      ]
+                    },
+                    {
+                      "id": 5,
+                      "type": "set",
+                      "name": "total",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 6,
+                      "type": "get",
+                      "name": "count",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "count"
+                      ]
+                    },
+                    {
+                      "id": 7,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "integer",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "id": 8,
+                      "type": "primitive",
+                      "name": "+",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "sum"
+                      ]
+                    },
+                    {
+                      "id": 9,
+                      "type": "set",
+                      "name": "count",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "self",
+                        "value"
+                      ],
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 10,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "self"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 1,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "product"
+                    },
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 0,
+                      "name": "total"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 1,
+                      "target_node": 4,
+                      "target_pin": 1,
+                      "name": "price"
+                    },
+                    {
+                      "source_node": 2,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 1,
+                      "name": "new total"
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 1,
+                      "target_node": 8,
+                      "target_pin": 0,
+                      "name": "count"
+                    },
+                    {
+                      "source_node": 7,
+                      "source_pin": 0,
+                      "target_node": 8,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 9,
+                      "target_pin": 0,
+                      "name": "self"
+                    },
+                    {
+                      "source_node": 8,
+                      "source_pin": 0,
+                      "target_node": 9,
+                      "target_pin": 1,
+                      "name": "count+1"
+                    },
+                    {
+                      "source_node": 9,
+                      "source_pin": 0,
+                      "target_node": 10,
+                      "target_pin": 0,
+                      "name": "self"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 10
+                }
+              ]
+            },
+            {
+              "name": "get-total",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "total",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "total"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 3,
+                      "target_pin": 0,
+                      "name": "total"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 3
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 1,
+          "output_names": [
+            "result"
+          ],
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "Product",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "product"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Widget"
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "set",
+                  "name": "name",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 25
+                  }
+                },
+                {
+                  "id": 6,
+                  "type": "set",
+                  "name": "price",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "instance_generator",
+                  "name": "Product",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "product"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Gadget"
+                  }
+                },
+                {
+                  "id": 9,
+                  "type": "set",
+                  "name": "name",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 10,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "integer",
+                    "value": 10
+                  }
+                },
+                {
+                  "id": 11,
+                  "type": "set",
+                  "name": "price",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 12,
+                  "type": "instance_generator",
+                  "name": "Cart",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "cart"
+                  ]
+                },
+                {
+                  "id": 13,
+                  "type": "method_call",
+                  "name": "Cart/add-item",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "product"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 14,
+                  "type": "method_call",
+                  "name": "Cart/add-item",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "product"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 15,
+                  "type": "method_call",
+                  "name": "Cart/get-total",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "total"
+                  ]
+                },
+                {
+                  "id": 16,
+                  "type": "output_bar",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "result"
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "named"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 8,
+                  "source_pin": 0,
+                  "target_node": 9,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 9,
+                  "source_pin": 0,
+                  "target_node": 11,
+                  "target_pin": 0,
+                  "name": "named"
+                },
+                {
+                  "source_node": 10,
+                  "source_pin": 0,
+                  "target_node": 11,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 12,
+                  "source_pin": 0,
+                  "target_node": 13,
+                  "target_pin": 0,
+                  "name": "cart"
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 13,
+                  "target_pin": 1,
+                  "name": "widget"
+                },
+                {
+                  "source_node": 13,
+                  "source_pin": 0,
+                  "target_node": 14,
+                  "target_pin": 0,
+                  "name": "+widget"
+                },
+                {
+                  "source_node": 11,
+                  "source_pin": 0,
+                  "target_node": 14,
+                  "target_pin": 1,
+                  "name": "gadget"
+                },
+                {
+                  "source_node": 14,
+                  "source_pin": 0,
+                  "target_node": 15,
+                  "target_pin": 0,
+                  "name": "+gadget"
+                },
+                {
+                  "source_node": 15,
+                  "source_pin": 0,
+                  "target_node": 16,
+                  "target_pin": 0,
+                  "name": "35"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 16
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

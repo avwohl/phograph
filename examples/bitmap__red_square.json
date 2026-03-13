@@ -1,0 +1,172 @@
+{
+  "name": "Red Square",
+  "libraries": [
+    {
+      "name": "bitmap",
+      "version": "1.0.0"
+    }
+  ],
+  "sections": [
+    {
+      "name": "Main",
+      "methods": [
+        {
+          "name": "/main",
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "constant",
+                  "value": 100,
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "size"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "primitive",
+                  "name": "bitmap-create",
+                  "library": "bitmap",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "w",
+                    "h"
+                  ],
+                  "output_names": [
+                    "bmp"
+                  ]
+                },
+                {
+                  "id": 4,
+                  "type": "constant",
+                  "value": 255,
+                  "num_inputs": 0,
+                  "num_outputs": 1
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "value": 0,
+                  "num_inputs": 0,
+                  "num_outputs": 1
+                },
+                {
+                  "id": 6,
+                  "type": "primitive",
+                  "name": "color-rgb",
+                  "library": "bitmap",
+                  "num_inputs": 3,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "r",
+                    "g",
+                    "b"
+                  ],
+                  "output_names": [
+                    "color"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "primitive",
+                  "name": "bitmap-fill",
+                  "library": "bitmap",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "bmp",
+                    "color"
+                  ],
+                  "output_names": [
+                    "bmp"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 3,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 2
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "bitmap"
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 1,
+                  "name": "red"
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "filled"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 9
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

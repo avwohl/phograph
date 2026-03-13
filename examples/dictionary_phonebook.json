@@ -1,0 +1,429 @@
+{
+  "name": "Dictionary Phonebook",
+  "sections": [
+    {
+      "name": "Main",
+      "classes": [
+        {
+          "name": "Contact",
+          "attributes": [
+            {
+              "name": "name",
+              "default": ""
+            },
+            {
+              "name": "phone",
+              "default": ""
+            }
+          ],
+          "methods": [
+            {
+              "name": "display",
+              "num_inputs": 1,
+              "num_outputs": 1,
+              "cases": [
+                {
+                  "nodes": [
+                    {
+                      "id": 1,
+                      "type": "input_bar",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "output_names": [
+                        "self"
+                      ]
+                    },
+                    {
+                      "id": 2,
+                      "type": "get",
+                      "name": "name",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "name"
+                      ]
+                    },
+                    {
+                      "id": 3,
+                      "type": "get",
+                      "name": "phone",
+                      "num_inputs": 1,
+                      "num_outputs": 2,
+                      "input_names": [
+                        "self"
+                      ],
+                      "output_names": [
+                        "self",
+                        "phone"
+                      ]
+                    },
+                    {
+                      "id": 4,
+                      "type": "constant",
+                      "num_inputs": 0,
+                      "num_outputs": 1,
+                      "value": {
+                        "type": "string",
+                        "value": ": "
+                      }
+                    },
+                    {
+                      "id": 5,
+                      "type": "primitive",
+                      "name": "concat",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "joined"
+                      ]
+                    },
+                    {
+                      "id": 6,
+                      "type": "primitive",
+                      "name": "concat",
+                      "num_inputs": 2,
+                      "num_outputs": 1,
+                      "input_names": [
+                        "a",
+                        "b"
+                      ],
+                      "output_names": [
+                        "joined"
+                      ]
+                    },
+                    {
+                      "id": 7,
+                      "type": "output_bar",
+                      "num_inputs": 1,
+                      "num_outputs": 0,
+                      "input_names": [
+                        "result"
+                      ]
+                    }
+                  ],
+                  "wires": [
+                    {
+                      "source_node": 2,
+                      "source_pin": 1,
+                      "target_node": 5,
+                      "target_pin": 0,
+                      "name": "name"
+                    },
+                    {
+                      "source_node": 4,
+                      "source_pin": 0,
+                      "target_node": 5,
+                      "target_pin": 1
+                    },
+                    {
+                      "source_node": 5,
+                      "source_pin": 0,
+                      "target_node": 6,
+                      "target_pin": 0,
+                      "name": "name:"
+                    },
+                    {
+                      "source_node": 3,
+                      "source_pin": 1,
+                      "target_node": 6,
+                      "target_pin": 1,
+                      "name": "phone"
+                    },
+                    {
+                      "source_node": 6,
+                      "source_pin": 0,
+                      "target_node": 7,
+                      "target_pin": 0,
+                      "name": "display"
+                    }
+                  ],
+                  "input_bar_id": 1,
+                  "output_bar_id": 7
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "name": "main",
+          "num_inputs": 0,
+          "num_outputs": 0,
+          "cases": [
+            {
+              "nodes": [
+                {
+                  "id": 1,
+                  "type": "input_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                },
+                {
+                  "id": 2,
+                  "type": "instance_generator",
+                  "name": "Contact",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "c"
+                  ]
+                },
+                {
+                  "id": 3,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Alice"
+                  }
+                },
+                {
+                  "id": 4,
+                  "type": "set",
+                  "name": "name",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 5,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "555-1234"
+                  }
+                },
+                {
+                  "id": 6,
+                  "type": "set",
+                  "name": "phone",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 7,
+                  "type": "method_call",
+                  "name": "/display",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "text"
+                  ]
+                },
+                {
+                  "id": 8,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 9,
+                  "type": "instance_generator",
+                  "name": "Contact",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "output_names": [
+                    "c"
+                  ]
+                },
+                {
+                  "id": 10,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "Bob"
+                  }
+                },
+                {
+                  "id": 11,
+                  "type": "set",
+                  "name": "name",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 12,
+                  "type": "constant",
+                  "num_inputs": 0,
+                  "num_outputs": 1,
+                  "value": {
+                    "type": "string",
+                    "value": "555-5678"
+                  }
+                },
+                {
+                  "id": 13,
+                  "type": "set",
+                  "name": "phone",
+                  "num_inputs": 2,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self",
+                    "value"
+                  ],
+                  "output_names": [
+                    "self"
+                  ]
+                },
+                {
+                  "id": 14,
+                  "type": "method_call",
+                  "name": "/display",
+                  "num_inputs": 1,
+                  "num_outputs": 1,
+                  "input_names": [
+                    "self"
+                  ],
+                  "output_names": [
+                    "text"
+                  ]
+                },
+                {
+                  "id": 15,
+                  "type": "primitive",
+                  "name": "log",
+                  "num_inputs": 1,
+                  "num_outputs": 0,
+                  "input_names": [
+                    "value"
+                  ]
+                },
+                {
+                  "id": 16,
+                  "type": "output_bar",
+                  "num_inputs": 0,
+                  "num_outputs": 0
+                }
+              ],
+              "wires": [
+                {
+                  "source_node": 2,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 3,
+                  "source_pin": 0,
+                  "target_node": 4,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 4,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 0,
+                  "name": "Alice"
+                },
+                {
+                  "source_node": 5,
+                  "source_pin": 0,
+                  "target_node": 6,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 6,
+                  "source_pin": 0,
+                  "target_node": 7,
+                  "target_pin": 0,
+                  "name": "contact"
+                },
+                {
+                  "source_node": 7,
+                  "source_pin": 0,
+                  "target_node": 8,
+                  "target_pin": 0,
+                  "name": "Alice: 555-1234"
+                },
+                {
+                  "source_node": 9,
+                  "source_pin": 0,
+                  "target_node": 11,
+                  "target_pin": 0,
+                  "name": "new"
+                },
+                {
+                  "source_node": 10,
+                  "source_pin": 0,
+                  "target_node": 11,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 11,
+                  "source_pin": 0,
+                  "target_node": 13,
+                  "target_pin": 0,
+                  "name": "Bob"
+                },
+                {
+                  "source_node": 12,
+                  "source_pin": 0,
+                  "target_node": 13,
+                  "target_pin": 1
+                },
+                {
+                  "source_node": 13,
+                  "source_pin": 0,
+                  "target_node": 14,
+                  "target_pin": 0,
+                  "name": "contact"
+                },
+                {
+                  "source_node": 14,
+                  "source_pin": 0,
+                  "target_node": 15,
+                  "target_pin": 0,
+                  "name": "Bob: 555-5678"
+                }
+              ],
+              "input_bar_id": 1,
+              "output_bar_id": 16
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -4,7 +4,11 @@ xcuserdata/
 DerivedData/
 
 # Build
+build/
 phograph_core/build/
+
+# Test output
+test_output/
 
 # macOS
 .DS_Store

@@ -119,6 +119,7 @@ class IDEViewModel: ObservableObject {
             consoleOutput += "Error parsing project: \(error.localizedDescription)\n"
             statusMessage = "Parse failed"
             showConsole = true
+            return
         }
         model.filePath = url
         self.project = model
@@ -136,8 +137,12 @@ class IDEViewModel: ObservableObject {
         // Resolve library references
         missingLibraries = libraryManager.resolveReferences(model.libraryReferences)
 
-        // Auto-select first method
-        if let firstMethod = model.sections.first?.methods.first {
+        // Auto-select first method (check top-level methods, then class methods)
+        let firstMethod: MethodModel? = model.sections.lazy.compactMap { section in
+            if let m = section.methods.first { return m }
+            return section.classes.lazy.compactMap { $0.methods.first }.first
+        }.first
+        if let firstMethod = firstMethod {
             selectMethod(name: firstMethod.name, caseIndex: 0)
         }
     }

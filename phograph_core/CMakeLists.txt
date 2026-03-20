@@ -52,6 +52,13 @@ add_library(phograph_core STATIC
 
 target_include_directories(phograph_core PUBLIC src)
 
+# Use static CRT on Windows to avoid undisclosed MSVC runtime dependency
+if(MSVC)
+    set_target_properties(phograph_core PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    )
+endif()
+
 if(APPLE)
     find_library(COREAUDIO_LIB CoreAudio)
     find_library(AUDIOTOOLBOX_LIB AudioToolbox)

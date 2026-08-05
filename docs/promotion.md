@@ -29,7 +29,7 @@ Pharo Discord
     Active chat. OOP-enthusiastic crowd who appreciate live environments.
 
 Pharo-users mailing list
-    https://lists.pharo.org/empathy/list/pharo-users@lists.pharo.org/
+    https://lists.pharo.org/postorius/lists/pharo-users.lists.pharo.org/
     Friendly to announcements of related projects.
 
 Squeak-dev mailing list
@@ -165,9 +165,6 @@ Pharo Newsletter
 The Weekly Squeak
     https://news.squeak.org/
     News aggregator for the Squeak world. Submit a tip.
-
-smalltalk.community
-    https://smalltalk.community/
 
 
 ### Other

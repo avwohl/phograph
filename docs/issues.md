@@ -54,8 +54,9 @@
 ## Documentation / Repo
 
 11. ~~README is sparse~~ -- **Resolved.** README now has prerequisites,
-    quick-start instructions, architecture overview, full test list,
-    library docs, and contribution guidelines.
+    quick-start instructions, and library docs. The architecture overview
+    is in docs/architecture.md; the full test list and contribution
+    guidelines are in docs/building_and_testing.md.
 
 12. GitHub About box is empty -- repo description, topics, and homepage URL
     should be set so the project is discoverable and has a proper summary.
